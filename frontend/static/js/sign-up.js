@@ -1,22 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="cache-control" content="no-cache" />
-    <meta http-equiv="expires" content="0" />
-    <meta http-equiv="pragma" content="no-cache" />
+export const SignUpPage = () => {
+    let scriptFiles = [
+        "/frontend/static/js/script.js",
+        "/frontend/static/js/signup_validation.js",
+    ];
 
-    <link rel="stylesheet" href="/frontend/static/css/style.css" />
-    <link rel="stylesheet" href="/frontend/static/css/sign-up.css" />
-    <script defer src="/frontend/static/js/script.js"></script>
-    <script defer src="/frontend/static/js/signup_validation.js"></script>
+    scriptFiles.forEach(src => {
+        let script = document.createElement("script");
+        script.src = src;
+        script.defer = true;
+        document.head.appendChild(script);
+    });
+    let title = document.createElement('title');
+    title.textContent = 'Sign Up';
+    document.head.appendChild(title);
 
-    <title>Sign Up</title>
-  </head>
-  <body>
-    <header>
-      <nav class="navbar">
+    let header = document.createElement('header')
+    header.innerHTML = `
+    <nav class="navbar">
         <div class="logo"><a href="/">Forum</a></div>
         <div class="theme-toggler">
           <span class="tooltip-text">Toggle Mode</span>
@@ -45,9 +45,11 @@
           />
         </div>
       </nav>
-    </header>
+    `
+    document.body.appendChild(header)
 
-    <main>
+    let main = document.createElement('main')
+    main.innerHTML = `
       <p class="message-popup" id="message-popup"></p>
       <div class="form-container">
         <h2>Sign Up</h2>
@@ -129,9 +131,8 @@
           Already have an account? <a href="/sign-in">Sign In</a>
         </p>
       </div>
-    </main>
+    `
+    document.body.appendChild(main)
 
-    <!-- Icon -->
-    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
-  </body>
-</html>
+    document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js')
+}

@@ -1,22 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="cache-control" content="no-cache" />
-    <meta http-equiv="expires" content="0" />
-    <meta http-equiv="pragma" content="no-cache" />
+export const SignInPage = () => {
+    let scriptFiles = [
+        "/frontend/static/js/script.js",
+        "/frontend/static/js/signin_validation.js",
+    ];
 
-    <link rel="stylesheet" href="/frontend/static/css/style.css" />
-    <link rel="stylesheet" href="/frontend/static/css/sign-in.css" />
-    <script defer src="/frontend/static/js/script.js"></script>
-    <script defer src="/frontend/static/js/signin_validation.js"></script>
+    scriptFiles.forEach(src => {
+        let script = document.createElement("script");
+        script.src = src;
+        script.defer = true;
+        document.head.appendChild(script);
+    });
+    let title = document.createElement('title');
+    title.textContent = 'Sign In';
+    document.head.appendChild(title);
 
-    <title>Sign In</title>
-  </head>
-  <body>
-    <header>
-      <nav class="navbar">
+    let header = document.createElement('header')
+    header.innerHTML = `
+    <nav class="navbar">
         <div class="logo">
           <a href="/">Forum</a>
         </div>
@@ -50,9 +50,11 @@
           </div>
         </div>
       </nav>
-    </header>
+    `
+    document.body.appendChild(header)
 
-    <main>
+    let main = document.createElement('main')
+    main.innerHTML = `
       <p class="message-popup" id="message-popup"></p>
       <div class="form-container">
         <h2>Sign In</h2>
@@ -106,9 +108,8 @@
           Don't have an account? <a href="/sign-up">Sign Up</a>
         </p>
       </div>
-    </main>
+    `
+    document.body.appendChild(main)
 
-    <!-- Icon -->
-    <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
-  </body>
-</html>
+    document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js');
+}
