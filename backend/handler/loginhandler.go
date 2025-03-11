@@ -84,7 +84,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 		return
 	} else if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("frontend/templates/sign-in.html")
+		tmpl, err := template.ParseFiles("frontend/templates/index.html")
 		if err != nil {
 			log.Println("Error parsing sign in template:", err)
 			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
