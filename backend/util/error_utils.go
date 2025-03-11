@@ -13,7 +13,7 @@ type Message struct {
 }
 
 func ErrorHandler(w http.ResponseWriter, errval string, statusCode int) {
-	tmpl, err := template.ParseFiles("frontend/templates/error.html")
+	tmpl, err := template.ParseFiles("frontend/templates/index.html")
 	if err != nil {
 		log.Printf("Failed to load error template: %v", err)
 		http.Error(w, errval, statusCode)
