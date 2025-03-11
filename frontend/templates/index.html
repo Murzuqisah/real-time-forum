@@ -5,40 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forum</title>
-  <script defer src="/frontend/static/js/homepage.js"></script>
-</head>
-
+  <link rel="stylesheet" href="/frontend/static/css/style.css"/>
+  <link rel="stylesheet" href="/frontend/static/css/sign-in.css" />
+  <link rel="stylesheet" href="/frontend/static/css/sign-up.css" />
+  <link rel="stylesheet" href="/frontend/static/css/error-page.css" />
+  <script type="module" src="/frontend/static/js/dom.js"></script>
 <body>
 </body>
 
 </html>
-
-
-{{ define "status"}}
-<img src="/frontend/static/img/profile-image.jpeg" alt="Profile Picture" />
-<p>Hello <strong>{{.Name}}</strong> 👋</p>
-<form action="/logout" method="POST">
-  <button class="logout-button">Log Out</button>
-</form>
-{{ end }}
-
-<!-- {{ if .IsLoggedIn }}
-      <form class="filter-form" action="/filter" method="get">
-        <ul class="sidebar-links">
-          <li>
-            <button type="submit" name="filter" value="created">Created</button>
-          </li>
-          <li>
-            <button type="submit" name="filter" value="liked">Liked</button>
-          </li>
-        </ul>
-      </form>
-      {{ end }} -->
-<!-- <aside class="profile">
-      
-
-      {{if .IsLoggedIn }} {{template "status" .}} {{else}}
-      <p class="session-status"><strong>Status:</strong> Not logged in</p>
-
-      {{end}}
-    </aside> -->
