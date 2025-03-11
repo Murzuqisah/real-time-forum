@@ -69,7 +69,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
 		return
 	} else if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("frontend/templates/sign-up.html")
+		tmpl, err := template.ParseFiles("frontend/templates/index.html")
 		if err != nil {
 			log.Println("failed parsing files:", err)
 			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
