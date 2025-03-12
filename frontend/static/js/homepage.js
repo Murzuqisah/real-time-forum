@@ -60,7 +60,8 @@ export const HomePage = () => {
     document.body.appendChild(aside);
 
     // Create main content
-    let main = document.createElement('main');
+    let main = document.createElement('main'); method: 'POST',
+        H
     main.classList.add('posts');
     main.innerHTML = `
         <section class="create-post hidden">
@@ -82,6 +83,8 @@ export const HomePage = () => {
     `;
     document.body.appendChild(main);
 
+    getPosts()
+
     // Add profile section
     let profile = document.createElement('aside');
     profile.classList.add('profile');
@@ -89,4 +92,60 @@ export const HomePage = () => {
     document.body.appendChild(profile);
 };
 
+function getPosts() {
+    fetch('/api/posts', {
+        headers: { "Accept": "application/json" }
+    })
+        .then(response => response.json())
+        .then(data => {
+            let postsContainer = document.getElementById("post");
+            postsContainer.innerHTML = ``
+
+            data.Posts.forEach(item => {
+                let article = document.createElement('article');
+                article.classList.add('post');
+                let headerDiv = document.createElement('div');
+                headerDiv.classList.add('post-header');
+
+                let name = document.createElement('p');
+                name.classList.add('post-author');
+                name.textContent = item.UserName;
+                headerDiv.appendChild(name);
+
+                let time = document.createElement('p');
+                time.classList.add('post-time');
+                time.textContent = new Date(item.CreatedOn).toLocaleString();
+                headerDiv.appendChild(time);
+
+                article.appendChild(headerDiv);
+                article.innerHTML = `
+                    <h3>${item.PostTitle}</h3>
+                    <p>${item.Body}</p>
+                `
+
+                if (item.MediaURL !== "") {
+                    let img = document.createElement('img');
+                    img.classList.add('uploaded-file');
+                    img.src = item.MediaURL;
+                    img.alt = item.PostTitle;
+                    article.appendChild(img);
+                }
+
+                // Categories
+                if (item.Categories) {
+                    let categoryDiv = document.createElement('div');
+                    categoryDiv.classList.add('category-div');
+                    item.categorie.forEach(cat => {
+                        let p = document.createElement('p');
+                        p.classList.add('post-category');
+                        p.textContent = cat.category;
+                        categoryDiv.appendChild(p);
+                    });
+                    article.appendChild(categoryDiv);
+                }
+                postsContainer.appendChild(article);
+            });
+        })
+        .catch(error => console.error("Error fetching posts:", error));
+}
 
