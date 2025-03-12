@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
-	"text/template"
 
 	"github.com/jesee-kuya/forum/backend/models"
 	"github.com/jesee-kuya/forum/backend/repositories"
@@ -97,12 +97,6 @@ func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, lo
 		Posts:      posts,
 	}
 
-	// Parse and execute the template
-	tmpl, err := template.ParseFiles("frontend/templates/index.html")
-	if err != nil {
-		log.Printf("Failed to load index template: %v", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, data)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }
