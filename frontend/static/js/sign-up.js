@@ -1,21 +1,31 @@
 export const SignUpPage = () => {
-    let scriptFiles = [
-        "/frontend/static/js/script.js",
-        "/frontend/static/js/signup_validation.js",
-    ];
+  document.body.innerHTML = `
+  <style>
+  body {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+  </style>
+  `
+  let scriptFiles = [
+    "/frontend/static/js/script.js",
+    "/frontend/static/js/signup_validation.js",
+  ];
 
-    scriptFiles.forEach(src => {
-        let script = document.createElement("script");
-        script.src = src;
-        script.defer = true;
-        document.head.appendChild(script);
-    });
-    let title = document.createElement('title');
-    title.textContent = 'Sign Up';
-    document.head.appendChild(title);
+  scriptFiles.forEach(src => {
+    let script = document.createElement("script");
+    script.src = src;
+    script.defer = true;
+    document.head.appendChild(script);
+  });
+  let title = document.createElement('title');
+  title.textContent = 'Sign Up';
+  document.head.appendChild(title);
 
-    let header = document.createElement('header')
-    header.innerHTML = `
+  let header = document.createElement('header')
+  header.innerHTML = `
     <nav class="navbar">
         <div class="logo"><a href="/">Forum</a></div>
         <div class="theme-toggler">
@@ -46,10 +56,10 @@ export const SignUpPage = () => {
         </div>
       </nav>
     `
-    document.body.appendChild(header)
+  document.body.appendChild(header)
 
-    let main = document.createElement('main')
-    main.innerHTML = `
+  let main = document.createElement('main')
+  main.innerHTML = `
       <p class="message-popup" id="message-popup"></p>
       <div class="form-container">
         <h2>Sign Up</h2>
@@ -132,7 +142,7 @@ export const SignUpPage = () => {
         </p>
       </div>
     `
-    document.body.appendChild(main)
+  document.body.appendChild(main)
 
-    document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js')
+  document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js')
 }
