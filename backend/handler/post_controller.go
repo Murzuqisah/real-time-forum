@@ -108,7 +108,7 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		if ok {
 			logged = true
 		}
-
+		
 		PostDetails(w, r, posts, logged)
 		return
 	}
