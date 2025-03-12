@@ -55,5 +55,9 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
 		return
 	}
-	PostDetails(w, r, posts, true)
+	if r.Header.Get("Accept") == "application/json" {
+		PostDetails(w, r, posts, true)
+		return
+	}
+	Render(w, r)
 }
