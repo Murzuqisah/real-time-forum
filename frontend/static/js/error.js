@@ -1,10 +1,25 @@
 export const ErrorPage = () => {
-    let script = document.createElement('script');
-    script.src = '/frontend/static/js/script.js';
-    script.defer = true;
-    document.head.appendChild(script);
-    let header = document.createElement('header')
-    header.innerHTML = `
+  document.body.innerHTML`
+  <style>
+  body {
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: var(--dark-text-color);
+  color: var(--dark-bg-color);
+  transition: var(--transition);
+}
+  </style>
+  `
+  let script = document.createElement('script');
+  script.src = '/frontend/static/js/script.js';
+  script.defer = true;
+  document.head.appendChild(script);
+  let header = document.createElement('header')
+  header.innerHTML = `
       <nav class="navbar">
         <div class="logo">
           <a href="/">Forum</a>
@@ -26,22 +41,22 @@ export const ErrorPage = () => {
         </div>
       </nav>
     `
-    document.body.appendChild(header)
+  document.body.appendChild(header)
 
-    let div = document.createElement('div');
-    div.classList.add('wrapper')
-    div.innerHTML = `
+  let div = document.createElement('div');
+  div.classList.add('wrapper')
+  div.innerHTML = `
     <div class="container">
         <pre class="status-code">{{ .Code }}</pre>
         <pre class="status-msg">{{ .ErrMessage }}</pre>
         <button><a href="/">Back To Homepage</a></button>
     </div>
     `
-    document.body.appendChild(div)
-    let footer = document.createElement('footer')
-    footer.classList.add('footer')
-    footer.innerHTML = `
+  document.body.appendChild(div)
+  let footer = document.createElement('footer')
+  footer.classList.add('footer')
+  footer.innerHTML = `
     <p class="footer-text">@2025 . All rights Reserved.</p>
     `
-    document.body.appendChild(footer)
+  document.body.appendChild(footer)
 }
