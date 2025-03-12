@@ -35,5 +35,9 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	PostDetails(w, r, posts, false)
+	if r.Header.Get("Accept") == "application/json" {
+		PostDetails(w, r, posts, false)
+		return
+	}
+	Render(w, r)
 }
