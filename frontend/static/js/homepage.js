@@ -61,7 +61,6 @@ export const HomePage = () => {
 
     // Create main content
     let main = document.createElement('main'); method: 'POST',
-        H
     main.classList.add('posts');
     main.innerHTML = `
         <section class="create-post hidden">
