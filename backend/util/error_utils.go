@@ -2,7 +2,6 @@ package util
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -20,5 +19,5 @@ func ErrorHandler(w http.ResponseWriter, errval string, statusCode int) {
 		ErrMessage: errval,
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)s
+	json.NewEncoder(w).Encode(data)
 }
