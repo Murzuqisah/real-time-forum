@@ -61,7 +61,7 @@ export const HomePage = () => {
 
     // Create main content
     let main = document.createElement('main'); method: 'POST',
-    main.classList.add('posts');
+        main.classList.add('posts');
     main.innerHTML = `
         <section class="create-post hidden">
             <h2>Create a New Post</h2>
@@ -81,9 +81,6 @@ export const HomePage = () => {
         </div>
     `;
     document.body.appendChild(main);
-
-    getPosts()
-
     // Add profile section
     let profile = document.createElement('aside');
     profile.classList.add('profile');
@@ -91,16 +88,16 @@ export const HomePage = () => {
     document.body.appendChild(profile);
 };
 
-function getPosts() {
-    fetch('/api/posts', {
+export async function getPosts() {
+    const response = fetch('/posts', {
         headers: { "Accept": "application/json" }
     })
         .then(response => response.json())
         .then(data => {
+            console.log(data)
             let postsContainer = document.getElementById("post");
-            postsContainer.innerHTML = ``
-
             data.Posts.forEach(item => {
+                console.log(item)
                 let article = document.createElement('article');
                 article.classList.add('post');
                 let headerDiv = document.createElement('div');
@@ -130,7 +127,6 @@ function getPosts() {
                     article.appendChild(img);
                 }
 
-                // Categories
                 if (item.Categories) {
                     let categoryDiv = document.createElement('div');
                     categoryDiv.classList.add('category-div');
@@ -144,6 +140,7 @@ function getPosts() {
                 }
                 postsContainer.appendChild(article);
             });
+            window.location.reload();
         })
         .catch(error => console.error("Error fetching posts:", error));
 }
