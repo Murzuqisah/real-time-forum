@@ -21,7 +21,7 @@ func InitRoutes() *http.ServeMux {
 
 	// App routes
 	r.HandleFunc("/home", middleware.Authenticate(handler.IndexHandler))
-	r.HandleFunc("/api/posts", (handler.HomeHandler))
+	r.HandleFunc("/posts", (handler.HomeHandler))
 	r.HandleFunc("/sign-in", handler.LoginHandler)
 	r.HandleFunc("/sign-up", handler.SignupHandler)
 	r.HandleFunc("/upload", middleware.Authenticate(handler.CreatePost))
