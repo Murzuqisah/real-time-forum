@@ -122,4 +122,29 @@ export const SignInPage = () => {
   document.body.appendChild(main)
 
   document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js');
+
+
+  let form = document.getElementById('signin-form')
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault()
+
+    const formData = new FormData(form)
+
+    fetch("/", {
+      method: 'POST',
+      body: formData
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log("HEre wer are")
+        if (data.status === "success") {
+          alert(data.Message);
+          window.location.href = "/home";
+        } else {
+          alert('login failed: ' + data.Message)
+        }
+      })
+      .catch(error => console.error('Error: ', error))
+  })
 }
