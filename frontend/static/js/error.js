@@ -1,5 +1,5 @@
 export const ErrorPage = () => {
-  document.body.innerHTML`
+  document.body.innerHTML = `
   <style>
   body {
   height: 100vh;
@@ -45,13 +45,24 @@ export const ErrorPage = () => {
 
   let div = document.createElement('div');
   div.classList.add('wrapper')
-  div.innerHTML = `
-    <div class="container">
-        <pre class="status-code">{{ .Code }}</pre>
-        <pre class="status-msg">{{ .ErrMessage }}</pre>
-        <button><a href="/">Back To Homepage</a></button>
-    </div>
-    `
+
+  let errDiv = document.createElement('div')
+  errDiv.classList.add('container')
+  fetch('/error', {
+    headers: { 'Accept': 'application/json' }
+  })
+    .then(response => response.json())
+    .then(data => {
+      errDiv.innerHTML = `
+      <pre class="status-code">${data.Code}</pre>
+      <pre class="status-msg">${data.ErrMessage}</pre>
+      <button><a href="/">Back To HomePage</a></button>
+      `
+    })
+    .catch(error => console.error('Error showing error message:', error));
+
+  div.appendChild(errDiv)
+
   document.body.appendChild(div)
   let footer = document.createElement('footer')
   footer.classList.add('footer')
@@ -59,4 +70,8 @@ export const ErrorPage = () => {
     <p class="footer-text">@2025 . All rights Reserved.</p>
     `
   document.body.appendChild(footer)
+}
+
+const getError = () => {
+
 }
