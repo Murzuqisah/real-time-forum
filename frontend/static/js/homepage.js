@@ -120,36 +120,32 @@ export async function getPosts() {
                 let article = document.createElement('article');
                 article.classList.add('post');
                 let headerDiv = document.createElement('div');
-                headerDiv.classList.add('post-header');
-
-                let name = document.createElement('p');
-                name.classList.add('post-author');
-                name.textContent = item.UserName;
-                headerDiv.appendChild(name);
-
-                let time = document.createElement('p');
-                time.classList.add('post-time');
-                time.textContent = new Date(item.CreatedOn).toLocaleString();
-                headerDiv.appendChild(time);
+                console.log(`${item.username}`)
+                headerDiv.innerHTML = `
+                <p class="post-author">@${item.username}</p>
+                <p class="post-time">
+                Posted: <time datetime="${item.created_on}"> {{ .CreatedOn }}</time>
+                </p>
+                `
 
                 article.appendChild(headerDiv);
                 article.innerHTML = `
-                    <h3>${item.PostTitle}</h3>
-                    <p>${item.Body}</p>
+                    <h3>${item.post_title}</h3>
+                    <p>${item.body}</p>
                 `
 
-                if (item.MediaURL !== "") {
+                if (item.imageurl !== "") {
                     let img = document.createElement('img');
                     img.classList.add('uploaded-file');
-                    img.src = item.MediaURL;
-                    img.alt = item.PostTitle;
+                    img.src = item.imageurl;
+                    img.alt = item.post_title;
                     article.appendChild(img);
                 }
 
-                if (item.Categories) {
+                if (item.categories) {
                     let categoryDiv = document.createElement('div');
                     categoryDiv.classList.add('category-div');
-                    item.Categories.forEach(cat => {
+                    item.categories.forEach(cat => {
                         let page = document.createElement('p');
                         page.classList.add('post-category');
                         page.textContent = cat;
