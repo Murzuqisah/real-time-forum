@@ -59,29 +59,6 @@ export const HomePage = () => {
     `;
     document.body.appendChild(aside);
 
-    // Create main content
-    let main = document.createElement('main'); method: 'POST',
-        main.classList.add('posts');
-    main.innerHTML = `
-        <section class="create-post hidden">
-            <h2>Create a New Post</h2>
-            <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
-                <label for="post-title">Title</label>
-                <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
-                <label for="post-content">Content</label>
-                <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
-                <button type="submit">Post</button>
-            </form>
-        </section>
-        <div class="floating-create-post-btn-container">
-            <p>Create a Post</p>
-            <button class="floating-create-post-btn">
-                <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
-            </button>
-        </div>
-    `;
-    document.body.appendChild(main);
-    // Add profile section
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
@@ -89,14 +66,56 @@ export const HomePage = () => {
 };
 
 export async function getPosts() {
-    const response = fetch('/posts', {
+    await fetch('/posts', {
         headers: { "Accept": "application/json" }
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
-            let postsContainer = document.getElementById("post");
+            if (!data) {
+                data = {}
+            }
+
+            if (!data.Posts) {
+                data.Posts = {}
+            }
+
+
+            console.log(data.Posts)
+            let postsContainer = document.createElement('main'); method: 'POST',
+                postsContainer.classList.add('posts');
+            postsContainer.innerHTML = `
+            <section class="create-post hidden">
+                <h2>Create a New Post</h2>
+                <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
+                    <label for="post-title">Title</label>
+                    <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
+                    <label for="post-content">Content</label>
+                    <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
+                    <button type="submit">Post</button>
+                </form>
+            </section>
+            <div class="floating-create-post-btn-container">
+                <p>Create a Post</p>
+                <button class="floating-create-post-btn">
+                    <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
+                </button>
+            </div>
+        `;
+
             data.Posts.forEach(item => {
+                if (!item) {
+                    item = {}
+                }
+                if (!item.Categories) {
+                    item.Categories = []
+                }
+
+                if (!item.Comments) {
+                    item.Comments = []
+                }
+                if (!item.Parentid) {
+                    item.Parentid = ''
+                }
                 console.log(item)
                 let article = document.createElement('article');
                 article.classList.add('post');
@@ -130,17 +149,17 @@ export async function getPosts() {
                 if (item.Categories) {
                     let categoryDiv = document.createElement('div');
                     categoryDiv.classList.add('category-div');
-                    item.categorie.forEach(cat => {
-                        let p = document.createElement('p');
-                        p.classList.add('post-category');
-                        p.textContent = cat.category;
+                    item.Categories.forEach(cat => {
+                        let page = document.createElement('p');
+                        page.classList.add('post-category');
+                        page.textContent = cat;
                         categoryDiv.appendChild(p);
                     });
                     article.appendChild(categoryDiv);
                 }
                 postsContainer.appendChild(article);
             });
-            window.location.reload();
+            document.body.appendChild(postsContainer)
         })
         .catch(error => console.error("Error fetching posts:", error));
 }
