@@ -106,15 +106,15 @@ export async function getPosts() {
                 if (!item) {
                     item = {}
                 }
-                if (!item.Categories) {
-                    item.Categories = []
+                if (!item.categories) {
+                    item.categories = []
                 }
 
-                if (!item.Comments) {
-                    item.Comments = []
+                if (!item.commments) {
+                    item.commments = []
                 }
-                if (!item.Parentid) {
-                    item.Parentid = ''
+                if (!item.parent_id) {
+                    item.parent_id = ''
                 }
                 console.log(item)
                 let article = document.createElement('article');
