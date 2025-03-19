@@ -201,7 +201,7 @@ export function navigate(event, page) {
 export function renderPage() {
     const page = location.pathname.substring(1) || "home";
     console.log(page);
-    if (page === "home") {
+    if (page === "home" || page === "/") {
         HomePage();
     } else if (page === "sign-up") {
         SignUpPage();
