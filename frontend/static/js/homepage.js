@@ -1,3 +1,6 @@
+import { SignUpPage } from './sign-up.js';
+import { SignInPage } from './sign-in.js';
+
 export const HomePage = () => {
     let scriptFiles = [
         "/frontend/static/js/script.js",
@@ -195,8 +198,9 @@ function navigate(event, page) {
     renderPage();
 }
 
-function renderPage() {
+export function renderPage() {
     const page = location.pathname.substring(1) || "home";
+    console.log(page);
     if (page === "home") {
         HomePage();
     } else if (page === "sign-up") {
