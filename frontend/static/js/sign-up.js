@@ -141,5 +141,5 @@ export const SignUpPage = () => {
     `
   document.body.appendChild(main)
 
-  document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js')
+  // document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js')
 }
