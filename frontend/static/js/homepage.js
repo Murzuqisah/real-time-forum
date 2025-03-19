@@ -14,25 +14,47 @@ export const HomePage = () => {
 
     // Append the header
     let header = document.createElement('header');
-    header.innerHTML = `
-        <nav class="navbar">
-            <div class="logo">
-                <a href="/">Forum</a>
-            </div>
-            <div class="right-container">
-                <div class="auth-container">
-                    {{if .IsLoggedIn}}{{ else}}
-                    <a href="/sign-up">Sign Up</a>
-                    <a href="/sign-in">Sign In</a>
-                    {{ end }}
-                </div>
-                <div class="theme-toggler">
-                    <img class="moon" src="/frontend/static/assets/moon-regular.svg" alt="Moon Icon" />
-                    <img class="sunny" src="/frontend/static/assets/sun-regular.svg" alt="Sunny Icon" />
-                </div>
-            </div>
-        </nav>
-    `;
+    let navbar = document.createElement('nav');
+    navbar.classList.add('navbar');
+    let logo = document.createElement('div');
+    logo.classList.add('logo');
+    let logoLink = document.createElement('a');
+    logoLink.href = "/";
+    logoLink.textContent = "Forum";
+    logoLink.addEventListener('click', (e) => navigate(e, '/'));
+    logo.appendChild(logoLink);
+    navbar.appendChild(logo);
+
+    let rightContainer = document.createElement('div');
+    rightContainer.classList.add('right-container');
+    let authContainer = document.createElement('div');
+    authContainer.classList.add('auth-container');
+    let signUpLink = document.createElement('a');
+    signUpLink.href = "/sign-up";
+    signUpLink.textContent = "Sign Up";
+    signUpLink.addEventListener('click', (e) => navigate(e, 'sign-up'));
+    let signInLink = document.createElement('a');
+    signInLink.href = "/sign-in";
+    signInLink.textContent = "Sign In";
+    signInLink.addEventListener('click', (e) => navigate(e, 'sign-in'));
+    authContainer.appendChild(signUpLink);
+    authContainer.appendChild(signInLink);
+    rightContainer.appendChild(authContainer);
+    let themeToggler = document.createElement('div');
+    themeToggler.classList.add('theme-toggler');
+    let moon = document.createElement('img');
+    moon.classList.add('moon');
+    moon.src = "/frontend/static/assets/moon-regular.svg";
+    moon.alt = "Moon Icon";
+    let sunny = document.createElement('img');
+    sunny.classList.add('sunny');
+    sunny.src = "/frontend/static/assets/sun-regular.svg";
+    sunny.alt = "Sunny Icon";
+    themeToggler.appendChild(moon);
+    themeToggler.appendChild(sunny);
+    rightContainer.appendChild(themeToggler);
+    navbar.appendChild(rightContainer);
+    header.appendChild(navbar);
     document.body.appendChild(header);
 
     // Create sidebar
@@ -166,3 +188,20 @@ export async function getPosts(article) {
         .catch(error => console.error("Error fetching posts:", error));
 }
 
+
+function navigate(event, page) {
+    event.preventDefault();
+    history.pushState({ page }, "", `/${page}`);
+    renderPage();
+}
+
+function renderPage() {
+    const page = location.pathname.substring(1) || "home";
+    if (page === "home") {
+        HomePage();
+    } else if (page === "sign-up") {
+        SignUpPage();
+    } else if (page === "sign-in") {
+        SignInPage();
+    }
+}
