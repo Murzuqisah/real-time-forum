@@ -11,11 +11,26 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
+	// hijack network connection
+	h, ok := w.(http.Hijacker)
+	if !ok {
+		log.Printf("Hijacking not supported: %v", ok)
+		http.Error(w, "Hijacking not supported", http.StatusInternalServerError)
+		return
+	}
+	
+	conn, buf, err := hijacker.Hijack()
+	if err != nil {
+		log.Printf("Hijacking error: %v", err)
+		return
+	}
+	
 	// upgrade to a websocket connection
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
