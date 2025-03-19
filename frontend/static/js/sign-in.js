@@ -25,42 +25,32 @@ export const SignInPage = () => {
   document.head.appendChild(title);
 
   let header = document.createElement('header')
-  header.innerHTML = `
-    <nav class="navbar">
-        <div class="logo">
-          <a href="/">Forum</a>
-        </div>
 
-        <div class="right-container">
-          <div class="theme-toggler">
-            <span class="tooltip-text">Toggle Mode</span>
-
-            <img
-              style="
-                height: 25px;
-                width: 1.2rem;
-                filter: invert(17%) sepia(27%) saturate(7051%)
-                  hue-rotate(205deg) brightness(90%) contrast(99%);
-              "
-              class="moon"
-              src="/frontend/static/assets/moon-regular.svg"
-              alt="Moon Icon"
-            />
-            <img
-              style="
-                height: 25px;
-                width: 1.2rem;
-                filter: invert(100%) sepia(3%) saturate(2485%)
-                  hue-rotate(188deg) brightness(112%) contrast(95%);
-              "
-              class="sunny"
-              src="/frontend/static/assets/sun-regular.svg"
-              alt="Sunny Icon"
-            />
-          </div>
-        </div>
-      </nav>
-    `
+  let navbar = document.createElement('nav')
+  navbar.classList.add('navbar')
+  let logo = document.createElement('div')
+  logo.classList.add('logo')
+  let logoLink = document.createElement('a')
+  logoLink.href = '/'
+  logoLink.textContent = 'Forum'
+  logoLink.addEventListener('click', (e) => navigate(e, '/'));
+  logo.appendChild(logoLink)
+  navbar.appendChild(logo)
+  let themeToggler = document.createElement('div')
+  themeToggler.classList.add('theme-toggler')
+  let moon = document.createElement('img')
+  moon.classList.add('moon')
+  moon.src = '/frontend/static/assets/moon-regular.svg'
+  moon.alt = 'Moon Icon'
+  let sunny = document.createElement('img')
+  sunny.classList.add('sunny')
+  sunny.src = '/frontend/static/assets/sun-regular.svg'
+  sunny.alt = 'Sunny Icon'
+  themeToggler.appendChild(moon)
+  themeToggler.appendChild(sunny)
+  navbar.appendChild(themeToggler)
+  header.appendChild(navbar)
+  
   document.body.appendChild(header)
 
   let main = document.createElement('main')
