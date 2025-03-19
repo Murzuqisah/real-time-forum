@@ -1,3 +1,5 @@
+import { navigate } from "./homepage.js";
+
 export const SignInPage = () => {
   document.body.innerHTML = `
   <style>
