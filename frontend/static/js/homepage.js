@@ -59,13 +59,20 @@ export const HomePage = () => {
     `;
     document.body.appendChild(aside);
 
+    let article = document.createElement('article');
+    article.classList.add('post');
+
+    getPosts(article);
+
+    document.body.appendChild(article);
+
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
     document.body.appendChild(profile);
 };
 
-export async function getPosts() {
+export async function getPosts(article) {
     await fetch('/posts', {
         headers: { "Accept": "application/json" }
     })
@@ -117,8 +124,7 @@ export async function getPosts() {
                     item.parent_id = ''
                 }
                 console.log(item)
-                let article = document.createElement('article');
-                article.classList.add('post');
+
                 let headerDiv = document.createElement('div');
                 console.log(`${item.username}`)
                 headerDiv.innerHTML = `
