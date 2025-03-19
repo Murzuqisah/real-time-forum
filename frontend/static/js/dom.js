@@ -7,7 +7,6 @@ import { getPosts } from './homepage.js';
 document.addEventListener('DOMContentLoaded', async () => {
     if (window.location.pathname === "/" || window.location.pathname === '/home') {
         HomePage();
-        getPosts()
     } else if (window.location.pathname === "/sign-in") {
         SignInPage();
     } else if (window.location.pathname === '/sign-up') {
