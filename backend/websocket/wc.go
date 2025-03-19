@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,11 +26,28 @@ func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	conn, buf, err := hijacker.Hijack()
+	conn, buf, err := h.Hijack()
 	if err != nil {
 		log.Printf("Hijacking error: %v", err)
 		return
 	}
+
+	// Resuses Reader instead of allocating a new one
+	// if the read buffer size is configured and hijacked reader is large enough
+	var br *bufio.Reader
+	if buf != nil {
+		buffer := bufio.NewReaderSize(buf, 1024)
+		br = buffer
+	}
+
+	// compute websocket accept key
+	Key := r.Header.Get("Sec-Websocket-Key")
+	if Key == "" {
+		log.Print("Key cannot be empty")
+		conn.Close()
+		return
+	}
+	acceptKey := computeWSKey(Key)
 	
 	// upgrade to a websocket connection
 	ws, err := upgrader.Upgrade(w, r, nil)
