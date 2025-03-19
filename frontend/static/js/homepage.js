@@ -192,7 +192,7 @@ export async function getPosts(article) {
 }
 
 
-function navigate(event, page) {
+export function navigate(event, page) {
     event.preventDefault();
     history.pushState({ page }, "", `/${page}`);
     renderPage();
