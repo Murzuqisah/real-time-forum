@@ -193,9 +193,15 @@ export async function getPosts(article) {
 
 
 export function navigate(event, page) {
-    event.preventDefault();
-    history.pushState({ page }, "", `/${page}`);
-    renderPage();
+
+    if (!page.startsWith('/')) {
+        page = '/' + page;
+    }
+
+    if (location.origin + page !== location.href) {
+        history.pushState({ page }, "", page);
+        renderPage();
+    }
 }
 
 export function renderPage() {
