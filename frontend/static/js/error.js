@@ -1,4 +1,9 @@
 export const ErrorPage = () => {
+  document.head.innerHTML = ""
+  document.head.innerHTML = `
+    <link rel="stylesheet" href="/frontend/static/css/style.css" />
+    <link rel="stylesheet" href="/frontend/static/css/error-page.css" />
+  `
   document.body.innerHTML = `
   <style>
   body {
