@@ -1,6 +1,7 @@
 import { navigate } from "./homepage.js";
 
 export const SignUpPage = () => {
+  document.body.innerHTML = ""
   document.body.innerHTML = `
   <style>
   body {
@@ -140,6 +141,4 @@ export const SignUpPage = () => {
       </div>
     `
   document.body.appendChild(main)
-
-  // document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js')
 }
