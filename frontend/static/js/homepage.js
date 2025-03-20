@@ -194,6 +194,7 @@ export async function getPosts(article) {
 
 
 export function navigate(event, page) {
+    event.preventDefault()
     if (!page.startsWith('/')) {
         page = '/' + page;
     }
