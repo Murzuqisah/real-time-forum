@@ -65,6 +65,12 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 			"redirect": "/sign-in",
 		})
 		return
+	} else if r.Method == http.MethodGet {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"redirect": "/sign-up",
+		})
 	} else {
 		log.Println("Method not allowed", r.Method)
 		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
