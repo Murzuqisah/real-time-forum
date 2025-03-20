@@ -63,88 +63,153 @@ export const SignUpPage = () => {
   document.body.appendChild(header)
 
   let main = document.createElement('main')
-  main.innerHTML = `
-      <p class="message-popup" id="message-popup"></p>
-      <div class="form-container">
-        <h2>Sign Up</h2>
-        <form action="/sign-up" method="POST" id="signup-form">
-          <div class="input-group">
-            <label for="name">Username</label>
-            <input type="text" id="username" name="username" required />
-          </div>
+  let message = document.createElement('p');
+  message.id = 'message-popup';
+  message.classList.add('message-popup');
+  main.appendChild(message);
 
-          <div class="input-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required />
-          </div>
+  let formContainer = document.createElement('div');
+  formContainer.classList.add = 'form-container'
+  let h2 = document.createElement('h2');
+  h2.textContent = 'Sign Up';
+  formContainer.appendChild(h2);
+  
+  let signupForm = document.createElement('form');
+  signupForm.id = 'signup-form';
 
-          <div class="password">
-            <div class="input-group">
-              <label for="password">Password</label>
-              <div class="password-wrapper">
-                <input type="password" id="password" name="password" required />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  data-target="password"
-                >
-                  <box-icon type="solid" name="show"></box-icon>
-                </button>
-              </div>
-            </div>
+  let div1 = document.createElement('div');
+  div1.classList.add('input-group');
+  let label1 = document.createElement('label');
+  label1.htmlFor = 'name';
+  label1.textContent = 'Username';
+  let input1 = document.createElement('input');
+  input1.type = 'text';
+  input1.id = 'username';
+  input1.name = 'username';
+  input1.required = true;
+  div1.appendChild(label1);
+  div1.appendChild(input1);
 
-            <div class="input-group">
-              <label for="confirmed-password">Confirm Password</label>
-              <div class="password-wrapper">
-                <input
-                  type="password"
-                  id="confirmed-password"
-                  name="confirmed-password"
-                  required
-                />
-                <button
-                  type="button"
-                  class="toggle-password"
-                  data-target="confirmed-password"
-                >
-                  <box-icon type="solid" name="show"></box-icon>
-                </button>
-              </div>
-            </div>
-          </div>
+  let div2 = document.createElement('div');
+  div2.classList.add('input-group');
+  let label2 = document.createElement('label');
+  label2.htmlFor = 'email';
+  label2.textContent = 'Email';
+  let input2 = document.createElement('input');
+  input2.type = 'email';
+  input2.id = 'email';
+  input2.name = 'email';
+  input2.required = true;
+  div2.appendChild(label2);
+  div2.appendChild(input2);
 
-          <!-- <div class="line"></div> -->
-          <button type="submit" class="sign-up-btn btn">Create Account</button>
-        </form>
+  let div3 = document.createElement('div');
+  div3.classList.add('password');
+  let div4 = document.createElement('div');
+  div4.classList.add('input-group');
+  let label3 = document.createElement('label');
+  label3.htmlFor = 'password';
+  label3.textContent = 'Password';
+  let div5 = document.createElement('div');
+  div5.classList.add('password-wrapper');
+  let input3 = document.createElement('input');
+  input3.type = 'password';
+  input3.id = 'password';
+  input3.name = 'password';
+  input3.required = true;
+  let button1 = document.createElement('button');
+  button1.type = 'button';
+  button1.classList.add('toggle-password');
+  button1.dataset.target = 'password';
+  let boxIcon1 = document.createElement('box-icon');
+  boxIcon1.type = 'solid';
+  boxIcon1.name = 'show';
+  button1.appendChild(boxIcon1);
+  div5.appendChild(input3);
+  div5.appendChild(button1);
+  div4.appendChild(label3);
+  div4.appendChild(div5);
+  let div6 = document.createElement('div');
+  div6.classList.add('input-group');
+  let label4 = document.createElement('label');
+  label4.htmlFor = 'confirmed-password';
+  label4.textContent = 'Confirm Password';
+  let div7 = document.createElement('div');
+  div7.classList.add('password-wrapper');
+  let input4 = document.createElement('input');
+  input4.type = 'password';
+  input4.id = 'confirmed-password';
+  input4.name = 'confirmed-password';
+  input4.required = true;
+  let button2 = document.createElement('button');
+  button2.type = 'button';
+  button2.classList.add('toggle-password');
+  button2.dataset.target = 'confirmed-password';
+  let boxIcon2 = document.createElement('box-icon');
+  boxIcon2.type = 'solid';
+  boxIcon2.name = 'show';
+  button2.appendChild(boxIcon2);
+  div7.appendChild(input4);
+  div7.appendChild(button2);
+  div6.appendChild(label4);
+  div6.appendChild(div7);
+  div4.appendChild(div6);
 
-        <br />
+  let button3 = document.createElement('button');
+  button3.type = 'submit';
+  button3.classList.add('sign-up-btn', 'btn');
+  button3.textContent = 'Create Account';
+  signupForm.appendChild(div1);
+  signupForm.appendChild(div2);
+  signupForm.appendChild(div3);
+  signupForm.appendChild(div4);
+  signupForm.appendChild(button3);
+  formContainer.appendChild(signupForm);
+  formContainer.appendChild(document.createElement('br'));
 
-        <p class="continue-with" style="font-size: small">Or Continue With</p>
+  let continueWith = document.createElement('p');
+  continueWith.classList.add('continue-with');
+  continueWith.textContent = 'Or Continue With';
+  formContainer.appendChild(continueWith);
 
-        <div class="oauth-buttons">
-          <button
-            style="width: 45%"
-            type="button"
-            class="oauth-btn google-btn"
-            onclick="window.location.href='/auth/google'"
-          >
-            <box-icon style="fill: white" type="logo" name="google"></box-icon>
-            Google
-          </button>
-          <button
-            style="width: 45%"
-            type="button"
-            class="oauth-btn github-btn"
-            onclick="window.location.href='/auth/github'"
-          >
-            <box-icon style="fill: white" type="logo" name="github"></box-icon>
-            GitHub
-          </button>
-        </div>
-        <p class="switch-form">
-          Already have an account? <a href="/sign-in">Sign In</a>
-        </p>
-      </div>
-    `
+  let oauthButtons = document.createElement('div');
+  oauthButtons.classList.add('oauth-buttons');
+  let googleButton = document.createElement('button');
+  googleButton.type = 'button';
+  googleButton.classList.add('oauth-btn', 'google-btn');
+  googleButton.textContent = 'Google';
+  googleButton.style.width = '45%';
+  googleButton.addEventListener('click', () => window.location.href = '/auth/google');
+  let googleIcon = document.createElement('box-icon');
+  googleIcon.style.fill = 'white';
+  googleIcon.type = 'logo';
+  googleIcon.name = 'google';
+  googleButton.prepend(googleIcon);
+  let githubButton = document.createElement('button');
+  githubButton.type = 'button';
+  githubButton.classList.add('oauth-btn', 'github-btn');
+  githubButton.textContent = 'GitHub';
+  githubButton.style.width = '45%';
+  githubButton.addEventListener('click', () => window.location.href = '/auth/github');
+  let githubIcon = document.createElement('box-icon');
+  githubIcon.style.fill = 'white';
+  githubIcon.type = 'logo';
+  githubIcon.name = 'github';
+  githubButton.prepend(githubIcon);
+  oauthButtons.appendChild(googleButton);
+  oauthButtons.appendChild(githubButton);
+  formContainer.appendChild(oauthButtons);
+
+  let switchForm = document.createElement('p');
+  switchForm.classList.add('switch-form');
+  switchForm.textContent = "Already have an account? ";
+  let switchLink = document.createElement('a');
+  switchLink.href = '/sign-in';
+  switchLink.textContent = 'Sign In';
+  switchLink.addEventListener('click', (e) => navigate(e, '/sign-in'));
+  switchForm.appendChild(switchLink);
+  formContainer.appendChild(switchForm);
+  main.appendChild(formContainer);
+
   document.body.appendChild(main)
 }
