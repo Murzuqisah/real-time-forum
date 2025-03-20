@@ -229,7 +229,7 @@ export const SignUpPage = () => {
 
 async function signUp(username, email, password){
   console.log('here signup')
-  await fetch("sign-up", {
+  await fetch("/sign-up", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password })
