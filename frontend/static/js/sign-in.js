@@ -1,6 +1,7 @@
 import { navigate } from "./homepage.js";
 
 export const SignInPage = () => {
+  document.body.innerHTML = ""
   document.body.innerHTML = `
   <style>
   body {
@@ -112,9 +113,6 @@ export const SignInPage = () => {
       </div>
     `
   document.body.appendChild(main)
-
-  document.body.appendChild(document.createElement('script').src = 'https://unpkg.com/boxicons@2.1.4/dist/boxicons.js');
-
 
   let form = document.getElementById('signin-form')
 
