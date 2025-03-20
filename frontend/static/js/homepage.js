@@ -1,5 +1,6 @@
 import { SignUpPage } from './sign-up.js';
 import { SignInPage } from './sign-in.js';
+import { ErrorPage } from './error.js';
 
 export const HomePage = () => {
     document.head.innerHTML = ""
@@ -136,10 +137,6 @@ export async function getPosts(postsContainer) {
                 data.Posts = {}
             }
 
-
-            console.log(data.Posts)
-
-
             data.Posts.forEach(item => {
                 if (!item) {
                     item = {}
@@ -154,7 +151,6 @@ export async function getPosts(postsContainer) {
                 if (!item.parent_id) {
                     item.parent_id = ''
                 }
-                console.log(item)
 
                 let article = document.createElement('article');
                 article.classList.add('post');
@@ -221,5 +217,8 @@ export function renderPage() {
         SignUpPage();
     } else if (page === "sign-in") {
         SignInPage();
+    } else {
+        console.log("Error page");
+        ErrorPage();
     }
 }
