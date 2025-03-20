@@ -1,4 +1,3 @@
-import { HomePage } from './homepage.js';
 import { renderPage } from './homepage.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
