@@ -214,10 +214,7 @@ export const SignUpPage = () => {
   main.appendChild(formContainer);
 
   document.body.appendChild(main)
-  post()
-}
-
-const post = () => {
+  
   let button = document.getElementById('sign-up-btn');
   button.addEventListener('click', (e) => {
     e.preventDefault();
@@ -233,7 +230,9 @@ const post = () => {
   });
 }
 
+
 async function signUp(username, email, password){
+  console.log('here signup')
   await fetch("sign-up", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
