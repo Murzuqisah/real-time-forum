@@ -2,6 +2,7 @@ import { SignUpPage } from './sign-up.js';
 import { SignInPage } from './sign-in.js';
 
 export const HomePage = () => {
+    document.body.innerHTML = ""
     let scriptFiles = [
         "/frontend/static/js/script.js",
         "/frontend/static/js/comments_toggler.js",
