@@ -156,7 +156,6 @@ export async function getPosts(postsContainer) {
                 article.classList.add('post');
 
                 let headerDiv = document.createElement('div');
-                console.log(`${item.username}`)
                 headerDiv.innerHTML = `
                 <p class="post-author">@${item.username}</p>
                 <p class="post-time">
