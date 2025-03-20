@@ -31,7 +31,7 @@ export const HomePage = () => {
     let logoLink = document.createElement('a');
     logoLink.href = "/";
     logoLink.textContent = "Forum";
-    logoLink.addEventListener('click', (e) => navigate(e, '/'));
+    logoLink.addEventListener('click', (e) => navigate(e, '/home'));
     logo.appendChild(logoLink);
     navbar.appendChild(logo);
 
@@ -208,13 +208,16 @@ export function navigate(event, page) {
 }
 
 export function renderPage() {
-    const page = location.pathname.substring(1) || "home";
+    let page = location.pathname.substring(1);
     console.log(page);
-    if (page === "home" || page === "/") {
+    if (!page) {
+        page = 'sign-in'
+    }
+    if (page === "home") {
         HomePage();
     } else if (page === "sign-up") {
         SignUpPage();
-    } else if (page === "sign-in") {
+    } else if (page === "sign-in" || page === "/") {
         SignInPage();
     } else {
         console.log("Error page");
