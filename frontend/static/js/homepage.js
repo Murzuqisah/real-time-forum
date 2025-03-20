@@ -217,7 +217,7 @@ export function renderPage() {
         HomePage();
     } else if (page === "sign-up") {
         SignUpPage();
-    } else if (page === "sign-in" || page === "/") {
+    } else if (page === "sign-in") {
         SignInPage();
     } else {
         console.log("Error page");
