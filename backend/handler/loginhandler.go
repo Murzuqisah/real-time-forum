@@ -56,7 +56,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		// decrypt password & authorize user
 		storedPassword := user.Password
 
-		err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(r.FormValue("password")))
+		err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(signIn.Password))
 		if err != nil {
 			log.Printf("Failed to hash: %v", err)
 			w.Header().Set("Content-Type", "application/json")
@@ -93,9 +93,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
-			"redirect": "/home",
-		})
+		jsonResponse := map[string]string{"redirect": "/home"}
+		json.NewEncoder(w).Encode(jsonResponse)
 		return
 	} else if r.Method == http.MethodGet {
 		w.Header().Set("Content-Type", "application/json")
@@ -103,7 +102,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"redirect": "/sign-in",
 		})
-	}else {
+	} else {
 		log.Println("Method not allowed", r.Method)
 		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
