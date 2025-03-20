@@ -1,4 +1,5 @@
 import { navigate } from "./homepage.js";
+import { renderPage } from "./homepage.js";
 
 export const SignUpPage = () => {
   document.head.innerHTML = ""
@@ -73,7 +74,7 @@ export const SignUpPage = () => {
   let h2 = document.createElement('h2');
   h2.textContent = 'Sign Up';
   formContainer.appendChild(h2);
-  
+
   let signupForm = document.createElement('form');
   signupForm.id = 'signup-form';
 
@@ -156,6 +157,7 @@ export const SignUpPage = () => {
   div4.appendChild(div6);
 
   let button3 = document.createElement('button');
+  button3.id = 'sign-up-btn';
   button3.type = 'submit';
   button3.classList.add('sign-up-btn', 'btn');
   button3.textContent = 'Create Account';
@@ -212,4 +214,38 @@ export const SignUpPage = () => {
   main.appendChild(formContainer);
 
   document.body.appendChild(main)
+  post()
+}
+
+const post = () => {
+  let button = document.getElementById('sign-up-btn');
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+    let username = document.getElementById('username').value;
+    let email = document.getElementById('email').value;
+    let password = document.getElementById('password').value;
+    let confirmedPassword = document.getElementById('confirmed-password').value;
+    if (password !== confirmedPassword) {
+      document.getElementById('message-popup').textContent = 'Passwords do not match';
+      return;
+    }
+    signUp(username, email, password);
+  });
+}
+
+async function signUp(username, email, password){
+  await fetch("sign-up", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data.redirect)
+      if (data.redirect) {
+        history.pushState({}, "", data.redirect);
+        renderPage();
+      }
+    })
+    .catch(error => console.error("Error:", error));
 }
