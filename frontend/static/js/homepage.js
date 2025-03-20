@@ -2,6 +2,10 @@ import { SignUpPage } from './sign-up.js';
 import { SignInPage } from './sign-in.js';
 
 export const HomePage = () => {
+    document.head.innerHTML = ""
+    document.head.innerHTML = `
+    <link rel="stylesheet" href="/frontend/static/css/style.css" />
+    `
     document.body.innerHTML = ""
     let scriptFiles = [
         "/frontend/static/js/script.js",
@@ -85,12 +89,31 @@ export const HomePage = () => {
     `;
     document.body.appendChild(aside);
 
-    let article = document.createElement('article');
-    article.classList.add('post');
 
-    getPosts(article);
+    let postsContainer = document.createElement('main');
+    postsContainer.classList.add('posts');
+    postsContainer.innerHTML = `
+    <section class="create-post hidden">
+        <h2>Create a New Post</h2>
+        <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
+            <label for="post-title">Title</label>
+            <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
+            <label for="post-content">Content</label>
+            <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
+            <button type="submit">Post</button>
+        </form>
+    </section>
+    <div class="floating-create-post-btn-container">
+        <p>Create a Post</p>
+        <button class="floating-create-post-btn">
+            <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
+        </button>
+    </div>
+    `;
 
-    document.body.appendChild(article);
+    getPosts(postsContainer);
+
+    document.body.appendChild(postsContainer);
 
     let profile = document.createElement('aside');
     profile.classList.add('profile');
@@ -98,7 +121,7 @@ export const HomePage = () => {
     document.body.appendChild(profile);
 };
 
-export async function getPosts(article) {
+export async function getPosts(postsContainer) {
     await fetch('/posts', {
         headers: { "Accept": "application/json" }
     })
@@ -114,26 +137,7 @@ export async function getPosts(article) {
 
 
             console.log(data.Posts)
-            let postsContainer = document.createElement('main'); method: 'POST',
-                postsContainer.classList.add('posts');
-            postsContainer.innerHTML = `
-            <section class="create-post hidden">
-                <h2>Create a New Post</h2>
-                <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
-                    <label for="post-title">Title</label>
-                    <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
-                    <label for="post-content">Content</label>
-                    <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
-                    <button type="submit">Post</button>
-                </form>
-            </section>
-            <div class="floating-create-post-btn-container">
-                <p>Create a Post</p>
-                <button class="floating-create-post-btn">
-                    <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
-                </button>
-            </div>
-        `;
+
 
             data.Posts.forEach(item => {
                 if (!item) {
@@ -150,6 +154,9 @@ export async function getPosts(article) {
                     item.parent_id = ''
                 }
                 console.log(item)
+
+                let article = document.createElement('article');
+                article.classList.add('post');
 
                 let headerDiv = document.createElement('div');
                 console.log(`${item.username}`)
@@ -187,7 +194,6 @@ export async function getPosts(article) {
                 }
                 postsContainer.appendChild(article);
             });
-            document.body.appendChild(postsContainer)
         })
         .catch(error => console.error("Error fetching posts:", error));
 }
