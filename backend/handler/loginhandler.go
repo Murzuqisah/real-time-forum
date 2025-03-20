@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"text/template"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/models"
@@ -13,18 +12,31 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type SignInData struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 var SessionStore = make(map[string]map[string]interface{})
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var user models.User
-	var err error
+	var signIn SignInData
 	if r.URL.Path != "/sign-in" {
 		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
 		return
 	}
 
 	if r.Method == http.MethodPost {
-		email := r.FormValue("email")
+		err := json.NewDecoder(r.Body).Decode(&signIn)
+		if err != nil {
+			log.Printf("Failed decoding request body: %v\n", err)
+			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			return
+		}
+
+		email := signIn.Email
+
 		if isValidEmail(email) {
 			user, err = repositories.GetUserByEmail(email)
 			if err != nil {
@@ -78,20 +90,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
 			return
 		}
-		
-		http.Redirect(w, r, "/home", http.StatusSeeOther)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"redirect": "/home",
+		})
 		return
 	} else if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("frontend/templates/index.html")
-		if err != nil {
-			log.Println("Error parsing sign in template:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
-		}
-
-		tmpl.Execute(w, nil)
-
-	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{
+			"redirect": "/sign-in",
+		})
+	}else {
 		log.Println("Method not allowed", r.Method)
 		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
