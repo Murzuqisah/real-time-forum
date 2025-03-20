@@ -56,7 +56,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		_, err = repositories.InsertRecord(util.DB, "tblUsers", []string{"username", "email", "user_password"}, user.Username, user.Email, string(hashed))
 		if err != nil {
 			log.Println("Error adding user:", err)
-			http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{
+				"redirect": "/sign-in",
+			})
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
