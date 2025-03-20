@@ -13,6 +13,7 @@ export const HomePage = () => {
         "/frontend/static/js/reactions.js",
         "/frontend/static/js/format_time.js"
     ];
+
     scriptFiles.forEach(src => {
         let script = document.createElement("script");
         script.src = src;
