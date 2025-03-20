@@ -1,6 +1,11 @@
 import { navigate } from "./homepage.js";
 
 export const SignInPage = () => {
+  document.head.innerHTML = ""
+  document.head.innerHTML = `
+  <link rel="stylesheet" href="/frontend/static/css/style.css" />
+  <link rel="stylesheet" href="/frontend/static/css/sign-in.css" />
+  `
   document.body.innerHTML = ""
   document.body.innerHTML = `
   <style>
@@ -53,7 +58,7 @@ export const SignInPage = () => {
   themeToggler.appendChild(sunny)
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
-  
+
   document.body.appendChild(header)
 
   let main = document.createElement('main')
