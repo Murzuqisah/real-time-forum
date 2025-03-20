@@ -64,10 +64,6 @@ export const SignUpPage = () => {
   document.body.appendChild(header)
 
   let main = document.createElement('main')
-  let message = document.createElement('p');
-  message.id = 'message-popup';
-  message.classList.add('message-popup');
-  main.appendChild(message);
 
   let formContainer = document.createElement('div');
   formContainer.classList.add = 'form-container'
@@ -223,7 +219,7 @@ export const SignUpPage = () => {
     let password = document.getElementById('password').value;
     let confirmedPassword = document.getElementById('confirmed-password').value;
     if (password !== confirmedPassword) {
-      document.getElementById('message-popup').textContent = 'Passwords do not match';
+      alert('Passwords do not match')
       return;
     }
     signUp(username, email, password);
