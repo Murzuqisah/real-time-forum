@@ -208,19 +208,25 @@ export function navigate(event, page) {
 }
 
 export function renderPage() {
-    let page = location.pathname.substring(1);
-    console.log(page);
-    if (!page) {
-        page = 'sign-in'
+    let page = location.pathname;
+    console.log("Current page:", page);
+
+    if (!page || page === "/") {
+        page = "/sign-in";
     }
-    if (page === "home") {
-        HomePage();
-    } else if (page === "sign-up") {
-        SignUpPage();
-    } else if (page === "sign-in") {
-        SignInPage();
-    } else {
-        console.log("Error page");
-        ErrorPage();
+
+    switch (page) {
+        case "/home":
+            HomePage();
+            break;
+        case "/sign-up":
+            SignUpPage();
+            break;
+        case "/sign-in":
+            SignInPage();
+            break;
+        default:
+            console.log("Error page");
+            ErrorPage();
     }
 }
