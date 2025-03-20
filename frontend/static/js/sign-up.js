@@ -1,6 +1,11 @@
 import { navigate } from "./homepage.js";
 
 export const SignUpPage = () => {
+  document.head.innerHTML = ""
+  document.head.innerHTML = `
+  <link rel="stylesheet" href="/frontend/static/css/style.css" />
+  <link rel="stylesheet" href="/frontend/static/css/sign-up.css" />
+  `
   document.body.innerHTML = ""
   document.body.innerHTML = `
   <style>
@@ -15,6 +20,7 @@ export const SignUpPage = () => {
   let scriptFiles = [
     "/frontend/static/js/script.js",
     "/frontend/static/js/signup_validation.js",
+    "/frontend/static/css/sign-up.css",
   ];
 
   scriptFiles.forEach(src => {
@@ -52,8 +58,8 @@ export const SignUpPage = () => {
   themeToggler.appendChild(sunny)
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
- 
- 
+
+
   document.body.appendChild(header)
 
   let main = document.createElement('main')
