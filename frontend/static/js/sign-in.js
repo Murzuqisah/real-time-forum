@@ -168,13 +168,14 @@ export const SignInPage = () => {
   document.body.appendChild(main)
 
   let signin = document.getElementById('sign-in-btn')
-  signin.addEventListener('click', (e) => {
-    console.log('here')
-    let password = document.getElementById('password').value;
-    let email = document.getElementById('email').value;
-    signIn(email, password)
-  })
-
+  if (signin) {
+    signin.addEventListener('click', (e) => {
+      e.preventDefault();
+      let password = document.getElementById('password').value;
+      let email = document.getElementById('email').value;
+      signIn(email, password)
+    })
+  }
 }
 
 async function signIn(email, password) {
@@ -190,6 +191,7 @@ async function signIn(email, password) {
       if (data.redirect) {
         history.pushState({}, "", data.redirect);
         renderPage();
+        return
       }
     })
     .catch(error => console.error("Error:", error));
