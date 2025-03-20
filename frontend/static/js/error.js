@@ -1,4 +1,4 @@
-export const ErrorPage = () => {
+export const ErrorPage = (page) => {
   document.head.innerHTML = ""
   document.head.innerHTML = `
     <link rel="stylesheet" href="/frontend/static/css/style.css" />
@@ -53,7 +53,7 @@ export const ErrorPage = () => {
 
   let errDiv = document.createElement('div')
   errDiv.classList.add('container')
-  fetch('/error', {
+  fetch('/' + page, {
     headers: { 'Accept': 'application/json' }
   })
     .then(response => response.json())
