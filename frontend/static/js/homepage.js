@@ -37,19 +37,6 @@ export const HomePage = () => {
 
     let rightContainer = document.createElement('div');
     rightContainer.classList.add('right-container');
-    let authContainer = document.createElement('div');
-    authContainer.classList.add('auth-container');
-    let signUpLink = document.createElement('a');
-    signUpLink.href = "/sign-up";
-    signUpLink.textContent = "Sign Up";
-    signUpLink.addEventListener('click', (e) => navigate(e, 'sign-up'));
-    let signInLink = document.createElement('a');
-    signInLink.href = "/sign-in";
-    signInLink.textContent = "Sign In";
-    signInLink.addEventListener('click', (e) => navigate(e, 'sign-in'));
-    authContainer.appendChild(signUpLink);
-    authContainer.appendChild(signInLink);
-    rightContainer.appendChild(authContainer);
     let themeToggler = document.createElement('div');
     themeToggler.classList.add('theme-toggler');
     let moon = document.createElement('img');
@@ -94,26 +81,64 @@ export const HomePage = () => {
 
     let postsContainer = document.createElement('main');
     postsContainer.classList.add('posts');
-    postsContainer.innerHTML = `
-    <section class="create-post hidden">
-        <h2>Create a New Post</h2>
-        <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
-            <label for="post-title">Title</label>
-            <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
-            <label for="post-content">Content</label>
-            <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
-            <button type="submit">Post</button>
-        </form>
-    </section>
-    <div class="floating-create-post-btn-container">
-        <p>Create a Post</p>
-        <button class="floating-create-post-btn">
-            <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
-        </button>
-    </div>
-    `;
+
+    let postForm = document.createElement('section');
+    postForm.classList.add('create-post', 'hidden');
+
+    let postdiv = document.createElement('div')
+    postdiv.classList.add('post-popup')
+
+    let upload = document.createElement('form');
+    upload.name = "upload";
+    upload.enctype = "multipart/form-data";
+
+    let labelTitle = document.createElement('label');
+    labelTitle.htmlFor = "post-title";
+    labelTitle.textContent = "Title";
+    let inputTitle = document.createElement('input');
+    inputTitle.type = "text";
+    inputTitle.id = "post-title";
+    inputTitle.name = "post-title";
+    inputTitle.placeholder = "Enter your post title";
+    inputTitle.required = true;
+    let labelContent = document.createElement('label');
+    labelContent.htmlFor = "post-content";
+    labelContent.textContent = "Content";
+    let textarea = document.createElement('textarea');
+    textarea.id = "post-content";
+    textarea.name = "post-content";
+    textarea.placeholder = "Write your post here...";
+    textarea.required = true;
+    let button = document.createElement('button');
+    button.type = "submit";
+    button.textContent = "Post";
+
+    upload.appendChild(labelTitle);
+    upload.appendChild(inputTitle);
+    upload.appendChild(labelContent);
+    upload.appendChild(textarea);
+    upload.appendChild(button);
+    postdiv.appendChild(upload)
+    postForm.appendChild(postdiv);
+    postsContainer.appendChild(postForm);
 
     getPosts(postsContainer);
+
+    let floating = document.createElement('div')
+    floating.classList.add('floating-create-post-btn-container')
+    let createPost = document.createElement('p')
+    createPost.textContent = 'Create a Post'
+    let floatingButton = document.createElement('button')
+    floatingButton.type = 'submit'
+    floatingButton.classList.add('floating-create-post-btn')
+    let img = document.createElement('img')
+    img.classList.add('web-icon')
+    img.src = '/frontend/static/assets/plus-solid.svg'
+    img.alt = 'create-post'
+    floatingButton.appendChild(img)
+    floating.appendChild(createPost)
+    floating.appendChild(floatingButton)
+    postsContainer.appendChild(floating)
 
     document.body.appendChild(postsContainer);
 
@@ -121,6 +146,18 @@ export const HomePage = () => {
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
     document.body.appendChild(profile);
+
+    const createPostSection = document.querySelector('.create-post');
+    const createPostBtn = document.querySelector('.floating-create-post-btn');
+
+    if (createPostBtn && createPostSection) {
+        console.log('here')
+        createPostBtn.addEventListener('click', () => {
+            console.log('clicked')
+            createPostSection.classList.toggle('hidden');
+        });
+    }
+
 };
 
 export async function getPosts(postsContainer) {
@@ -129,6 +166,7 @@ export async function getPosts(postsContainer) {
     })
         .then(response => response.json())
         .then(data => {
+            console.log(data)
             if (!data) {
                 data = {}
             }
@@ -227,6 +265,6 @@ export function renderPage() {
             break;
         default:
             console.log("Error page");
-            ErrorPage();
+            ErrorPage(page);
     }
 }
