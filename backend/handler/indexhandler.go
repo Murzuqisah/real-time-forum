@@ -32,20 +32,20 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := getSessionID(r)
 	if err != nil {
 		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.ServeFile(w, r, "./frontend/templates/index.html")
 		return
 	}
 	sessionData, err := getSessionData(cookie)
 	if err != nil {
 		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.ServeFile(w, r, "./frontend/templates/index.html")
 		return
 	}
 	// Fetch user information
 	_, err = repositories.GetUserByEmail(sessionData["userEmail"].(string))
 	if err != nil {
 		log.Printf("Invalid session token: %v", err)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.ServeFile(w, r, "./frontend/templates/index.html")
 		return
 	}
 
