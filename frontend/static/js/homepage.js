@@ -1,6 +1,7 @@
 import { SignUpPage } from './sign-up.js';
 import { SignInPage } from './sign-in.js';
 import { ErrorPage } from './error.js';
+import {socket} from './dom.js';
 
 export const HomePage = () => {
     document.head.innerHTML = ""
@@ -129,8 +130,6 @@ export const HomePage = () => {
     postForm.appendChild(postdiv);
     postsContainer.appendChild(postForm);
 
-    getPosts(postsContainer);
-
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
     let createPost = document.createElement('p')
@@ -193,76 +192,12 @@ export const HomePage = () => {
 
 };
 
-export async function getPosts(postsContainer) {
-    await fetch('/posts', {
-        headers: { "Accept": "application/json" }
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data)
-            if (!data) {
-                data = {}
-            }
-
-            if (!data.Posts) {
-                data.Posts = {}
-            }
-
-            data.Posts.forEach(item => {
-                if (!item) {
-                    item = {}
-                }
-                if (!item.categories) {
-                    item.categories = []
-                }
-
-                if (!item.commments) {
-                    item.commments = []
-                }
-                if (!item.parent_id) {
-                    item.parent_id = ''
-                }
-
-                let article = document.createElement('article');
-                article.classList.add('post');
-
-                let headerDiv = document.createElement('div');
-                headerDiv.innerHTML = `
-                <p class="post-author">@${item.username}</p>
-                <p class="post-time">
-                Posted: <time datetime="${item.created_on}"> {{ .CreatedOn }}</time>
-                </p>
-                `
-
-                article.appendChild(headerDiv);
-                article.innerHTML = `
-                    <h3>${item.post_title}</h3>
-                    <p>${item.body}</p>
-                `
-
-                if (item.imageurl !== "") {
-                    let img = document.createElement('img');
-                    img.classList.add('uploaded-file');
-                    img.src = item.imageurl;
-                    img.alt = item.post_title;
-                    article.appendChild(img);
-                }
-
-                if (item.categories) {
-                    let categoryDiv = document.createElement('div');
-                    categoryDiv.classList.add('category-div');
-                    item.categories.forEach(cat => {
-                        let page = document.createElement('p');
-                        page.classList.add('post-category');
-                        page.textContent = cat;
-                        categoryDiv.appendChild(p);
-                    });
-                    article.appendChild(categoryDiv);
-                }
-                postsContainer.appendChild(article);
-            });
-        })
-        .catch(error => console.error("Error fetching posts:", error));
+export async function getPosts() {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: 'getposts' }));
+    } else {
+        console.error('Socket not open');
+    }
 }
 
 
@@ -300,4 +235,70 @@ export function renderPage() {
             console.log("Error page");
             ErrorPage(page);
     }
+}
+
+export function renderPosts(data, postsContainer) {
+    console.log('Rendering posts');
+    if (!data) {
+        data = {}
+    }
+
+    if (!data.Posts) {
+        data.Posts = {}
+    }
+
+    data.Posts.forEach(item => {
+        if (!item) {
+            item = {}
+        }
+        if (!item.categories) {
+            item.categories = []
+        }
+
+        if (!item.commments) {
+            item.commments = []
+        }
+        if (!item.parent_id) {
+            item.parent_id = ''
+        }
+
+        let article = document.createElement('article');
+        article.classList.add('post');
+
+        let headerDiv = document.createElement('div');
+        headerDiv.innerHTML = `
+        <p class="post-author">@${item.username}</p>
+        <p class="post-time">
+        Posted: <time datetime="${item.created_on}"> {{ .CreatedOn }}</time>
+        </p>
+        `
+
+        article.appendChild(headerDiv);
+        article.innerHTML = `
+            <h3>${item.post_title}</h3>
+            <p>${item.body}</p>
+        `
+
+        if (item.imageurl !== "") {
+            let img = document.createElement('img');
+            img.classList.add('uploaded-file');
+            img.src = item.imageurl;
+            img.alt = item.post_title;
+            article.appendChild(img);
+        }
+
+        if (item.categories) {
+            let categoryDiv = document.createElement('div');
+            categoryDiv.classList.add('category-div');
+            item.categories.forEach(cat => {
+                let page = document.createElement('p');
+                page.classList.add('post-category');
+                page.textContent = cat;
+                categoryDiv.appendChild(p);
+            });
+            article.appendChild(categoryDiv);
+        }
+        postsContainer.appendChild(article);
+    });
+    document.body.appendChild(postsContainer);
 }
