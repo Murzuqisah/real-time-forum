@@ -70,7 +70,7 @@ func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 	// register clients
 	client := &Client{Conn: ws, Username: username}
 	RegisterClient(client)
-	defer RemoveClient(username)
+	defer RemoveClient(&Client{client.Conn, client.Username})
 
 	log.Printf("Client connected: %v", username)
 	Read(ws)
