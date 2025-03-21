@@ -30,6 +30,7 @@ func InitRoutes() *http.ServeMux {
 	r.HandleFunc("/likes", middleware.Authenticate(handler.ReactionHandler))
 	r.HandleFunc("/dilikes", middleware.Authenticate(handler.ReactionHandler))
 	r.HandleFunc("/filter", middleware.Authenticate(handler.FilterPosts))
+	r.HandleFunc("/ws", handler.HandleWebsocket)
 
 	r.HandleFunc("/validate", handler.ValidateInputHandler)
 
