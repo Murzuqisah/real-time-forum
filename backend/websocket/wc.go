@@ -5,10 +5,13 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/jesee-kuya/forum/backend/util"
 )
+
+var writeMutex sync.Mutex
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -59,8 +62,14 @@ func Read(conn *websocket.Conn) {
 		}
 		fmt.Println(p)
 
-		if err := conn.WriteMessage(messageType, p); err != nil {
+		if err := Write(conn, messageType, p); err != nil {
 			log.Printf("Error writing message: %v", err)
 		}
 	}
+}
+
+func Write(ws *websocket.Conn, messageType int, data []byte) error {
+	writeMutex.Lock()
+	defer writeMutex.Unlock()
+	return ws.WriteMessage(messageType, data)
 }
