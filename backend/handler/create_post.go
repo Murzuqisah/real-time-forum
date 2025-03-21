@@ -14,17 +14,11 @@ import (
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
-type Post struct {
-	Title   string
-	Content string
-}
-
 /*
 UploadMedia handler function is responsible for performing server operations to enable media upload with a file size limit of up to 20 megabytes.
 */
 func CreatePost(w http.ResponseWriter, r *http.Request) {
 	var url string
-	var post Post
 	if r.Method != http.MethodPost {
 		log.Println("Invalid request method:", r.Method)
 		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -46,12 +40,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&post)
-	if err != nil {
-		log.Println()
-	}
-
-	file, header, err := r.FormFile("uploaded-file")
+	file, header, err := r.FormFile("file")
 	if err != nil {
 		if err.Error() == "http: no such file" {
 			log.Println("No file uploaded, continuing process.")
@@ -126,7 +115,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(post.Title), html.EscapeString(post.Content), url, sessionData["userId"].(int))
+	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("title")), html.EscapeString(r.FormValue("content")), url, sessionData["userId"].(int))
 	if err != nil {
 		log.Println("failed to add post", err)
 		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
