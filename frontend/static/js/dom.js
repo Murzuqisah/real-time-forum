@@ -1,16 +1,29 @@
-import {SignInPage} from './sign-in.js'
-import { HomePage } from './homepage.js';
-import {SignUpPage} from './sign-up.js'
-import { ErrorPage } from './error.js';
+import { renderPage } from './homepage.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname === "/" || window.location.pathname === '/home') {
-        HomePage();
-    } else if (window.location.pathname === "/sign-in") {
-        SignInPage();
-    } else if (window.location.pathname === '/sign-up') {
-        SignUpPage();
-    } else {
-        ErrorPage()
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+    window.addEventListener("popstate", renderPage);
+    await handleNavigation();
 });
+
+async function handleNavigation() {
+    console.log('handling navigation')
+    const path = window.location.pathname;
+
+    try {
+        const response = await fetch(path, { method: "GET" });
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            if (data.redirect) {
+                history.pushState({}, "", data.redirect);
+                renderPage();
+                return;
+            }
+        }
+
+        renderPage();
+    } catch (error) {
+        console.error("Error handling navigation:", error);
+    }
+}

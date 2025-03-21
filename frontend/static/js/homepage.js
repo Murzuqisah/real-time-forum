@@ -1,10 +1,20 @@
+import { SignUpPage } from './sign-up.js';
+import { SignInPage } from './sign-in.js';
+import { ErrorPage } from './error.js';
+
 export const HomePage = () => {
+    document.head.innerHTML = ""
+    document.head.innerHTML = `
+    <link rel="stylesheet" href="/frontend/static/css/style.css" />
+    `
+    document.body.innerHTML = ""
     let scriptFiles = [
         "/frontend/static/js/script.js",
         "/frontend/static/js/comments_toggler.js",
         "/frontend/static/js/reactions.js",
         "/frontend/static/js/format_time.js"
     ];
+
     scriptFiles.forEach(src => {
         let script = document.createElement("script");
         script.src = src;
@@ -14,25 +24,47 @@ export const HomePage = () => {
 
     // Append the header
     let header = document.createElement('header');
-    header.innerHTML = `
-        <nav class="navbar">
-            <div class="logo">
-                <a href="/">Forum</a>
-            </div>
-            <div class="right-container">
-                <div class="auth-container">
-                    {{if .IsLoggedIn}}{{ else}}
-                    <a href="/sign-up">Sign Up</a>
-                    <a href="/sign-in">Sign In</a>
-                    {{ end }}
-                </div>
-                <div class="theme-toggler">
-                    <img class="moon" src="/frontend/static/assets/moon-regular.svg" alt="Moon Icon" />
-                    <img class="sunny" src="/frontend/static/assets/sun-regular.svg" alt="Sunny Icon" />
-                </div>
-            </div>
-        </nav>
-    `;
+    let navbar = document.createElement('nav');
+    navbar.classList.add('navbar');
+    let logo = document.createElement('div');
+    logo.classList.add('logo');
+    let logoLink = document.createElement('a');
+    logoLink.href = "/";
+    logoLink.textContent = "Forum";
+    logoLink.addEventListener('click', (e) => navigate(e, '/home'));
+    logo.appendChild(logoLink);
+    navbar.appendChild(logo);
+
+    let rightContainer = document.createElement('div');
+    rightContainer.classList.add('right-container');
+    let authContainer = document.createElement('div');
+    authContainer.classList.add('auth-container');
+    let signUpLink = document.createElement('a');
+    signUpLink.href = "/sign-up";
+    signUpLink.textContent = "Sign Up";
+    signUpLink.addEventListener('click', (e) => navigate(e, 'sign-up'));
+    let signInLink = document.createElement('a');
+    signInLink.href = "/sign-in";
+    signInLink.textContent = "Sign In";
+    signInLink.addEventListener('click', (e) => navigate(e, 'sign-in'));
+    authContainer.appendChild(signUpLink);
+    authContainer.appendChild(signInLink);
+    rightContainer.appendChild(authContainer);
+    let themeToggler = document.createElement('div');
+    themeToggler.classList.add('theme-toggler');
+    let moon = document.createElement('img');
+    moon.classList.add('moon');
+    moon.src = "/frontend/static/assets/moon-regular.svg";
+    moon.alt = "Moon Icon";
+    let sunny = document.createElement('img');
+    sunny.classList.add('sunny');
+    sunny.src = "/frontend/static/assets/sun-regular.svg";
+    sunny.alt = "Sunny Icon";
+    themeToggler.appendChild(moon);
+    themeToggler.appendChild(sunny);
+    rightContainer.appendChild(themeToggler);
+    navbar.appendChild(rightContainer);
+    header.appendChild(navbar);
     document.body.appendChild(header);
 
     // Create sidebar
@@ -59,34 +91,142 @@ export const HomePage = () => {
     `;
     document.body.appendChild(aside);
 
-    // Create main content
-    let main = document.createElement('main');
-    main.classList.add('posts');
-    main.innerHTML = `
-        <section class="create-post hidden">
-            <h2>Create a New Post</h2>
-            <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
-                <label for="post-title">Title</label>
-                <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
-                <label for="post-content">Content</label>
-                <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
-                <button type="submit">Post</button>
-            </form>
-        </section>
-        <div class="floating-create-post-btn-container">
-            <p>Create a Post</p>
-            <button class="floating-create-post-btn">
-                <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
-            </button>
-        </div>
-    `;
-    document.body.appendChild(main);
 
-    // Add profile section
+    let postsContainer = document.createElement('main');
+    postsContainer.classList.add('posts');
+    postsContainer.innerHTML = `
+    <section class="create-post hidden">
+        <h2>Create a New Post</h2>
+        <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
+            <label for="post-title">Title</label>
+            <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
+            <label for="post-content">Content</label>
+            <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
+            <button type="submit">Post</button>
+        </form>
+    </section>
+    <div class="floating-create-post-btn-container">
+        <p>Create a Post</p>
+        <button class="floating-create-post-btn">
+            <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
+        </button>
+    </div>
+    `;
+
+    getPosts(postsContainer);
+
+    document.body.appendChild(postsContainer);
+
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
     document.body.appendChild(profile);
 };
 
+export async function getPosts(postsContainer) {
+    await fetch('/posts', {
+        headers: { "Accept": "application/json" }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (!data) {
+                data = {}
+            }
 
+            if (!data.Posts) {
+                data.Posts = {}
+            }
+
+            data.Posts.forEach(item => {
+                if (!item) {
+                    item = {}
+                }
+                if (!item.categories) {
+                    item.categories = []
+                }
+
+                if (!item.commments) {
+                    item.commments = []
+                }
+                if (!item.parent_id) {
+                    item.parent_id = ''
+                }
+
+                let article = document.createElement('article');
+                article.classList.add('post');
+
+                let headerDiv = document.createElement('div');
+                headerDiv.innerHTML = `
+                <p class="post-author">@${item.username}</p>
+                <p class="post-time">
+                Posted: <time datetime="${item.created_on}"> {{ .CreatedOn }}</time>
+                </p>
+                `
+
+                article.appendChild(headerDiv);
+                article.innerHTML = `
+                    <h3>${item.post_title}</h3>
+                    <p>${item.body}</p>
+                `
+
+                if (item.imageurl !== "") {
+                    let img = document.createElement('img');
+                    img.classList.add('uploaded-file');
+                    img.src = item.imageurl;
+                    img.alt = item.post_title;
+                    article.appendChild(img);
+                }
+
+                if (item.categories) {
+                    let categoryDiv = document.createElement('div');
+                    categoryDiv.classList.add('category-div');
+                    item.categories.forEach(cat => {
+                        let page = document.createElement('p');
+                        page.classList.add('post-category');
+                        page.textContent = cat;
+                        categoryDiv.appendChild(p);
+                    });
+                    article.appendChild(categoryDiv);
+                }
+                postsContainer.appendChild(article);
+            });
+        })
+        .catch(error => console.error("Error fetching posts:", error));
+}
+
+
+export function navigate(event, page) {
+    event.preventDefault()
+    if (!page.startsWith('/')) {
+        page = '/' + page;
+    }
+
+    if (location.origin + page !== location.href) {
+        history.pushState({ page }, "", page);
+        renderPage();
+    }
+}
+
+export function renderPage() {
+    let page = location.pathname;
+    console.log("Current page:", page);
+
+    if (!page || page === "/") {
+        page = "/sign-in";
+    }
+
+    switch (page) {
+        case "/home":
+            HomePage();
+            break;
+        case "/sign-up":
+            SignUpPage();
+            break;
+        case "/sign-in":
+            SignInPage();
+            break;
+        default:
+            console.log("Error page");
+            ErrorPage();
+    }
+}
