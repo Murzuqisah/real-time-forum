@@ -4,9 +4,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/websocket"
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
 )
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
 
 type RequestData struct {
 	ID string `json:"id"`
@@ -49,11 +54,43 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := repositories.GetPosts(util.DB)
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("Failed to get posts: %v", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		log.Printf("Failed to upgrade connection: %v", err)
 		return
 	}
-	PostDetails(w, r, posts, true)
+
+	defer conn.Close()
+
+	for {
+		var msg map[string]string
+		err := conn.ReadJSON(&msg)
+		if err != nil {
+			log.Printf("Failed to read message: %v", err)
+			break
+		}
+
+		if msg["action"] == "getPosts" {
+			posts, err := repositories.GetPosts(util.DB)
+			if err != nil {
+				conn.WriteJSON(map[string]interface{}{
+					"type":    "error",
+					"message": "An Unexpected Error Occurred. Try Again Later",
+				})
+			}
+
+			posts, err = PostDetails(posts)
+			if err != nil {
+				conn.WriteJSON(map[string]interface{}{
+					"type":    "error",
+					"message": err.Error(),
+				})
+			}
+			conn.WriteJSON(map[string]interface{}{
+				"type":  "posts",
+				"posts": posts,
+			})
+		}
+
+	}
 }
