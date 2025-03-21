@@ -4,25 +4,35 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
+type Client struct {
+	Conn     *websocket.Conn
+	Username string
+}
+
 var writeMutex sync.Mutex
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		allowedOrigins := map[string]bool{
-			"http://localhost:9000": true,
-		}
-		return allowedOrigins[r.Header.Get("Origin")]
-	},
-}
+var (
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			allowedOrigins := map[string]bool{
+				"http://localhost:9000": true,
+			}
+			return allowedOrigins[r.Header.Get("Origin")]
+		},
+	}
+
+	clients   = make(map[string]*Client)
+	clientMux sync.Mutex
+)
 
 func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
@@ -49,7 +59,15 @@ func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 
-	log.Println("Client connected")
+	// extract username from request query
+	username := r.URL.Query().Get("username")
+	if username == "" {
+		log.Printf("Username is missing: %v", username)
+		ws.Close()
+		return
+	}
+
+	log.Printf("Client connected: %v", username)
 	Read(ws)
 }
 
