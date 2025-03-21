@@ -133,9 +133,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	for _, category := range categories {
 		repositories.InsertRecord(util.DB, "tblPostCategories", []string{"post_id", "category"}, id, category)
 	}
-
-	r.Method = http.MethodGet
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	http.ServeFile(w, r, "frontend/templates/home.html")
 }
 
 /*
