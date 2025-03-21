@@ -69,13 +69,13 @@ func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, lo
 		cookie, err := getSessionID(r)
 		if err != nil {
 			log.Println("Invalid Session")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.ServeFile(w, r, "./frontend/templates/index.html")
 			return
 		}
 		sessionData, err := getSessionData(cookie)
 		if err != nil {
 			log.Println("Invalid Session")
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.ServeFile(w, r, "./frontend/templates/index.html")
 			return
 		}
 		user, err = repositories.GetUserByEmail(sessionData["userEmail"].(string))
@@ -97,6 +97,10 @@ func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, lo
 		Posts:      posts,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(data)
+		return
+	}
+	http.ServeFile(w, r, "./frontend/templates/index.html")
 }
