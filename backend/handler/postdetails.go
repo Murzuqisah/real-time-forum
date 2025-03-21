@@ -1,22 +1,20 @@
 package handler
 
 import (
-	"encoding/json"
+	"errors"
 	"log"
-	"net/http"
 
 	"github.com/jesee-kuya/forum/backend/models"
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
-func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, logged bool) {
+func PostDetails(posts []models.Post) ([]models.Post, error) {
 	for i, post := range posts {
 		comments, err1 := repositories.GetComments(util.DB, post.ID)
 		if err1 != nil {
 			log.Println("Failed to get comments:", err1)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 		}
 
 		// Getting comment reactions
@@ -24,15 +22,13 @@ func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, lo
 			commentLikes, errLikes := repositories.GetReactions(util.DB, comment.ID, "Like")
 			if errLikes != nil {
 				log.Println("Failed to get likes", errLikes)
-				util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-				return
+				return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 			}
 
 			commentDislikes, errDislikes := repositories.GetReactions(util.DB, comment.ID, "Dislike")
 			if errDislikes != nil {
 				log.Println("Failed to get dislikes", errDislikes)
-				util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-				return
+				return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 			}
 
 			comments[j].Likes = len(commentLikes)
@@ -42,20 +38,17 @@ func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, lo
 		categories, err3 := repositories.GetCategories(util.DB, post.ID)
 		if err3 != nil {
 			log.Println("Failed to get categories", err3)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 		}
 		likes, err4 := repositories.GetReactions(util.DB, post.ID, "Like")
 		if err4 != nil {
 			log.Println("Failed to get likes", err4)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 		}
 		dislikes, err := repositories.GetReactions(util.DB, post.ID, "Dislike")
 		if err != nil {
 			log.Printf("Failed to get dislikes: %v", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 		}
 
 		posts[i].Comments = comments
@@ -64,43 +57,5 @@ func PostDetails(w http.ResponseWriter, r *http.Request, posts []models.Post, lo
 		posts[i].Likes = len(likes)
 		posts[i].Dislikes = len(dislikes)
 	}
-	var user models.User
-	if logged {
-		cookie, err := getSessionID(r)
-		if err != nil {
-			log.Println("Invalid Session")
-			http.ServeFile(w, r, "./frontend/templates/index.html")
-			return
-		}
-		sessionData, err := getSessionData(cookie)
-		if err != nil {
-			log.Println("Invalid Session")
-			http.ServeFile(w, r, "./frontend/templates/index.html")
-			return
-		}
-		user, err = repositories.GetUserByEmail(sessionData["userEmail"].(string))
-		if err != nil {
-			log.Println("User not found", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
-		}
-	}
-
-	data := struct {
-		IsLoggedIn  bool
-		Name, Email string
-		Posts       []models.Post
-	}{
-		IsLoggedIn: logged,
-		Name:       user.Username,
-		Email:      user.Email,
-		Posts:      posts,
-	}
-
-	if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
-		return
-	}
-	http.ServeFile(w, r, "./frontend/templates/index.html")
+	return posts, nil
 }
