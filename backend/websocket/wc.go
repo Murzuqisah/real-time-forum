@@ -67,8 +67,29 @@ func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// register clients
+	client := &Client{Conn: ws, Username: username}
+	RegisterClient(client)
+	defer RemoveClient(username)
+
 	log.Printf("Client connected: %v", username)
 	Read(ws)
+}
+
+// add user to active connections
+func RegisterClient(client *Client) {
+	clientMux.Lock()
+	clients[client.Username] = client
+	clientMux.Unlock()
+	log.Printf("Client %s connected", client.Username)
+}
+
+// remove user from active connection
+func RemoveClient(client *Client) {
+	clientMux.Lock()
+	delete(clients, client.Username)
+	clientMux.Unlock()
+	log.Printf("Client %s disconnected", client.Username)
 }
 
 func Read(conn *websocket.Conn) {
