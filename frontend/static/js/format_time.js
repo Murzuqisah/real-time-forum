@@ -44,23 +44,3 @@ function formatTimestamp(timestamp) {
       : `${Math.floor(timeDifference / 31536000)} years ago`;
   }
 }
-
-fetch('/posts')
-  .then((response) => response.json())
-  .then((posts) => {
-    posts.forEach((post) => {
-      const timeElement = document.querySelector(
-        `.post-time time[datetime="${post.created_on}"]`
-      );
-
-      if (timeElement) {
-        const timestamp = new Date(post.created_on);
-        timeElement.innerText = formatTimestamp(timestamp);
-      } else {
-        console.warn(
-          `No matching <time> element found for timestamp: ${post.created_on}`
-        );
-      }
-    });
-  })
-  .catch((error) => console.error('Error fetching posts:', error));
