@@ -53,7 +53,9 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./frontend/templates/index.html")
 		return
 	}
+}
 
+func HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Failed to upgrade connection: %v", err)
@@ -62,6 +64,10 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer conn.Close()
 
+	go HandleConnection(conn)
+}
+
+func HandleConnection(conn *websocket.Conn) {
 	for {
 		var msg map[string]string
 		err := conn.ReadJSON(&msg)
