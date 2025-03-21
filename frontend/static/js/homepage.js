@@ -109,6 +109,12 @@ export const HomePage = () => {
     textarea.name = "post-content";
     textarea.placeholder = "Write your post here...";
     textarea.required = true;
+    let postOperation = document.createElement('div');
+    postOperation.classList.add('post-operation');
+    let fileInput = document.createElement('input');
+    fileInput.type = "file";
+    fileInput.name = "uploaded-file";
+    postOperation.appendChild(fileInput);
     let button = document.createElement('button');
     button.type = "submit";
     button.textContent = "Post";
@@ -117,6 +123,7 @@ export const HomePage = () => {
     upload.appendChild(inputTitle);
     upload.appendChild(labelContent);
     upload.appendChild(textarea);
+    upload.appendChild(postOperation);
     upload.appendChild(button);
     postdiv.appendChild(upload)
     postForm.appendChild(postdiv);
@@ -155,6 +162,32 @@ export const HomePage = () => {
         createPostBtn.addEventListener('click', () => {
             console.log('clicked')
             createPostSection.classList.toggle('hidden');
+
+            if (button) {
+                button.addEventListener('click', async (e) => {
+                    e.preventDefault()
+                    const title = inputTitle.value;
+                    const content = textarea.value;
+                    const file = fileInput.files[0];
+                    const formData = new FormData();
+                    formData.append('title', title);
+                    formData.append('content', content)
+                    formData.append('file', file)
+                    await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirect) {
+                            history.pushState({}, "", data.redirect);
+                            renderPage();
+                            return;
+                        }
+                    })
+                    .catch(error => console.error("Error creating post:", error));
+                });
+            }
         });
     }
 
