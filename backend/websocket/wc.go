@@ -92,16 +92,17 @@ func RemoveClient(client *Client) {
 	log.Printf("Client %s disconnected", client.Username)
 }
 
-func Read(conn *websocket.Conn) {
+// read messages from a user
+func ReadMessage(client *Client) {
 	for {
-		messageType, p, err := conn.ReadMessage()
+		messageType, p, err := client.Conn.ReadMessage()
 		if err != nil {
 			log.Printf("Error reading message: %v", err)
 			return
 		}
 		fmt.Println(p)
 
-		if err := Write(conn, messageType, p); err != nil {
+		if err := Write(client.Conn, messageType, p); err != nil {
 			log.Printf("Error writing message: %v", err)
 		}
 	}
