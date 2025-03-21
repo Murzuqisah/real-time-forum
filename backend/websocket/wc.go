@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/jesee-kuya/forum/backend/util"
@@ -20,7 +21,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-
 func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
@@ -32,6 +32,19 @@ func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer ws.Close()
+
+	// keep websocket connection alive to avoid timeouts
+	ws.SetPingHandler(func(appData string) error {
+		log.Printf("Received Ping, sending Pong: %v", appData)
+		return ws.WriteMessage(websocket.PongMessage, []byte(appData))
+	})
+
+	// R/W timeout
+	ws.SetReadDeadline(time.Now().Add(30 * time.Second))
+	ws.SetPongHandler(func(appData string) error {
+		ws.SetReadDeadline(time.Now().Add(30 * time.Second))
+		return nil
+	})
 
 	log.Println("Client connected")
 	Read(ws)
