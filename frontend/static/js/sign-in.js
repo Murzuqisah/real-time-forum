@@ -117,10 +117,9 @@ export const SignInPage = () => {
   signinForm.appendChild(div2);
   signinForm.appendChild(button1);
   formContainer.appendChild(signinForm);
-  formContainer.appendChild(document.createElement('br'));
 
 
-  let switchForm = document.createElement('p');
+  let switchForm = document.createElement('div');
   switchForm.classList.add('switch-form');
   switchForm.textContent = `Don't have an account? `;
   let link = document.createElement('a');
