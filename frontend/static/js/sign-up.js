@@ -1,4 +1,4 @@
-import { navigate, renderPage } from "./sign-in"
+import { navigate } from "./sign-in.js"
 export const SignUpPage = () => {
   document.head.innerHTML = ""
   document.head.innerHTML = `
