@@ -235,6 +235,4 @@ export function renderPosts(data, postsContainer) {
 
         postsContainer.appendChild(article);
     });
-
-    document.body.appendChild(postsContainer);
 }
