@@ -18,6 +18,8 @@ func InitRoutes() *http.ServeMux {
 
 	r.Handle("/", http.FileServer(http.Dir("./frontend/templates")))
 
+	r.HandleFunc("/sign-up", handler.SignupHandler)
+
 	r.Handle("/ws", websocket.Handler(handler.HandleWebsocket))
 	return r
 }
