@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
@@ -69,23 +68,6 @@ func HandleConnection(conn *websocket.Conn) {
 				"type":  "posts",
 				"posts": posts,
 			})
-
-		case "signIn":
-			password, email := msg["password"], msg["email"]
-			user, err := LoginHandler(password, email)
-			if err != nil {
-				log.Println("Login error:", err)
-				sendJSON(conn, map[string]interface{}{
-					"type": "error",
-					"msg":  fmt.Sprintf("%v", err),
-				})
-			} else {
-				sendJSON(conn, map[string]interface{}{
-					"type":  "signIn",
-					"user":  user,
-					"error": fmt.Sprintf("%v", err),
-				})
-			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]interface{}{
