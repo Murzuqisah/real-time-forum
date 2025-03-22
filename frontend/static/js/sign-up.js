@@ -1,3 +1,4 @@
+import { navigate, renderPage } from "./sign-in"
 export const SignUpPage = () => {
   document.head.innerHTML = ""
   document.head.innerHTML = `
@@ -39,6 +40,7 @@ export const SignUpPage = () => {
   let logoLink = document.createElement('a')
   logoLink.id = 'move-sign-in'
   logoLink.textContent = 'Forum'
+  logoLink.addEventListener('click', (e) => navigate(e, '/sign-in'))
   logo.appendChild(logoLink)
   navbar.appendChild(logo)
   let themeToggler = document.createElement('div')
@@ -153,6 +155,26 @@ export const SignUpPage = () => {
   button3.type = 'submit';
   button3.classList.add('sign-up-btn', 'btn');
   button3.textContent = 'Create Account';
+  button3.addEventListener('click', (e) => {
+    e.preventDefault()
+    console.log('Signing up...');
+
+    let username = document.getElementById('username').value;
+    let email = document.getElementById('email').value;
+    let password = document.getElementById('password').value;
+    let confirmedPassword = document.getElementById('confirmed-password').value;
+
+    if (password !== confirmedPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    if (!username || !email || !password || !confirmedPassword) {
+      alert('Username, email, and password are required for sign up');
+      return;
+    }
+    signUp(username, email, password, confirmedPassword)
+
+  })
   signupForm.appendChild(div1);
   signupForm.appendChild(div2);
   signupForm.appendChild(div3);
@@ -167,9 +189,26 @@ export const SignUpPage = () => {
   let switchLink = document.createElement('a');
   switchLink.textContent = 'Sign In';
   switchLink.id = 'switchlink'
+  switchLink.addEventListener('click', (e) => navigate(e, '/sign-in'))
   switchForm.appendChild(switchLink);
   formContainer.appendChild(switchForm);
   main.appendChild(formContainer);
 
   document.body.appendChild(main)
+}
+
+async function signUp(username, email, password, confirmedPassword) {
+  await fetch('/sign-up', {
+    method: 'POST',
+    body: JSON.stringify({username:username, password:password, email:email, confirmedPassword: confirmedPassword})
+  })
+  .then(response)
+  .then(data => {
+    if (data.error === 'ok') {
+      navigate('click', '/sign-in')
+    } else {
+      alert(data.error)
+    }
+  })
+
 }
