@@ -52,7 +52,7 @@ func HandleConnection(conn *websocket.Conn) {
 					"type":    "error",
 					"message": "An unexpected error occurred. Try again later.",
 				})
-				continue
+				break
 			}
 
 			posts, err = PostDetails(posts)
@@ -62,7 +62,7 @@ func HandleConnection(conn *websocket.Conn) {
 					"type":    "error",
 					"message": err.Error(),
 				})
-				continue
+				break
 			}
 
 			sendJSON(conn, map[string]interface{}{
