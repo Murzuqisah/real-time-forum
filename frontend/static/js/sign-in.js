@@ -1,4 +1,4 @@
-import { SignUpPage } from "./sign-up"
+import { SignUpPage } from "./sign-up.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
