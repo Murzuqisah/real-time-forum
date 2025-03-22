@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/models"
@@ -10,9 +12,45 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type LoginData struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 var SessionStore = make(map[string]map[string]interface{})
 
-func LoginHandler(password, email string) (models.User, error) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var data LoginData
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	user, err := Login(data.Password, data.Email)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"error": "ok",
+		"user":  user,
+	})
+}
+
+func Login(password, email string) (models.User, error) {
 	var user models.User
 	var err error
 
