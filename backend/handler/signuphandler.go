@@ -80,7 +80,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("user added succesfully")
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusInternalServerError)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"error": "ok",
 	})
