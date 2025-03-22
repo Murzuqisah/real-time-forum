@@ -186,67 +186,55 @@ export const HomePage = () => {
 };
 
 export function renderPosts(data, postsContainer) {
-    console.log('Rendering posts');
-    if (!data) {
-        data = {}
+    console.log('Rendering posts:', data);
+
+    if (!data || !Array.isArray(data.posts)) {
+        console.error("Invalid posts data:", data.posts);
+        return; // Exit early if `posts` is not an array
     }
 
-    if (!data.Posts) {
-        data.Posts = {}
-    }
+    postsContainer.innerHTML = ""; // Clear previous posts
 
-    data.Posts.forEach(item => {
-        if (!item) {
-            item = {}
-        }
-        if (!item.categories) {
-            item.categories = []
-        }
-
-        if (!item.commments) {
-            item.commments = []
-        }
-        if (!item.parent_id) {
-            item.parent_id = ''
-        }
+    data.posts.forEach(item => {
+        item = item || {}; // Ensure item is an object
 
         let article = document.createElement('article');
         article.classList.add('post');
 
         let headerDiv = document.createElement('div');
         headerDiv.innerHTML = `
-        <p class="post-author">@${item.username}</p>
-        <p class="post-time">
-        Posted: <time datetime="${item.created_on}"> {{ .CreatedOn }}</time>
-        </p>
-        `
-
+            <p class="post-author">@${item.username || "Unknown"}</p>
+            <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
+        `;
         article.appendChild(headerDiv);
-        article.innerHTML = `
-            <h3>${item.post_title}</h3>
-            <p>${item.body}</p>
-        `
 
-        if (item.imageurl !== "") {
+        article.innerHTML += `
+            <h3>${item.post_title || "Untitled"}</h3>
+            <p>${item.body || "No content"}</p>
+        `;
+
+        if (item.imageurl) {
             let img = document.createElement('img');
             img.classList.add('uploaded-file');
             img.src = item.imageurl;
-            img.alt = item.post_title;
+            img.alt = item.post_title || "Image";
             article.appendChild(img);
         }
 
-        if (item.categories) {
+        if (Array.isArray(item.categories)) {
             let categoryDiv = document.createElement('div');
             categoryDiv.classList.add('category-div');
             item.categories.forEach(cat => {
                 let page = document.createElement('p');
                 page.classList.add('post-category');
                 page.textContent = cat;
-                categoryDiv.appendChild(p);
+                categoryDiv.appendChild(page);
             });
             article.appendChild(categoryDiv);
         }
+
         postsContainer.appendChild(article);
     });
+
     document.body.appendChild(postsContainer);
 }
