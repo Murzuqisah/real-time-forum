@@ -75,18 +75,39 @@ func HandleConnection(conn *websocket.Conn) {
 			user, err := LoginHandler(password, email)
 			if err != nil {
 				log.Println("Login error:", err)
+				sendJSON(conn, map[string]interface{}{
+					"type": "error",
+					"msg":  fmt.Sprintf("%v", err),
+				})
+			} else {
+				sendJSON(conn, map[string]interface{}{
+					"type":  "signIn",
+					"user":  user,
+					"error": fmt.Sprintf("%v", err),
+				})
 			}
-			sendJSON(conn, map[string]interface{}{
-				"type":  "signIn",
-				"user":  user,
-				"error": fmt.Sprintf("%v", err),
-			})
 
 		case "redirect":
 			sendJSON(conn, map[string]interface{}{
 				"type":  "redirect",
 				"route": msg["route"],
 			})
+
+		case "signUp":
+			username, email, password, confirmedPassword := msg["username"], msg["email"], msg["password"], msg["confirmedPassword"]
+			err := SignupHandler(username, email, password, confirmedPassword)
+			if err != nil {
+				log.Println("Error encountered: ", err)
+				sendJSON(conn, map[string]interface{}{
+					"type": "error",
+					"msg":  fmt.Sprintf("%v", err),
+				})
+			} else {
+				sendJSON(conn, map[string]interface{}{
+					"type":  "redirect",
+					"route": "/sign-in",
+				})
+			}
 
 		default:
 			log.Println("Unknown message type:", msg["type"])
