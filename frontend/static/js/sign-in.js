@@ -1,5 +1,3 @@
-import { navigate } from "./homepage.js";
-
 export const SignInPage = () => {
   document.head.innerHTML = ""
   document.head.innerHTML = `
