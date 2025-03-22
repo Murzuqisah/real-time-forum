@@ -19,6 +19,7 @@ func InitRoutes() *http.ServeMux {
 	r.Handle("/", http.FileServer(http.Dir("./frontend/templates")))
 
 	r.HandleFunc("/sign-up", handler.SignupHandler)
+	r.HandleFunc("/sign-in", handler.LoginHandler)
 
 	r.Handle("/ws", websocket.Handler(handler.HandleWebsocket))
 	return r
