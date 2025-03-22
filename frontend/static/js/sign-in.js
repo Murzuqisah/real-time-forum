@@ -1,4 +1,5 @@
 import { SignUpPage } from "./sign-up.js"
+import { RealTime } from "./dom.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -166,4 +167,26 @@ export function renderPage() {
       default:
           console.log("Error page");
   }
+}
+
+export async function login(email, password) {
+  await fetch('/sign-in',{
+    method: "POST",
+    headers: { 'Content-Type': 'application/json'},
+    body: JSON.stringify({email:email, password: password})
+  } )
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('unexpected error occured')
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.error === 'ok') {
+      RealTime(data.user)
+    } else {
+      alert(data.error)
+    }
+  })
+  .catch(error => alert(`Error: ${error.message}`))
 }
