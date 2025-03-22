@@ -190,13 +190,13 @@ export function renderPosts(data, postsContainer) {
 
     if (!data || !Array.isArray(data.posts)) {
         console.error("Invalid posts data:", data.posts);
-        return; // Exit early if `posts` is not an array
+        return; 
     }
 
-    postsContainer.innerHTML = ""; // Clear previous posts
+    postsContainer.innerHTML = ""; 
 
     data.posts.forEach(item => {
-        item = item || {}; // Ensure item is an object
+        item = item || {}; 
 
         let article = document.createElement('article');
         article.classList.add('post');
