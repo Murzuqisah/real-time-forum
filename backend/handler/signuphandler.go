@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"errors"
+	"encoding/json"
 	"log"
+	"net/http"
 	"reflect"
 
 	"github.com/jesee-kuya/forum/backend/models"
@@ -10,36 +11,77 @@ import (
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
-func SignupHandler(username, email, password, confirmedPassword string) error {
-	var user models.User
+type SignUpData struct {
+	Username          string `json:"username"`
+	Email             string `json:"email"`
+	Password          string `json:"password"`
+	ConfirmedPassword string `json:"confirmedPassword"`
+}
 
-	user.Username = username
-	user.Email = email
-	user.Password = password
-	user.ConfirmedPassword = confirmedPassword
+func SignupHandler(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+	var data SignUpData
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	user.Username = data.Username
+	user.Email = data.Email
+	user.Password = data.Password
+	user.ConfirmedPassword = data.ConfirmedPassword
 
 	if !reflect.DeepEqual(user.Password, user.ConfirmedPassword) {
 		log.Printf("User password %q and confirmed password %q do not match.\n", user.Password, user.ConfirmedPassword)
-		return errors.New("password and confirmed password do not match")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "password don't match",
+		})
+		return
 	}
 
-	err := util.ValidateFormFields(user.Username, user.Email, user.Password)
+	err = util.ValidateFormFields(user.Username, user.Email, user.Password)
 	if err != nil {
 		log.Printf("Invalid form values from user: %v\n", err)
-		return errors.New("invalid values")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid input",
+		})
+		return
 	}
 
 	hashed, err := util.PasswordEncrypt([]byte(user.Password), 10)
 	if err != nil {
 		log.Printf("Failed encrypting password: %v\n", err)
-		return errors.New("an unexpected error occurred. try again later")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
 	}
 
 	_, err = repositories.InsertRecord(util.DB, "tblUsers", []string{"username", "email", "user_password"}, user.Username, user.Email, string(hashed))
 	if err != nil {
 		log.Println("Error adding user:", err)
-		return errors.New("an unexpected error occurred. try again later")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 	}
 	log.Println("user added succesfully")
-	return nil
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	json.NewEncoder(w).Encode(map[string]string{
+		"error": "ok",
+	})
 }
