@@ -1,5 +1,5 @@
-import { navigate } from "./homepage.js";
-import { renderPage } from "./homepage.js";
+import { SignUpPage } from "./sign-up.js"
+import { RealTime } from "./dom.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -40,9 +40,10 @@ export const SignInPage = () => {
   let logo = document.createElement('div')
   logo.classList.add('logo')
   let logoLink = document.createElement('a')
+  logoLink.id = 'sign-in-redirect'
   logoLink.href = '/'
   logoLink.textContent = 'Forum'
-  logoLink.addEventListener('click', (e) => navigate(e, '/'));
+  logoLink.addEventListener('click', (e) => navigate(e, "/sign-in"))
   logo.appendChild(logoLink)
   navbar.appendChild(logo)
   let themeToggler = document.createElement('div')
@@ -120,79 +121,72 @@ export const SignInPage = () => {
   signinForm.appendChild(div2);
   signinForm.appendChild(button1);
   formContainer.appendChild(signinForm);
-  formContainer.appendChild(document.createElement('br'));
 
-  let p = document.createElement('p');
-  p.classList.add('continue-with');
-  p.textContent = 'Or Continue With';
-  formContainer.appendChild(p);
 
-  let oauthButtons = document.createElement('div');
-  oauthButtons.classList.add('oauth-buttons');
-  let googleBtn = document.createElement('button');
-  googleBtn.style.width = '45%';
-  googleBtn.type = 'button';
-  googleBtn.classList.add('oauth-btn', 'google-btn');
-  googleBtn.textContent = 'Google';
-  googleBtn.addEventListener('click', () => window.location.href = '/auth/google');
-  let githubBtn = document.createElement('button');
-  githubBtn.style.width = '45%';
-  githubBtn.type = 'button';
-  githubBtn.classList.add('oauth-btn', 'github-btn');
-  githubBtn.textContent = 'GitHub';
-  githubBtn.addEventListener('click', () => window.location.href = '/auth/github');
-  let box = document.createElement('box-icon');
-  box.type = 'logo';
-  box.name = 'google';
-  box.style.fill = 'white';
-  googleBtn.prepend(box);
-  let box1 = document.createElement('box-icon');
-  box1.type = 'logo';
-  box1.name = 'github';
-  box1.style.fill = 'white';
-  githubBtn.prepend(box1);
-  oauthButtons.appendChild(googleBtn);
-  oauthButtons.appendChild(githubBtn);
-  formContainer.appendChild(oauthButtons);
-
-  let switchForm = document.createElement('p');
+  let switchForm = document.createElement('div');
   switchForm.classList.add('switch-form');
   switchForm.textContent = `Don't have an account? `;
   let link = document.createElement('a');
+  link.id = 'move-sign-up'
   link.textContent = 'Sign Up';
-  link.addEventListener('click', (e) => navigate(e, '/sign-up'));
+  link.addEventListener('click', (e) => navigate(e, '/sign-up'))
   switchForm.appendChild(link);
   formContainer.appendChild(switchForm);
 
   main.appendChild(formContainer)
   document.body.appendChild(main)
+}
 
-  let signin = document.getElementById('sign-in-btn')
-  if (signin) {
-    signin.addEventListener('click', (e) => {
-      e.preventDefault();
-      let password = document.getElementById('password').value;
-      let email = document.getElementById('email').value;
-      signIn(email, password)
-    })
+export function navigate(event, page) {
+  event.preventDefault()
+  if (!page.startsWith('/')) {
+      page = '/' + page;
+  }
+
+  if (location.origin + page !== location.href) {
+      history.pushState({ page }, "", page);
+      renderPage();
   }
 }
 
-async function signIn(email, password) {
-  console.log('post signin')
-  await fetch("/sign-in", {
+export function renderPage() {
+  let page = location.pathname;
+  console.log("Current page:", page);
+
+  if (!page || page === "/") {
+      page = "/sign-in";
+  }
+
+  switch (page) {
+      case "/sign-up":
+          SignUpPage();
+          break;
+      case "/sign-in":
+          SignInPage();
+          break;
+      default:
+          console.log("Error page");
+  }
+}
+
+export async function login(email, password) {
+  await fetch('/sign-in',{
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
+    headers: { 'Content-Type': 'application/json'},
+    body: JSON.stringify({email:email, password: password})
+  } )
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('unexpected error occured')
+    }
+    return response.json();
   })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data.redirect)
-      if (data.redirect) {
-        history.pushState({}, "", data.redirect);
-        renderPage();
-        return
-      }
-    })
-    .catch(error => console.error("Error:", error));
+  .then(data => {
+    if (data.error === 'ok') {
+      RealTime(data.user)
+    } else {
+      alert(data.error)
+    }
+  })
+  .catch(error => alert(`Error: ${error.message}`))
 }
