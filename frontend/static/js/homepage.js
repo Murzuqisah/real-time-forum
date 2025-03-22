@@ -1,8 +1,3 @@
-import { SignUpPage } from './sign-up.js';
-import { SignInPage } from './sign-in.js';
-import { ErrorPage } from './error.js';
-import {socket} from './dom.js';
-
 export const HomePage = () => {
     document.head.innerHTML = ""
     document.head.innerHTML = `
@@ -30,9 +25,7 @@ export const HomePage = () => {
     let logo = document.createElement('div');
     logo.classList.add('logo');
     let logoLink = document.createElement('a');
-    logoLink.href = "/";
     logoLink.textContent = "Forum";
-    logoLink.addEventListener('click', (e) => navigate(e, '/home'));
     logo.appendChild(logoLink);
     navbar.appendChild(logo);
 
@@ -191,51 +184,6 @@ export const HomePage = () => {
     }
 
 };
-
-export async function getPosts() {
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: 'getposts' }));
-    } else {
-        console.error('Socket not open');
-    }
-}
-
-
-export function navigate(event, page) {
-    event.preventDefault()
-    if (!page.startsWith('/')) {
-        page = '/' + page;
-    }
-
-    if (location.origin + page !== location.href) {
-        history.pushState({ page }, "", page);
-        renderPage();
-    }
-}
-
-export function renderPage() {
-    let page = location.pathname;
-    console.log("Current page:", page);
-
-    if (!page || page === "/") {
-        page = "/sign-in";
-    }
-
-    switch (page) {
-        case "/home":
-            HomePage();
-            break;
-        case "/sign-up":
-            SignUpPage();
-            break;
-        case "/sign-in":
-            SignInPage();
-            break;
-        default:
-            console.log("Error page");
-            ErrorPage(page);
-    }
-}
 
 export function renderPosts(data, postsContainer) {
     console.log('Rendering posts');
