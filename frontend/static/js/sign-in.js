@@ -1,3 +1,5 @@
+import { SignUpPage } from "./sign-up"
+
 export const SignInPage = () => {
   document.head.innerHTML = ""
   document.head.innerHTML = `
@@ -40,6 +42,7 @@ export const SignInPage = () => {
   logoLink.id = 'sign-in-redirect'
   logoLink.href = '/'
   logoLink.textContent = 'Forum'
+  logoLink.addEventListener('click', (e) => navigate(e, "/sign-in"))
   logo.appendChild(logoLink)
   navbar.appendChild(logo)
   let themeToggler = document.createElement('div')
@@ -125,9 +128,42 @@ export const SignInPage = () => {
   let link = document.createElement('a');
   link.id = 'move-sign-up'
   link.textContent = 'Sign Up';
+  link.addEventListener('click', (e) => navigate(e, '/sign-up'))
   switchForm.appendChild(link);
   formContainer.appendChild(switchForm);
 
   main.appendChild(formContainer)
   document.body.appendChild(main)
+}
+
+export function navigate(event, page) {
+  event.preventDefault()
+  if (!page.startsWith('/')) {
+      page = '/' + page;
+  }
+
+  if (location.origin + page !== location.href) {
+      history.pushState({ page }, "", page);
+      renderPage();
+  }
+}
+
+export function renderPage() {
+  let page = location.pathname;
+  console.log("Current page:", page);
+
+  if (!page || page === "/") {
+      page = "/sign-in";
+  }
+
+  switch (page) {
+      case "/sign-up":
+          SignUpPage();
+          break;
+      case "/sign-in":
+          SignInPage();
+          break;
+      default:
+          console.log("Error page");
+  }
 }
