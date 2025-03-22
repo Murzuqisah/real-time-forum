@@ -1,87 +1,44 @@
 package handler
 
 import (
-	"encoding/json"
+	"errors"
 	"log"
-	"net/http"
+	"reflect"
 
 	"github.com/jesee-kuya/forum/backend/models"
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
-type SignUpData struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
+func SignupHandler(username, email, password, confirmedPassword string) error {
 	var user models.User
-	var signup SignUpData
 
-	if r.URL.Path != "/sign-up" {
-		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
-		return
+	user.Username = username
+	user.Email = email
+	user.Password = password
+	user.ConfirmedPassword = confirmedPassword
+
+	if !reflect.DeepEqual(user.Password, user.ConfirmedPassword) {
+		log.Printf("User password %q and confirmed password %q do not match.\n", user.Password, user.ConfirmedPassword)
+		return errors.New("password and confirmed password do not match")
 	}
 
-	if r.Method == http.MethodPost {
-		err := json.NewDecoder(r.Body).Decode(&signup)
-		if err != nil {
-			log.Printf("Failed decoding request body: %v\n", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
-		}
-
-		user.Username = signup.Username
-		user.Email = signup.Email
-		user.Password = signup.Password
-
-		err = util.ValidateFormFields(user.Username, user.Email, user.Password)
-		if err != nil {
-			log.Printf("Invalid form values from user: %v\n", err)
-			response := Response{Success: false}
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(response)
-			return
-		}
-
-		hashed, err := util.PasswordEncrypt([]byte(user.Password), 10)
-		if err != nil {
-			log.Printf("Failed encrypting password: %v\n", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
-		}
-
-		_, err = repositories.InsertRecord(util.DB, "tblUsers", []string{"username", "email", "user_password"}, user.Username, user.Email, string(hashed))
-		if err != nil {
-			log.Println("Error adding user:", err)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{
-				"redirect": "/sign-in",
-			})
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
-			"redirect": "/sign-in",
-		})
-		return
-	} else if r.Method == http.MethodGet {
-		if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{
-				"redirect": "/sign-up",
-			})
-		} else {
-			http.ServeFile(w, r, "frontend/templates/index.html")
-		}
-	} else {
-		log.Println("Method not allowed", r.Method)
-		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
+	err := util.ValidateFormFields(user.Username, user.Email, user.Password)
+	if err != nil {
+		log.Printf("Invalid form values from user: %v\n", err)
+		return errors.New("invalid values")
 	}
+
+	hashed, err := util.PasswordEncrypt([]byte(user.Password), 10)
+	if err != nil {
+		log.Printf("Failed encrypting password: %v\n", err)
+		return errors.New("an unexpected error occurred. try again later")
+	}
+
+	_, err = repositories.InsertRecord(util.DB, "tblUsers", []string{"username", "email", "user_password"}, user.Username, user.Email, string(hashed))
+	if err != nil {
+		log.Println("Error adding user:", err)
+		return errors.New("an unexpected error occurred. try again later")
+	}
+	return nil
 }
