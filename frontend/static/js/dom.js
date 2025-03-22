@@ -3,33 +3,82 @@ import { SignInPage } from './sign-in.js';
 import { SignUpPage } from './sign-up.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    SignInPage()
     const socket = new WebSocket(`ws://${window.location.host}/ws`);
 
     let signin = document.getElementById('sign-in-btn');
+    let signup = document.getElementById('sign-up-btn'); // Make sure this ID exists
     let signRedirect = document.getElementById('sign-in-redirect');
-    let signUp = document.getElementById('move-sign-up');
     let moveSignIn = document.getElementById('move-sign-in');
     let switchlink = document.getElementById('switchlink');
 
-    // Sign-in button event listener
-    if (signin) {
-        signin.addEventListener('click', (e) => {
+    SignInPage();
+
+
+    if (signup) {
+        signup.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Signing in...');
+            console.log('Signing up...');
+
+            let username = document.getElementById('username').value;
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+            let confirmedPassword = document.getElementById('confirmed-password').value;
+
+            if (password !== confirmedPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            if (!username || !email || !password || !confirmedPassword) {
+                alert('Username, email, and password are required for sign up');
+                return;
+            }
 
             waitForSocket(() => {
-                let password = document.getElementById('password').value;
-                let email = document.getElementById('email').value;
-                socket.send(JSON.stringify({ type: "signIn", password, email }));
+                console.log('Sign-up request sent');
+                socket.send(JSON.stringify({
+                    type: 'signUp',
+                    username,
+                    email,
+                    password
+                }));
             });
         });
     }
 
-    // Redirect buttons
-    const redirectBtn = signRedirect || moveSignIn || switchlink;
-    if (redirectBtn) {
-        redirectBtn.addEventListener('click', (e) => {
+    socket.addEventListener('open', () => {
+        console.log("WebSocket connected.");
+        // Ensure this function is correctly defined
+    });
+
+    const waitForSocket = (callback) => {
+        if (socket.readyState === WebSocket.OPEN) {
+            callback();
+        } else {
+            console.log('Socket not ready, retrying...');
+            setTimeout(() => waitForSocket(callback), 50);
+        }
+    };
+
+    // ✅ Sign-in Button Event Listener
+    if (signin) {
+        signin.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Signing in...');
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+
+            waitForSocket(() => {
+                socket.send(JSON.stringify({ type: "signIn", email, password }));
+            });
+        });
+    }
+
+  
+
+    // ✅ Redirect Button Event Listeners
+    if (signRedirect || moveSignIn || switchlink) {
+        let redirectButton = signRedirect || moveSignIn || switchlink;
+        redirectButton.addEventListener('click', (e) => {
             e.preventDefault();
             waitForSocket(() => {
                 socket.send(JSON.stringify({ type: 'redirect', route: '/sign-in' }));
@@ -37,57 +86,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Sign-up button event listener
-    if (signUp) {
-        signUp.addEventListener('click', (e) => {
-            e.preventDefault();
-            waitForSocket(() => {
-                socket.send(JSON.stringify({ type: 'redirect', route: '/sign-up' }));
-            });
-        });
-    }
-
-    // Handle WebSocket opening
-    socket.addEventListener('open', () => {
-        console.log("WebSocket connection established.");
-    });
-
-    // Function to wait for WebSocket to be open before sending
-    const waitForSocket = (callback, attempts = 0) => {
-        if (socket.readyState === WebSocket.OPEN) {
-            callback();
-        } else if (attempts < 10) { // Limit to 10 attempts (~500ms)
-            console.log('Waiting for WebSocket...');
-            setTimeout(() => waitForSocket(callback, attempts + 1), 50);
-        } else {
-            console.error('WebSocket failed to open.');
-        }
-    };
-
-    // Handle incoming messages from WebSocket
+    // ✅ WebSocket Message Handling
     socket.addEventListener('message', (event) => {
         const data = JSON.parse(event.data);
         console.log('Received message:', data);
 
         switch (data.type) {
             case "posts":
-                let postcontainer = document.querySelector('.posts'); // Ensure the correct selector
-                if (postcontainer) {
-                    renderPosts(data, postcontainer);
+                let postContainer = document.querySelector('.posts');
+                if (postContainer) {
+                    renderPosts(data, postContainer);
+                } else {
+                    console.error("Post container not found.");
                 }
                 break;
 
             case "signIn":
-                console.log('Handling sign-in response');
-                if (data.error === '<nil>') {
+                console.log('Processing sign-in response');
+                if (!data.error) {
                     HomePage();
                     getPosts();
                 } else {
-                    console.error('Sign-in error:', data.error);
+                    console.error("Login error:", data.error);
                 }
                 break;
 
-            case "redirect":
+            case "signUp":
+                console.log("Sign-up response received");
+                if (!data.error) {
+                    alert("Sign-up successful! Redirecting...");
+                    HomePage();
+                } else {
+                    console.error("Sign-up error:", data.error);
+                    alert(data.error);
+                }
+                break;
+
+            case 'redirect':
                 if (data.route === '/sign-in') {
                     SignInPage();
                 } else if (data.route === '/sign-up') {
@@ -100,90 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle WebSocket closure
+    // ✅ Handle WebSocket Closure
     socket.addEventListener('close', () => {
-        console.warn("WebSocket connection closed.");
+        console.log("WebSocket closed. Attempting to reconnect...");
     });
 
-    // Handle WebSocket errors
-    socket.addEventListener('error', (error) => {
-        console.error("WebSocket error:", error);
-    });
-
-    function getPosts() {
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ type: 'getposts' }));
-        } else {
-            console.error('Socket not open');
-        }
-    }
 });
 
-
-
-// let button = document.getElementById('sign-up-btn');
-// button.addEventListener('click', (e) => {
-//   e.preventDefault();
-//   let username = document.getElementById('username').value;
-//   let email = document.getElementById('email').value;
-//   let password = document.getElementById('password').value;
-//   let confirmedPassword = document.getElementById('confirmed-password').value;
-//   if (password !== confirmedPassword) {
-//     alert('Passwords do not match')
-//     return;
-//   }
-//   signUp(username, email, password);
-// });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// document.addEventListener('DOMContentLoaded', async () => {
-//     window.addEventListener("popstate", renderPage);
-//     await handleNavigation();
-// });
-
-// async function handleNavigation() {
-//     console.log('handling navigation')
-//     const path = window.location.pathname;
-
-//     try {
-//         const response = await fetch(path, { method: "GET" });
-//         const contentType = response.headers.get("content-type");
-
-//         if (contentType && contentType.includes("application/json")) {
-//             const data = await response.json();
-//             if (data.redirect) {
-//                 history.pushState({}, "", data.redirect);
-//                 renderPage();
-//                 return;
-//             }
-//         }
-
-//         renderPage();
-//     } catch (error) {
-//         console.error("Error handling navigation:", error);
-//     }
-// }
