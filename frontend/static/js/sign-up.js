@@ -161,7 +161,7 @@ export const SignUpPage = () => {
   formContainer.appendChild(signupForm);
   formContainer.appendChild(document.createElement('br'));
 
-  let switchForm = document.createElement('p');
+  let switchForm = document.createElement('div');
   switchForm.classList.add('switch-form');
   switchForm.textContent = "Already have an account? ";
   let switchLink = document.createElement('a');
