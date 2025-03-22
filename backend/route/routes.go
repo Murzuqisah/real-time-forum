@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/jesee-kuya/forum/backend/handler"
+	"golang.org/x/net/websocket"
 )
 
 func InitRoutes() *http.ServeMux {
@@ -17,6 +18,6 @@ func InitRoutes() *http.ServeMux {
 
 	r.Handle("/", http.FileServer(http.Dir("./frontend/templates")))
 
-	r.HandleFunc("/ws", handler.HandleWebsocket)
+	r.Handle("/ws", websocket.Handler(handler.HandleWebsocket))
 	return r
 }
