@@ -1,6 +1,3 @@
-import { navigate } from "./homepage.js";
-import { renderPage } from "./homepage.js";
-
 export const SignUpPage = () => {
   document.head.innerHTML = ""
   document.head.innerHTML = `
@@ -40,9 +37,8 @@ export const SignUpPage = () => {
   let logo = document.createElement('div')
   logo.classList.add('logo')
   let logoLink = document.createElement('a')
-  logoLink.href = '/'
+  logoLink.id = 'move-sign-in'
   logoLink.textContent = 'Forum'
-  logoLink.addEventListener('click', (e) => navigate(e, '/'));
   logo.appendChild(logoLink)
   navbar.appendChild(logo)
   let themeToggler = document.createElement('div')
@@ -165,82 +161,15 @@ export const SignUpPage = () => {
   formContainer.appendChild(signupForm);
   formContainer.appendChild(document.createElement('br'));
 
-  let continueWith = document.createElement('p');
-  continueWith.classList.add('continue-with');
-  continueWith.textContent = 'Or Continue With';
-  formContainer.appendChild(continueWith);
-
-  let oauthButtons = document.createElement('div');
-  oauthButtons.classList.add('oauth-buttons');
-  let googleButton = document.createElement('button');
-  googleButton.type = 'button';
-  googleButton.classList.add('oauth-btn', 'google-btn');
-  googleButton.textContent = 'Google';
-  googleButton.style.width = '45%';
-  googleButton.addEventListener('click', () => window.location.href = '/auth/google');
-  let googleIcon = document.createElement('box-icon');
-  googleIcon.style.fill = 'white';
-  googleIcon.type = 'logo';
-  googleIcon.name = 'google';
-  googleButton.prepend(googleIcon);
-  let githubButton = document.createElement('button');
-  githubButton.type = 'button';
-  githubButton.classList.add('oauth-btn', 'github-btn');
-  githubButton.textContent = 'GitHub';
-  githubButton.style.width = '45%';
-  githubButton.addEventListener('click', () => window.location.href = '/auth/github');
-  let githubIcon = document.createElement('box-icon');
-  githubIcon.style.fill = 'white';
-  githubIcon.type = 'logo';
-  githubIcon.name = 'github';
-  githubButton.prepend(githubIcon);
-  oauthButtons.appendChild(googleButton);
-  oauthButtons.appendChild(githubButton);
-  formContainer.appendChild(oauthButtons);
-
   let switchForm = document.createElement('p');
   switchForm.classList.add('switch-form');
   switchForm.textContent = "Already have an account? ";
   let switchLink = document.createElement('a');
-  switchLink.href = '/sign-in';
   switchLink.textContent = 'Sign In';
-  switchLink.addEventListener('click', (e) => navigate(e, '/sign-in'));
+  switchLink.id = 'switchlink'
   switchForm.appendChild(switchLink);
   formContainer.appendChild(switchForm);
   main.appendChild(formContainer);
 
   document.body.appendChild(main)
-  
-  let button = document.getElementById('sign-up-btn');
-  button.addEventListener('click', (e) => {
-    e.preventDefault();
-    let username = document.getElementById('username').value;
-    let email = document.getElementById('email').value;
-    let password = document.getElementById('password').value;
-    let confirmedPassword = document.getElementById('confirmed-password').value;
-    if (password !== confirmedPassword) {
-      alert('Passwords do not match')
-      return;
-    }
-    signUp(username, email, password);
-  });
-}
-
-
-async function signUp(username, email, password){
-  console.log('here signup')
-  await fetch("/sign-up", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password })
-  })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data.redirect)
-      if (data.redirect) {
-        history.pushState({}, "", data.redirect);
-        renderPage();
-      }
-    })
-    .catch(error => console.error("Error:", error));
 }
