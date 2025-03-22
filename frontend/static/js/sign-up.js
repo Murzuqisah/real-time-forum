@@ -171,7 +171,7 @@ export const SignUpPage = () => {
       alert('Username, email, and password are required for sign up');
       return;
     }
-    signUp(username, email, password, confirmedPassword)
+    signUp(username, email, password, confirmedPassword, e)
 
   })
   signupForm.appendChild(div1);
@@ -196,18 +196,29 @@ export const SignUpPage = () => {
   document.body.appendChild(main)
 }
 
-async function signUp(username, email, password, confirmedPassword) {
+async function signUp(username, email, password, confirmedPassword, e) {
   await fetch('/sign-up', {
     method: 'POST',
-    body: JSON.stringify({username:username, password:password, email:email, confirmedPassword: confirmedPassword})
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, email, password, confirmedPassword })
   })
-  .then(response)
-  .then(data => {
-    if (data.error === 'ok') {
-      navigate('click', '/sign-in')
-    } else {
-      alert(data.error)
-    }
-  })
-
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json(); 
+    })
+    .then(data => {
+      console.log(data);
+      if (data.error === 'ok') {
+        navigate(e, '/sign-in');
+      } else {
+        alert(data.error);
+      }
+    })
+    .catch(error => {
+      alert(`Error: ${error.message}`);
+    });
 }
