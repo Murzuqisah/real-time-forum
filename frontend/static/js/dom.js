@@ -3,22 +3,22 @@ import { SignInPage } from './sign-in.js';
 import { SignUpPage } from './sign-up.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    SignInPage()
     const socket = new WebSocket(`ws://${window.location.host}/ws`);
-    console.log(socket)
 
     let signin = document.getElementById('sign-in-btn');
-    let signRedirect = document.getElementById('sign-in-redirect')
-    let signUp = document.getElementById('move-sign-up')
-    let moveSignIn = document.getElementById('move-sign-in')
-    let switchlink = document.getElementById('switchlink')
+    let signRedirect = document.getElementById('sign-in-redirect');
+    let signUp = document.getElementById('move-sign-up');
+    let moveSignIn = document.getElementById('move-sign-in');
+    let switchlink = document.getElementById('switchlink');
 
-    if (signin)  {
+    // Sign-in button event listener
+    if (signin) {
         signin.addEventListener('click', (e) => {
-            console.log('signing in');
             e.preventDefault();
+            console.log('Signing in...');
 
             waitForSocket(() => {
-                console.log('socket is ready');
                 let password = document.getElementById('password').value;
                 let email = document.getElementById('email').value;
                 socket.send(JSON.stringify({ type: "signIn", password, email }));
@@ -26,90 +26,99 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (signRedirect || moveSignIn || switchlink) {
-        let bt = signRedirect
-        if (moveSignIn) {
-            bt = moveSignIn
-        } else if (switchlink) {
-            bt = switchlink
-        }else {
-            bt = signRedirect
-        }
-        bt.addEventListener('click', (e) => {
-            e.preventDefault()
+    // Redirect buttons
+    const redirectBtn = signRedirect || moveSignIn || switchlink;
+    if (redirectBtn) {
+        redirectBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             waitForSocket(() => {
-                socket.send(JSON.stringify({ type: 'redirect', route: '/sign-in' }))
-            })
-        })
+                socket.send(JSON.stringify({ type: 'redirect', route: '/sign-in' }));
+            });
+        });
     }
 
+    // Sign-up button event listener
     if (signUp) {
         signUp.addEventListener('click', (e) => {
-            e.preventDefault()
+            e.preventDefault();
             waitForSocket(() => {
-                socket.send(JSON.stringify({ type: 'redirect', route: '/sign-up' }))
-            })
-        })
+                socket.send(JSON.stringify({ type: 'redirect', route: '/sign-up' }));
+            });
+        });
     }
 
+    // Handle WebSocket opening
     socket.addEventListener('open', () => {
-        SignInPage();
+        console.log("WebSocket connection established.");
     });
 
-    socket.onopen = () => console.log("Connected to WebSocket");
-    socket.onerror = (error) => console.error("WebSocket Error:", error);
-    socket.onmessage = (event) => console.log("Message from server:", event.data);
-    socket.onclose = () => console.log("WebSocket Closed");
-
-    const waitForSocket = (callback) => {
+    // Function to wait for WebSocket to be open before sending
+    const waitForSocket = (callback, attempts = 0) => {
         if (socket.readyState === WebSocket.OPEN) {
             callback();
+        } else if (attempts < 10) { // Limit to 10 attempts (~500ms)
+            console.log('Waiting for WebSocket...');
+            setTimeout(() => waitForSocket(callback, attempts + 1), 50);
         } else {
-            console.log('socket not ready')
-            setTimeout(() => waitForSocket(callback), 50);
+            console.error('WebSocket failed to open.');
         }
     };
 
-
-
-
+    // Handle incoming messages from WebSocket
     socket.addEventListener('message', (event) => {
         const data = JSON.parse(event.data);
-        console.log('gotten message')
+        console.log('Received message:', data);
 
         switch (data.type) {
             case "posts":
-                postcontainer = document.querySelector('posts')
-                renderPosts(data, postcontainer);
-            case "signIn":
-                console.log('message sign in')
-                if (!data.error) {
-                    HomePage()
-                    getPosts()
-                } else {
-                    console.log(data.error)
+                let postcontainer = document.querySelector('.posts'); // Ensure the correct selector
+                if (postcontainer) {
+                    renderPosts(data, postcontainer);
                 }
-            case 'redirect':
-                if (data.route === '/sign-in') {
-                    SignInPage()
-                } else if (data.route === '/sign-up') {
-                    SignUpPage()
-                }
-            default:
-                console.log("no message")
-        }
+                break;
 
+            case "signIn":
+                console.log('Handling sign-in response');
+                if (data.error === '<nil>') {
+                    HomePage();
+                    getPosts();
+                } else {
+                    console.error('Sign-in error:', data.error);
+                }
+                break;
+
+            case "redirect":
+                if (data.route === '/sign-in') {
+                    SignInPage();
+                } else if (data.route === '/sign-up') {
+                    SignUpPage();
+                }
+                break;
+
+            default:
+                console.log("Unknown message type:", data.type);
+        }
     });
 
-})
+    // Handle WebSocket closure
+    socket.addEventListener('close', () => {
+        console.warn("WebSocket connection closed.");
+    });
 
-function getPosts() {
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: 'getposts' }));
-    } else {
-        console.error('Socket not open');
+    // Handle WebSocket errors
+    socket.addEventListener('error', (error) => {
+        console.error("WebSocket error:", error);
+    });
+
+    function getPosts() {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'getposts' }));
+        } else {
+            console.error('Socket not open');
+        }
     }
-}
+});
+
 
 
 // let button = document.getElementById('sign-up-btn');
