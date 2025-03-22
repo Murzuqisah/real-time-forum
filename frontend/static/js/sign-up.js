@@ -17,7 +17,6 @@ export const SignUpPage = () => {
   </style>
   `
   let scriptFiles = [
-    "/frontend/static/js/script.js",
     "/frontend/static/js/signup_validation.js",
     "/frontend/static/css/sign-up.css",
   ];
