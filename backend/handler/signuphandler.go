@@ -40,5 +40,6 @@ func SignupHandler(username, email, password, confirmedPassword string) error {
 		log.Println("Error adding user:", err)
 		return errors.New("an unexpected error occurred. try again later")
 	}
+	log.Println("user added succesfully")
 	return nil
 }
