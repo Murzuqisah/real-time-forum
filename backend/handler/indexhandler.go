@@ -20,7 +20,6 @@ func HandleWebsocket(ws *websocket.Conn) {
 
 func HandleConnection(conn *websocket.Conn) {
 	for {
-		// Receive raw JSON as a string
 		var rawMessage string
 		err := websocket.Message.Receive(conn, &rawMessage)
 		if err != nil {
@@ -28,7 +27,6 @@ func HandleConnection(conn *websocket.Conn) {
 			break
 		}
 
-		// Parse JSON into a map
 		var msg map[string]string
 		if err := json.Unmarshal([]byte(rawMessage), &msg); err != nil {
 			log.Println("Error decoding message:", err)
@@ -41,7 +39,6 @@ func HandleConnection(conn *websocket.Conn) {
 
 		log.Printf("Received Message: %v", msg)
 
-		// Handle different message types
 		switch msg["type"] {
 		case "getposts":
 			posts, err := repositories.GetPosts(util.DB)
@@ -67,6 +64,12 @@ func HandleConnection(conn *websocket.Conn) {
 			sendJSON(conn, map[string]interface{}{
 				"type":  "posts",
 				"posts": posts,
+			})
+		case "restoreState":
+			log.Println(msg["state"])
+			sendJSON(conn, map[string]interface{}{
+				"type":  "restoreState",
+				"state": msg["state"],
 			})
 		default:
 			log.Println("Unknown message type:", msg["type"])
