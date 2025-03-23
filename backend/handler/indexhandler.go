@@ -15,7 +15,7 @@ type Response struct {
 }
 
 func HandleWebsocket(ws *websocket.Conn) {
-	HandleConnection(ws)
+	go HandleConnection(ws)
 }
 
 func HandleConnection(conn *websocket.Conn) {
@@ -23,6 +23,10 @@ func HandleConnection(conn *websocket.Conn) {
 		var rawMessage string
 		err := websocket.Message.Receive(conn, &rawMessage)
 		if err != nil {
+			if err.Error() == "EOF" {
+				log.Println("websocket connection lost but keeping it open")
+				continue
+			}
 			log.Println("WebSocket closed: ", err)
 			break
 		}
@@ -65,12 +69,6 @@ func HandleConnection(conn *websocket.Conn) {
 				"type":  "posts",
 				"posts": posts,
 			})
-		case "restoreState":
-			log.Println(msg["state"])
-			sendJSON(conn, map[string]interface{}{
-				"type":  "restoreState",
-				"state": msg["state"],
-			})
 		case "reaction":
 			err := ReactionHandler(msg["userid"], msg["postid"], msg["reaction"])
 			if err != nil {
@@ -79,6 +77,28 @@ func HandleConnection(conn *websocket.Conn) {
 					"type":    "error",
 					"message": err.Error(),
 				})
+			}
+		case "getuser":
+			_, ok := SessionStore[msg["session"]]
+			if !ok {
+				sendJSON(conn, map[string]interface{}{
+					"type":    "error",
+					"message": "invalid session",
+				})
+			} else {
+				user, err := repositories.GetUserBySession(msg["session"])
+				if err != nil {
+					sendJSON(conn, map[string]interface{}{
+						"type":    "error",
+						"message": "invalid session",
+					})
+				} else {
+					sendJSON(conn, map[string]interface{}{
+						"type": "getuser",
+						"user": user,
+					})
+				}
+
 			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
