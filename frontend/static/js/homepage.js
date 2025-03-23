@@ -108,8 +108,10 @@ export const HomePage = () => {
     let fileInput = document.createElement('input');
     fileInput.type = "file";
     fileInput.name = "uploaded-file";
+    fileInput.id = "uploaded-file";
     postOperation.appendChild(fileInput);
     let button = document.createElement('button');
+    button.id = 'posting'
     button.type = "submit";
     button.textContent = "Post";
 
@@ -137,7 +139,7 @@ export const HomePage = () => {
     floatingButton.appendChild(img)
     floating.appendChild(createPost)
     floating.appendChild(floatingButton)
-    postsContainer.appendChild(floating)
+    document.body.appendChild(floating)
 
     document.body.appendChild(postsContainer);
 
@@ -145,44 +147,6 @@ export const HomePage = () => {
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
     document.body.appendChild(profile);
-
-    const createPostSection = document.querySelector('.create-post');
-    const createPostBtn = document.querySelector('.floating-create-post-btn');
-
-    if (createPostBtn && createPostSection) {
-        console.log('here')
-        createPostBtn.addEventListener('click', () => {
-            console.log('clicked')
-            createPostSection.classList.toggle('hidden');
-
-            if (button) {
-                button.addEventListener('click', async (e) => {
-                    e.preventDefault()
-                    const title = inputTitle.value;
-                    const content = textarea.value;
-                    const file = fileInput.files[0];
-                    const formData = new FormData();
-                    formData.append('title', title);
-                    formData.append('content', content)
-                    formData.append('file', file)
-                    await fetch('/upload', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.redirect) {
-                            history.pushState({}, "", data.redirect);
-                            renderPage();
-                            return;
-                        }
-                    })
-                    .catch(error => console.error("Error creating post:", error));
-                });
-            }
-        });
-    }
-
 };
 
 export function renderPosts(data, postsContainer) {
@@ -190,13 +154,13 @@ export function renderPosts(data, postsContainer) {
 
     if (!data || !Array.isArray(data.posts)) {
         console.error("Invalid posts data:", data.posts);
-        return; 
+        return;
     }
 
-    postsContainer.innerHTML = ""; 
+    postsContainer.innerHTML = "";
 
     data.posts.forEach(item => {
-        item = item || {}; 
+        item = item || {};
 
         let article = document.createElement('article');
         article.classList.add('post');
@@ -232,6 +196,99 @@ export function renderPosts(data, postsContainer) {
             });
             article.appendChild(categoryDiv);
         }
+
+        let postactions = document.createElement('div')
+        postactions.classList.add('post-actions')
+        postactions.id = item.id
+
+        let likebutton = document.createElement('button')
+        likebutton.classList.add('like-button')
+        likebutton.id = item.id
+        likebutton.ariaLabel = 'like this post'
+        let likeimg = document.createElement('img')
+        likeimg.classList.add('icon')
+        likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
+        likeimg.alt = 'thumbs-up-regular'
+        likeimg.style.height = '25px'
+        likeimg.style.width = '1.2rem'
+        likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        likeimg.style.marginRight = '5px'
+        likebutton.appendChild(likeimg)
+        let likecount = document.createElement('span')
+        likecount.classList.add('like-count')
+        likecount.textContent = item.likes
+        likebutton.appendChild(likecount)
+        article.appendChild(likebutton)
+
+        let dislikebutton = document.createElement('button')
+        dislikebutton.id = item.id
+        dislikebutton.ariaLabel = 'Dislike this post'
+        let dislikeimg = document.createElement('img')
+        dislikeimg.classList.add('icon')
+        dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
+        dislikeimg.style.height = '25px'
+        dislikeimg.style.width = '1.2rem'
+        dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        dislikeimg.style.marginRight = '5px'
+        dislikeimg.alt = 'thumbs-down-regular'
+        dislikebutton.appendChild(dislikeimg)
+        let dislikecount = document.createElement('span')
+        dislikecount.classList.add('dislike-count')
+        dislikecount.textContent = item.dislikes
+        dislikebutton.appendChild(dislikecount)
+        article.appendChild(dislikebutton)
+
+        let commentbutton = document.createElement('button')
+        commentbutton.classList.add('comment-button')
+        commentbutton.ariaLabel = 'View or add comments'
+        let commentimg = document.createElement('img')
+        commentimg.classList.add('icon')
+        commentimg.style.height = '25px'
+        commentimg.style.width = '1.2rem'
+        commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        commentimg.style.marginRight = '5px'
+        commentimg.src = '/frontend/static/assets/comment-regular.svg'
+        commentimg.alt = 'comment-regular'
+        let commentcount = document.createElement('span')
+        commentcount.classList.add('comment-count')
+        commentcount.textContent = item.comment_count
+        commentbutton.appendChild(commentimg)
+        commentbutton.append(commentcount)
+        article.appendChild(commentbutton)
+
+        let commentsection = document.createElement('div')
+        commentsection.classList.add('comments-section')
+        let h4 = document.createElement('h4')
+        h4.textContent = 'Comments'
+        commentsection.appendChild(h4)
+
+        let commentinput = document.createElement('comment-input')
+        commentinput.classList.add('comment-input')
+        let addcomment = document.createElement('form')
+        let input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = 'id'
+        input.value = item.id
+        addcomment.appendChild(input)
+        let comment = document.createElement('input')
+        comment.type = 'text'
+        comment.name = 'comment'
+        comment.classList.add('comment-box')
+        comment.placeholder = 'Write a comment...'
+        addcomment.appendChild(comment)
+        let addbutton = document.createElement('button')
+        addbutton.classList.add('submit-comment')
+        let addimg = document.createElement('img')
+        addimg.style.height = '20px'
+        addimg.style.margin = '0'
+        addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
+        addimg.alt = 'paper-plane-regular'
+        addbutton.appendChild(addimg)
+        addcomment.appendChild(addbutton)
+        commentsection.appendChild(addcomment)
+
+        article.appendChild(commentsection)
+
 
         postsContainer.appendChild(article);
     });
