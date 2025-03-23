@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (previousState === 'home') {
             RealTime()
         }
-        console.log(previousState)
     }
 
     if (signin) {
