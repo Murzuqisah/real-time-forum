@@ -71,6 +71,15 @@ func HandleConnection(conn *websocket.Conn) {
 				"type":  "restoreState",
 				"state": msg["state"],
 			})
+		case "reaction":
+			err := ReactionHandler(msg["userid"], msg["postid"], msg["reaction"])
+			if err != nil {
+				log.Println("Error adding reaction")
+				sendJSON(conn, map[string]interface{}{
+					"type":    "error",
+					"message": err.Error(),
+				})
+			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]interface{}{
