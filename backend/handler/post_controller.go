@@ -105,12 +105,5 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	posts := []models.Post{}
-
-	if err != nil {
-		log.Println(err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-		return
-	}
-
 	PostDetails(posts)
 }
