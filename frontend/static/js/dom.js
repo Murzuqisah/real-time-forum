@@ -1,14 +1,15 @@
 import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
 
-
 document.addEventListener('DOMContentLoaded', () => {
     SignInPage();
     let signin = document.getElementById('sign-in-btn');
 
     let previousState = sessionStorage.getItem('pageState');
+    console.log(`previous state ${previousState}`)
+    console.log(reload)
     if (previousState) {
-        if (previousState === 'home') {
+        if (previousState === 'home' && reload === true) {
             RealTime()
         }
     }
