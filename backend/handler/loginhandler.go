@@ -17,7 +17,7 @@ type LoginData struct {
 	Password string `json:"password"`
 }
 
-var SessionStore = make(map[string]map[string]interface{})
+var SessionStore = make(map[string]int)
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var data LoginData
@@ -78,7 +78,7 @@ func Login(password, email string) (models.User, string, error) {
 		return user, "", errors.New("wrong password")
 	}
 
-	sessionToken := CreateSession()
+	sessionToken := CreateSession(user.ID)
 
 	if user.ID != 0 {
 		DeleteSession(user.ID)
@@ -89,8 +89,6 @@ func Login(password, email string) (models.User, string, error) {
 		return user, "", errors.New("an Unexpected Error Occurred. Try Again Later")
 	}
 
-	SetSessionData(sessionToken, "userId", user.ID)
-	SetSessionData(sessionToken, "userEmail", user.Email)
 	expiryTime := time.Now().Add(24 * time.Hour)
 
 	err = repositories.StoreSession(user.ID, sessionToken, expiryTime)

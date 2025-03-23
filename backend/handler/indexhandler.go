@@ -15,7 +15,8 @@ type Response struct {
 }
 
 func HandleWebsocket(ws *websocket.Conn) {
-	go HandleConnection(ws)
+	defer ws.Close()
+	HandleConnection(ws)
 }
 
 func HandleConnection(conn *websocket.Conn) {
@@ -24,7 +25,6 @@ func HandleConnection(conn *websocket.Conn) {
 		err := websocket.Message.Receive(conn, &rawMessage)
 		if err != nil {
 			if err.Error() == "EOF" {
-				log.Println("websocket connection lost but keeping it open")
 				continue
 			}
 			log.Println("WebSocket closed: ", err)
@@ -81,6 +81,9 @@ func HandleConnection(conn *websocket.Conn) {
 		case "getuser":
 			_, ok := SessionStore[msg["session"]]
 			if !ok {
+				log.Println(msg["session"])
+				log.Println("no session found")
+				log.Println(SessionStore)
 				sendJSON(conn, map[string]interface{}{
 					"type":    "error",
 					"message": "invalid session",

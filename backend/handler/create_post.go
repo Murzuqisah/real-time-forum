@@ -102,20 +102,9 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		url = fmt.Sprintf("%v", tempFilePath)
 	}
 
-	cookie, err := getSessionID(r)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
-		return
-	}
-	sessionData, err := getSessionData(cookie)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
-		return
-	}
 
-	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("title")), html.EscapeString(r.FormValue("content")), url, sessionData["userId"].(int))
+	var userId string
+	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("title")), html.EscapeString(r.FormValue("content")), url, userId)
 	if err != nil {
 		log.Println("failed to add post", err)
 		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
