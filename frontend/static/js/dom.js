@@ -23,6 +23,7 @@ export function RealTime(user) {
 
     socket.addEventListener('open', () => {
         console.log("WebSocket connected.");
+        socket.send(JSON.stringify({type: 'getposts'}))
     });
 
     socket.addEventListener('message', (event) => {
