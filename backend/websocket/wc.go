@@ -73,7 +73,7 @@ func WSEndpoint(w http.ResponseWriter, r *http.Request) {
 	defer RemoveClient(&Client{client.Conn, client.Username})
 
 	log.Printf("Client connected: %v", username)
-	Read(ws)
+	ReadMessage(client)
 }
 
 // add user to active connections
