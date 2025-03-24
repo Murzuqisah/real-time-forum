@@ -1,29 +1,58 @@
-import { renderPage } from './homepage.js';
+import { HomePage, renderPosts } from './homepage.js';
+import { SignInPage, login } from './sign-in.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    window.addEventListener("popstate", renderPage);
-    await handleNavigation();
+
+document.addEventListener('DOMContentLoaded', () => {
+    SignInPage();
+    let signin = document.getElementById('sign-in-btn');
+
+    if (signin) {
+        signin.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Signing in...');
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+            login(email, password)
+        }); 
+    }
 });
 
-async function handleNavigation() {
-    console.log('handling navigation')
-    const path = window.location.pathname;
+export function RealTime(user) {
+    HomePage()
+    const socket = new WebSocket(`ws://${window.location.host}/ws`);
 
-    try {
-        const response = await fetch(path, { method: "GET" });
-        const contentType = response.headers.get("content-type");
+    socket.addEventListener('open', () => {
+        console.log("WebSocket connected.");
+    });
 
-        if (contentType && contentType.includes("application/json")) {
-            const data = await response.json();
-            if (data.redirect) {
-                history.pushState({}, "", data.redirect);
-                renderPage();
-                return;
-            }
+    socket.addEventListener('message', (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received message:', data);
+    
+        switch (data.type) {
+            case "posts":
+                let postContainer = document.querySelector('.posts');
+                if (postContainer) {
+                    renderPosts(data, postContainer);
+                } else {
+                    console.error("Post container not found.");
+                }
+                break;
+            default:
+                console.log("Unknown message type:", data.type);
         }
+    });
 
-        renderPage();
-    } catch (error) {
-        console.error("Error handling navigation:", error);
-    }
+
+    socket.addEventListener('close', () => {
+        console.log("WebSocket closed. Attempting to reconnect...");
+    });
+    
+
 }
+
+
+
+
+
+

@@ -1,59 +1,92 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
-	"net/http"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
+	"golang.org/x/net/websocket"
 )
-
-type RequestData struct {
-	ID string `json:"id"`
-}
 
 type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/home" {
-		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
-		return
-	}
+func HandleWebsocket(ws *websocket.Conn) {
+	HandleConnection(ws)
+}
 
-	if r.Method != http.MethodGet {
-		log.Println("wrong method used", r.Method)
-		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func HandleConnection(conn *websocket.Conn) {
+	for {
+		// Receive raw JSON as a string
+		var rawMessage string
+		err := websocket.Message.Receive(conn, &rawMessage)
+		if err != nil {
+			log.Println("WebSocket closed: ", err)
+			break
+		}
 
-	cookie, err := getSessionID(r)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	sessionData, err := getSessionData(cookie)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	// Fetch user information
-	_, err = repositories.GetUserByEmail(sessionData["userEmail"].(string))
-	if err != nil {
-		log.Printf("Invalid session token: %v", err)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
+		// Parse JSON into a map
+		var msg map[string]string
+		if err := json.Unmarshal([]byte(rawMessage), &msg); err != nil {
+			log.Println("Error decoding message:", err)
+			sendJSON(conn, map[string]interface{}{
+				"type":    "error",
+				"message": "Invalid JSON format",
+			})
+			continue
+		}
 
-	posts, err := repositories.GetPosts(util.DB)
+		log.Printf("Received Message: %v", msg)
+
+		// Handle different message types
+		switch msg["type"] {
+		case "getposts":
+			posts, err := repositories.GetPosts(util.DB)
+			if err != nil {
+				log.Println("Error fetching posts:", err)
+				sendJSON(conn, map[string]interface{}{
+					"type":    "error",
+					"message": "An unexpected error occurred. Try again later.",
+				})
+				break
+			}
+
+			posts, err = PostDetails(posts)
+			if err != nil {
+				log.Println("Error processing posts:", err)
+				sendJSON(conn, map[string]interface{}{
+					"type":    "error",
+					"message": err.Error(),
+				})
+				break
+			}
+
+			sendJSON(conn, map[string]interface{}{
+				"type":  "posts",
+				"posts": posts,
+			})
+		default:
+			log.Println("Unknown message type:", msg["type"])
+			sendJSON(conn, map[string]interface{}{
+				"type":    "error",
+				"message": "Invalid message type",
+			})
+		}
+	}
+}
+
+// Helper function to send JSON response
+func sendJSON(conn *websocket.Conn, data interface{}) {
+	jsonData, err := json.Marshal(data)
 	if err != nil {
-		log.Printf("Failed to get posts: %v", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		log.Println("Error encoding JSON:", err)
 		return
 	}
-	PostDetails(w, r, posts, true)
+	err = websocket.Message.Send(conn, string(jsonData))
+	if err != nil {
+		log.Println("Error sending message:", err)
+	}
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -39,7 +40,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, header, err := r.FormFile("uploaded-file")
+	file, header, err := r.FormFile("file")
 	if err != nil {
 		if err.Error() == "http: no such file" {
 			log.Println("No file uploaded, continuing process.")
@@ -114,7 +115,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("post-title")), html.EscapeString(r.FormValue("post-content")), url, sessionData["userId"].(int))
+	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("title")), html.EscapeString(r.FormValue("content")), url, sessionData["userId"].(int))
 	if err != nil {
 		log.Println("failed to add post", err)
 		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
@@ -133,9 +134,11 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	for _, category := range categories {
 		repositories.InsertRecord(util.DB, "tblPostCategories", []string{"post_id", "category"}, id, category)
 	}
-
-	r.Method = http.MethodGet
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"redirect": "/home",
+	})
 }
 
 /*

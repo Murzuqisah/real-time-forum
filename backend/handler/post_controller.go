@@ -73,7 +73,6 @@ func GetAllPostsAPI(db *sql.DB) http.HandlerFunc {
 
 // FilterPosts - Handles filtering posts by category or user
 func FilterPosts(w http.ResponseWriter, r *http.Request) {
-	logged := false
 	if r.URL.Path != "/filter" {
 		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
 		return
@@ -102,14 +101,7 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
 			return
 		}
-
-		cookie, _ := getSessionID(r)
-		_, ok := SessionStore[cookie]
-		if ok {
-			logged = true
-		}
-		
-		PostDetails(w, r, posts, logged)
+		PostDetails(posts)
 		return
 	}
 
@@ -140,5 +132,5 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	PostDetails(w, r, posts, true)
+	PostDetails(posts)
 }

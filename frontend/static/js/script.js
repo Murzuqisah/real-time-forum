@@ -20,23 +20,6 @@ applyTheme(savedTheme);
 
 document.querySelector('.theme-toggler').addEventListener('click', toggleTheme);
 
-// Toggle post creation window
-document.addEventListener('DOMContentLoaded', () => {
-  const createPostSection = document.querySelector('.create-post');
-  const createPostBtn = document.querySelector('.floating-create-post-btn');
-  const postsContainer = document.querySelector('main.posts');
-
-  createPostBtn.addEventListener('click', () => {
-    createPostSection.classList.toggle('hidden');
-
-    if (postsContainer) {
-      postsContainer.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
-    }
-  });
-});
 
 // Password toggle
 document.querySelectorAll('.toggle-password').forEach((button) => {

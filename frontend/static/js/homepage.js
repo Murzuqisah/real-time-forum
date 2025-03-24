@@ -1,7 +1,3 @@
-import { SignUpPage } from './sign-up.js';
-import { SignInPage } from './sign-in.js';
-import { ErrorPage } from './error.js';
-
 export const HomePage = () => {
     document.head.innerHTML = ""
     document.head.innerHTML = `
@@ -29,27 +25,12 @@ export const HomePage = () => {
     let logo = document.createElement('div');
     logo.classList.add('logo');
     let logoLink = document.createElement('a');
-    logoLink.href = "/";
     logoLink.textContent = "Forum";
-    logoLink.addEventListener('click', (e) => navigate(e, '/home'));
     logo.appendChild(logoLink);
     navbar.appendChild(logo);
 
     let rightContainer = document.createElement('div');
     rightContainer.classList.add('right-container');
-    let authContainer = document.createElement('div');
-    authContainer.classList.add('auth-container');
-    let signUpLink = document.createElement('a');
-    signUpLink.href = "/sign-up";
-    signUpLink.textContent = "Sign Up";
-    signUpLink.addEventListener('click', (e) => navigate(e, 'sign-up'));
-    let signInLink = document.createElement('a');
-    signInLink.href = "/sign-in";
-    signInLink.textContent = "Sign In";
-    signInLink.addEventListener('click', (e) => navigate(e, 'sign-in'));
-    authContainer.appendChild(signUpLink);
-    authContainer.appendChild(signInLink);
-    rightContainer.appendChild(authContainer);
     let themeToggler = document.createElement('div');
     themeToggler.classList.add('theme-toggler');
     let moon = document.createElement('img');
@@ -94,26 +75,69 @@ export const HomePage = () => {
 
     let postsContainer = document.createElement('main');
     postsContainer.classList.add('posts');
-    postsContainer.innerHTML = `
-    <section class="create-post hidden">
-        <h2>Create a New Post</h2>
-        <form name="upload" enctype="multipart/form-data" action="/upload" method="POST">
-            <label for="post-title">Title</label>
-            <input type="text" id="post-title" name="post-title" placeholder="Enter your post title" required />
-            <label for="post-content">Content</label>
-            <textarea id="post-content" name="post-content" placeholder="Write your post here..." required></textarea>
-            <button type="submit">Post</button>
-        </form>
-    </section>
-    <div class="floating-create-post-btn-container">
-        <p>Create a Post</p>
-        <button class="floating-create-post-btn">
-            <img class="web-icon" src="/frontend/static/assets/plus-solid.svg" alt="create-post" />
-        </button>
-    </div>
-    `;
 
-    getPosts(postsContainer);
+    let postForm = document.createElement('section');
+    postForm.classList.add('create-post', 'hidden');
+
+    let postdiv = document.createElement('div')
+    postdiv.classList.add('post-popup')
+
+    let upload = document.createElement('form');
+    upload.name = "upload";
+    upload.enctype = "multipart/form-data";
+
+    let labelTitle = document.createElement('label');
+    labelTitle.htmlFor = "post-title";
+    labelTitle.textContent = "Title";
+    let inputTitle = document.createElement('input');
+    inputTitle.type = "text";
+    inputTitle.id = "post-title";
+    inputTitle.name = "post-title";
+    inputTitle.placeholder = "Enter your post title";
+    inputTitle.required = true;
+    let labelContent = document.createElement('label');
+    labelContent.htmlFor = "post-content";
+    labelContent.textContent = "Content";
+    let textarea = document.createElement('textarea');
+    textarea.id = "post-content";
+    textarea.name = "post-content";
+    textarea.placeholder = "Write your post here...";
+    textarea.required = true;
+    let postOperation = document.createElement('div');
+    postOperation.classList.add('post-operation');
+    let fileInput = document.createElement('input');
+    fileInput.type = "file";
+    fileInput.name = "uploaded-file";
+    postOperation.appendChild(fileInput);
+    let button = document.createElement('button');
+    button.type = "submit";
+    button.textContent = "Post";
+
+    upload.appendChild(labelTitle);
+    upload.appendChild(inputTitle);
+    upload.appendChild(labelContent);
+    upload.appendChild(textarea);
+    upload.appendChild(postOperation);
+    upload.appendChild(button);
+    postdiv.appendChild(upload)
+    postForm.appendChild(postdiv);
+    postsContainer.appendChild(postForm);
+
+    let floating = document.createElement('div')
+    floating.classList.add('floating-create-post-btn-container')
+    let createPost = document.createElement('p')
+    createPost.textContent = 'Create a Post'
+    let floatingButton = document.createElement('button')
+    floatingButton.type = 'submit'
+    floatingButton.classList.add('floating-create-post-btn')
+    let img = document.createElement('img')
+    img.classList.add('web-icon')
+    img.src = '/frontend/static/assets/plus-solid.svg'
+    img.alt = 'create-post'
+    floatingButton.appendChild(img)
+    floating.appendChild(createPost)
+    floating.appendChild(floatingButton)
+    postsContainer.appendChild(floating)
 
     document.body.appendChild(postsContainer);
 
@@ -121,112 +145,94 @@ export const HomePage = () => {
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
     document.body.appendChild(profile);
+
+    const createPostSection = document.querySelector('.create-post');
+    const createPostBtn = document.querySelector('.floating-create-post-btn');
+
+    if (createPostBtn && createPostSection) {
+        console.log('here')
+        createPostBtn.addEventListener('click', () => {
+            console.log('clicked')
+            createPostSection.classList.toggle('hidden');
+
+            if (button) {
+                button.addEventListener('click', async (e) => {
+                    e.preventDefault()
+                    const title = inputTitle.value;
+                    const content = textarea.value;
+                    const file = fileInput.files[0];
+                    const formData = new FormData();
+                    formData.append('title', title);
+                    formData.append('content', content)
+                    formData.append('file', file)
+                    await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirect) {
+                            history.pushState({}, "", data.redirect);
+                            renderPage();
+                            return;
+                        }
+                    })
+                    .catch(error => console.error("Error creating post:", error));
+                });
+            }
+        });
+    }
+
 };
 
-export async function getPosts(postsContainer) {
-    await fetch('/posts', {
-        headers: { "Accept": "application/json" }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (!data) {
-                data = {}
-            }
+export function renderPosts(data, postsContainer) {
+    console.log('Rendering posts:', data);
 
-            if (!data.Posts) {
-                data.Posts = {}
-            }
+    if (!data || !Array.isArray(data.posts)) {
+        console.error("Invalid posts data:", data.posts);
+        return; 
+    }
 
-            data.Posts.forEach(item => {
-                if (!item) {
-                    item = {}
-                }
-                if (!item.categories) {
-                    item.categories = []
-                }
+    postsContainer.innerHTML = ""; 
 
-                if (!item.commments) {
-                    item.commments = []
-                }
-                if (!item.parent_id) {
-                    item.parent_id = ''
-                }
+    data.posts.forEach(item => {
+        item = item || {}; 
 
-                let article = document.createElement('article');
-                article.classList.add('post');
+        let article = document.createElement('article');
+        article.classList.add('post');
 
-                let headerDiv = document.createElement('div');
-                headerDiv.innerHTML = `
-                <p class="post-author">@${item.username}</p>
-                <p class="post-time">
-                Posted: <time datetime="${item.created_on}"> {{ .CreatedOn }}</time>
-                </p>
-                `
+        let headerDiv = document.createElement('div');
+        headerDiv.innerHTML = `
+            <p class="post-author">@${item.username || "Unknown"}</p>
+            <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
+        `;
+        article.appendChild(headerDiv);
 
-                article.appendChild(headerDiv);
-                article.innerHTML = `
-                    <h3>${item.post_title}</h3>
-                    <p>${item.body}</p>
-                `
+        article.innerHTML += `
+            <h3>${item.post_title || "Untitled"}</h3>
+            <p>${item.body || "No content"}</p>
+        `;
 
-                if (item.imageurl !== "") {
-                    let img = document.createElement('img');
-                    img.classList.add('uploaded-file');
-                    img.src = item.imageurl;
-                    img.alt = item.post_title;
-                    article.appendChild(img);
-                }
+        if (item.imageurl) {
+            let img = document.createElement('img');
+            img.classList.add('uploaded-file');
+            img.src = item.imageurl;
+            img.alt = item.post_title || "Image";
+            article.appendChild(img);
+        }
 
-                if (item.categories) {
-                    let categoryDiv = document.createElement('div');
-                    categoryDiv.classList.add('category-div');
-                    item.categories.forEach(cat => {
-                        let page = document.createElement('p');
-                        page.classList.add('post-category');
-                        page.textContent = cat;
-                        categoryDiv.appendChild(p);
-                    });
-                    article.appendChild(categoryDiv);
-                }
-                postsContainer.appendChild(article);
+        if (Array.isArray(item.categories)) {
+            let categoryDiv = document.createElement('div');
+            categoryDiv.classList.add('category-div');
+            item.categories.forEach(cat => {
+                let page = document.createElement('p');
+                page.classList.add('post-category');
+                page.textContent = cat;
+                categoryDiv.appendChild(page);
             });
-        })
-        .catch(error => console.error("Error fetching posts:", error));
-}
+            article.appendChild(categoryDiv);
+        }
 
-
-export function navigate(event, page) {
-    event.preventDefault()
-    if (!page.startsWith('/')) {
-        page = '/' + page;
-    }
-
-    if (location.origin + page !== location.href) {
-        history.pushState({ page }, "", page);
-        renderPage();
-    }
-}
-
-export function renderPage() {
-    let page = location.pathname;
-    console.log("Current page:", page);
-
-    if (!page || page === "/") {
-        page = "/sign-in";
-    }
-
-    switch (page) {
-        case "/home":
-            HomePage();
-            break;
-        case "/sign-up":
-            SignUpPage();
-            break;
-        case "/sign-in":
-            SignInPage();
-            break;
-        default:
-            console.log("Error page");
-            ErrorPage();
-    }
+        postsContainer.appendChild(article);
+    });
 }
