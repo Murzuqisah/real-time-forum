@@ -2,17 +2,20 @@ import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    SignInPage();
-    let signin = document.getElementById('sign-in-btn');
-
     let previousState = sessionStorage.getItem('pageState');
     console.log(`previous state ${previousState}`)
-    console.log(reload)
-    if (previousState) {
-        if (previousState === 'home' && reload === true) {
-            RealTime()
-        }
+    if (previousState === 'home') {
+        let session = sessionStorage.getItem('session')
+        let check = checksession(session, previousState)
+        console.log(check)
+
+        sessionStorage.setItem('pageState', '')
     }
+
+    console.log('checked the session')
+
+    SignInPage();
+    let signin = document.getElementById('sign-in-btn');
 
     if (signin) {
         signin.addEventListener('click', (e) => {
@@ -75,11 +78,11 @@ export function RealTime(user, session) {
 
         socket.addEventListener('error', (err) => {
             console.error("WebSocket encountered an error:", err);
-            socket.close(); 
+            socket.close();
         });
     }
 
-    connectWebSocket(); 
+    connectWebSocket();
 
     window.addEventListener('load', () => {
         if (!socket || socket.readyState === WebSocket.CLOSED) {
@@ -116,9 +119,21 @@ export function RealTime(user, session) {
     }
 }
 
-
-
-
-
-
-
+async function checksession(session) {
+    await fetch('/check', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session: session })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('unexpected error occured')
+            }
+            return response.json()
+        })
+        .then(data => {
+            if (data.error === 'ok') {
+                RealTime() 
+            }
+        })
+}
