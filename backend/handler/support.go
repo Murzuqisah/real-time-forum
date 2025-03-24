@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"regexp"
 
@@ -8,8 +9,11 @@ import (
 )
 
 func CreateSession(id int) string {
+	mu.Lock()
+	defer mu.Unlock()
 	sessionID := uuid.Must(uuid.NewV4()).String()
 	SessionStore[sessionID] = id
+	log.Println(SessionStore)
 	return sessionID
 }
 
