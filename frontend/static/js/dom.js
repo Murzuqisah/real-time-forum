@@ -5,16 +5,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
     console.log(`previous state ${previousState}`)
     if (previousState === 'home') {
+        sessionStorage.setItem('pageState', '')
         let session = sessionStorage.getItem('session')
         let check = checksession(session, previousState)
         console.log(check)
 
-        sessionStorage.setItem('pageState', '')
+    } else {
+        SignInPage();
     }
 
-    console.log('checked the session')
-
-    SignInPage();
     let signin = document.getElementById('sign-in-btn');
 
     if (signin) {
@@ -134,6 +133,8 @@ async function checksession(session) {
         .then(data => {
             if (data.error === 'ok') {
                 RealTime() 
+            } else {
+                SignInPage()
             }
         })
 }
