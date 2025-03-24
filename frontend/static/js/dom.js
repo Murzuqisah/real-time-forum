@@ -7,9 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (previousState === 'home') {
         sessionStorage.setItem('pageState', '')
         let session = sessionStorage.getItem('session')
-        let check = checksession(session, previousState)
-        console.log(check)
-
+        checksession(session, previousState)
     } else {
         SignInPage();
     }
