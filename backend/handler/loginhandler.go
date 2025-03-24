@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/models"
@@ -17,7 +18,10 @@ type LoginData struct {
 	Password string `json:"password"`
 }
 
-var SessionStore = make(map[string]int)
+var (
+	SessionStore = make(map[string]int)
+	mu           sync.Mutex
+)
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var data LoginData
@@ -41,6 +45,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	log.Println(SessionStore)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -78,16 +84,17 @@ func Login(password, email string) (models.User, string, error) {
 		return user, "", errors.New("wrong password")
 	}
 
-	sessionToken := CreateSession(user.ID)
-
 	if user.ID != 0 {
 		DeleteSession(user.ID)
 	}
+
 	err = repositories.DeleteSessionByUser(user.ID)
 	if err != nil {
 		log.Printf("Failed to delete session token: %v", err)
 		return user, "", errors.New("an Unexpected Error Occurred. Try Again Later")
 	}
+
+	sessionToken := CreateSession(user.ID)
 
 	expiryTime := time.Now().Add(24 * time.Hour)
 
