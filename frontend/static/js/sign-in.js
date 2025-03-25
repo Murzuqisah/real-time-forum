@@ -183,6 +183,7 @@ export async function login(email, password) {
   })
   .then(data => {
     if (data.error === 'ok') {
+      console.log(data)
       RealTime(data.user, data.session)
     } else {
       alert(data.error)
