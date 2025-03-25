@@ -29,6 +29,14 @@ export function RealTime(user, session) {
     HomePage();
     let socket;
 
+    let likebutton = document.querySelector('.like-button')
+    if (likebutton) {
+        likebutton.addEventListener('click', (e) => {
+            e.preventDefault()
+            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: user.id, reaction: 'like' }))
+        })
+    }
+
     function connectWebSocket() {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
 
@@ -63,6 +71,12 @@ export function RealTime(user, session) {
                     user = data.user;
                     socket.send(JSON.stringify({ type: 'getposts' }));
                     break;
+                case 'reaction':
+                    console.log('adding reaction')
+                    let reaction = document.getElementById(data.id)
+                    if (data.reaction === 'like') {
+                        reaction.likecount.textContent = reaction.likecount + data.reaction
+                    }
                 default:
                     console.log("Unknown message type:", data.type);
             }
@@ -130,7 +144,7 @@ async function checksession(session) {
         })
         .then(data => {
             if (data.error === 'ok') {
-                RealTime() 
+                RealTime()
             } else {
                 SignInPage()
             }
