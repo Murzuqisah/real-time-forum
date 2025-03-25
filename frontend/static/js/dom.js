@@ -29,6 +29,10 @@ export function RealTime(user, session) {
     HomePage();
     let socket;
 
+    if (user) {
+        MessengerData.current(user)
+    }
+
     let likebutton = document.querySelector('.like-button')
     if (likebutton) {
         likebutton.addEventListener('click', (e) => {
@@ -71,6 +75,7 @@ export function RealTime(user, session) {
                     user = data.user;
                     console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts' }));
+                    MessengerData.current(data.user)
                     break;
                 case 'reaction':
                     console.log('adding reaction')
