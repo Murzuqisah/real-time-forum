@@ -29,10 +29,6 @@ export function RealTime(user, session) {
     HomePage();
     let socket;
 
-    if (user) {
-        MessengerData.current(user)
-    }
-
     let likebutton = document.querySelector('.like-button')
     if (likebutton) {
         likebutton.addEventListener('click', (e) => {
@@ -75,7 +71,6 @@ export function RealTime(user, session) {
                     user = data.user;
                     console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts' }));
-                    MessengerData.current(data.user)
                     break;
                 case 'reaction':
                     console.log('adding reaction')
@@ -111,11 +106,12 @@ export function RealTime(user, session) {
     console.log(`state is ${state}`);
 
     if (state === 'new') {
+
         console.log('Getting user...');
         waitForSocket(() => {
             console.log('State found');
             let session = sessionStorage.getItem('session');
-            sessionStorage.setItem('pageState', '');
+            sessionStorage.setItem('pageState', 'home');
             socket.send(JSON.stringify({ type: 'getuser', session: session }));
         });
     }
@@ -152,6 +148,17 @@ async function checksession(session) {
             if (data.error === 'ok') {
                 RealTime()
             } else {
+                let email = document.getElementById('email').value;
+                let password = document.getElementById('password').value;
+                if (email && password) {
+                    if (email.value !== "" && password.value !== ""){
+                        login(email, password)
+                    }else {
+                       sessionStorage.setItem('pageState', '')
+                       SignInPage()
+                    }
+                }
+                sessionStorage.setItem('pageState', '')
                 SignInPage()
             }
         })
