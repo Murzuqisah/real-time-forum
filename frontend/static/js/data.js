@@ -40,6 +40,29 @@ class MessengerData {
   getCurrentUser() {
     return this.currentUser
   }
+
+  conversations = []
+  messages = {}
+  getUserConversations(){
+    fetch('/conversations', {
+      body: this.currentUser.id
+    })
+    .then(response => {
+      if (!response.ok) {
+        alert('unexpected error occured')
+      }
+      return response.JSON()
+    })
+    .then(data => {
+      data.messages.forEach(element => {
+        if (this.messages[element.conversation_id]) {
+          this.messages[element.conversation_id] = [];
+          this.conversations.push[this.messages[element.conversation_id]]
+        }
+        this.messages[element.conversation_id].push(element)
+      })
+    })
+  }
   
 }
 
