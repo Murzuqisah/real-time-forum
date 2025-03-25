@@ -146,6 +146,7 @@ export const HomePage = () => {
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile.innerHTML = `<h2>Profile</h2>`;
+    profile = chat(profile)
     document.body.appendChild(profile);
 };
 
@@ -292,4 +293,48 @@ export function renderPosts(data, postsContainer) {
 
         postsContainer.appendChild(article);
     });
+}
+
+function chat(profile) {
+    const style = document.createElement("style");
+    style.textContent = `
+                    body { font-family: Arial, sans-serif; }
+                    .profile { padding: 20px; border-radius: 10px; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+                    .profile img { border-radius: 50%; width: 50px; }
+                    .status { color: green; }
+                    .stats { display: flex; gap: 10px; margin-top: 10px; }
+                    .stats div { padding: 10px; background: #f1f1f1; border-radius: 5px; }
+                    .messages { margin-top: 20px; }
+                    .message-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; }
+                    .message-item img { border-radius: 50%; width: 40px; margin-right: 10px; }
+                    .message-text { flex-grow: 1; }
+                    .unread { background: purple; color: white; border-radius: 50%; padding: 5px 10px; }
+                `;
+    profile.appendChild(style);
+
+    const profileDiv = document.createElement("div");
+    profileDiv.classList.add("profile");
+    profileDiv.innerHTML = `
+                    <h2>$Username</h2>
+                    <p class="status">Online</p>
+                    <div class="stats">
+                        <div>Active Chats</div>
+                    </div>
+                `;
+
+    const messagesDiv = document.createElement("div");
+    messagesDiv.classList.add("messages");
+
+    const heading = document.createElement("h3");
+    heading.textContent = "Messages";
+
+    const searchInput = document.createElement("input");
+    searchInput.setAttribute("type", "text");
+    searchInput.setAttribute("placeholder", "Search");
+
+    messagesDiv.prepend(searchInput, heading);
+
+    profile.appendChild(profileDiv);
+    profile.appendChild(messagesDiv);
+    return profile
 }
