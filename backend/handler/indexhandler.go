@@ -70,12 +70,20 @@ func HandleConnection(conn *websocket.Conn) {
 				"posts": posts,
 			})
 		case "reaction":
-			err := ReactionHandler(msg["userid"], msg["postid"], msg["reaction"])
+			err, action := ReactionHandler(msg["userid"], msg["postid"], msg["reaction"])
 			if err != nil {
 				log.Println("Error adding reaction")
 				sendJSON(conn, map[string]any{
 					"type":    "error",
 					"message": err.Error(),
+				})
+			} else {
+				log.Println("Reaction added")
+				sendJSON(conn, map[string]any{
+					"type":     "reaction",
+					"id":       msg["postid"],
+					"action":   action,
+					"reaction": msg["reaction"],
 				})
 			}
 		case "getuser":
