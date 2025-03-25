@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
     console.log(`previous state ${previousState}`)
     if (previousState === 'home') {
-        sessionStorage.setItem('pageState', '')
+        sessionStorage.setItem('pageState', 'new')
         let session = sessionStorage.getItem('session')
         checksession(session, previousState)
     } else {
@@ -69,6 +69,7 @@ export function RealTime(user, session) {
                 case 'getuser':
                     console.log('Got user data');
                     user = data.user;
+                    console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts' }));
                     break;
                 case 'reaction':
@@ -104,7 +105,7 @@ export function RealTime(user, session) {
     let state = sessionStorage.getItem('pageState');
     console.log(`state is ${state}`);
 
-    if (state === 'home') {
+    if (state === 'new') {
         console.log('Getting user...');
         waitForSocket(() => {
             console.log('State found');
