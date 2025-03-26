@@ -346,6 +346,7 @@ function chat(profile) {
 
     let backbutton = document.createElement('div')
     backbutton.classList.add('header')
+    backbutton.id = 'chatHeader'
     let bcbutton = document.createElement('button')
     bcbutton.classList.add('back-button')
     bcbutton.textContent = 'Back'
