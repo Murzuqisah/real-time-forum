@@ -118,6 +118,29 @@ func GetUserBySession(session string) (models.User, error) {
 	return user, nil
 }
 
+func GetUsers() ([]models.User, error) {
+	var users []models.User
+	rows, err := util.DB.Query("SELECT id, username FROM tblUsers")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Username); err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return users, nil
+}
+
 func UserDetails(row *sql.Row) (models.User, error) {
 	var user models.User
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password)
