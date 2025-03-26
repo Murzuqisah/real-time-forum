@@ -89,6 +89,20 @@ export function RealTime(user, session) {
                         item.addEventListener('click', (e) => {
                             e.preventDefault();
                             document.getElementById("userListContainer").style.display = 'none';
+                            let chatheader = document.getElementById(`chatHeader`)
+                            let name = document.createElement('div')
+                            name.textContent = user.username
+                            name.style.color = 'white'
+                            name.style.display = 'flex'
+                            name.style.position = 'relative'
+                            name.style.alignItems = 'center'
+                            name.style.padding = '0 15px'
+                            name.style.marginRight = '150px'
+                            name.style.flexDirection = 'columnf'
+                            name.style.justifyContent = 'spacebetween'
+                            name.style.textAlign = 'center'
+                            name.style.whitespace = 'nowrap'
+                            chatheader.appendChild(name)
                             let chatContainer = document.getElementById('chatContainer');
                             chatContainer.style.display = 'flex';
                         });
