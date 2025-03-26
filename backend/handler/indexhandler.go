@@ -111,6 +111,19 @@ func HandleConnection(conn *websocket.Conn) {
 				}
 
 			}
+		case "getusers":
+			users, err := repositories.GetUsers()
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			} else {
+				sendJSON(conn, map[string]any{
+					"type":  "getusers",
+					"users": users,
+				})
+			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
