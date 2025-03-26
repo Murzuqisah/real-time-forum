@@ -602,7 +602,7 @@ body.dark-theme .profile p {
 }
 
 .header {
-  background: #075e54;
+  background: var(--primary-color);
   color: white;
   padding: 15px;
   text-align: center;
