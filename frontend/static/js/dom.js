@@ -158,7 +158,7 @@ export function RealTime(User, session) {
 
         socket.addEventListener('close', () => {
             console.log("WebSocket closed. Attempting to reconnect...");
-            setTimeout(connectWebSocket, 3000); // Reconnect after 3 seconds
+            setTimeout(connectWebSocket, 3000);
         });
 
         socket.addEventListener('error', (err) => {
