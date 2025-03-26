@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
@@ -140,8 +141,9 @@ func HandleConnection(conn *websocket.Conn) {
 					"message": "unexpected error occured",
 				})
 			}
-			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "send_on"}, receiver.ID, sender.ID, html.EscapeString(msg["message"]))
+			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "sent_on"}, receiver.ID, sender.ID, html.EscapeString(msg["message"]), time.Now())
 			if err != nil {
+				log.Println(err)
 				sendJSON(conn, map[string]any{
 					"type":    "error",
 					"message": "unexpected error occured",
