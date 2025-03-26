@@ -367,10 +367,7 @@ function chat(profile) {
     input.id = 'messageInput'
     input.placeholder = 'Type a message...'
     let send = document.createElement('button')
-    send.addEventListener('click', (e) =>{
-        e.preventDefault()
-        sendMessage()
-    })
+    send.id = 'send'
     chatinput.appendChild(input)
     chatinput.appendChild(send)
 
@@ -387,17 +384,6 @@ export function goBack() {
     document.getElementById("chatListContainer").style.display = "flex";
 }
 
-function sendMessage() {
-    let messageInput = document.getElementById("messageInput");
-    let messageText = messageInput.value.trim();
-    if (messageText !== "") {
-        let messageElement = document.createElement("div");
-        messageElement.classList.add("message", "sent");
-        messageElement.innerText = messageText;
-        document.getElementById("chatBox").appendChild(messageElement);
-        messageInput.value = "";
-    }
-}
 
 function goBackToChats() {
     document.getElementById("userListContainer").style.display = "none";
