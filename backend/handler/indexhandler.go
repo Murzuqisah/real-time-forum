@@ -6,6 +6,7 @@ import (
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
+	"golang.org/x/net/html"
 	"golang.org/x/net/websocket"
 )
 
@@ -124,6 +125,33 @@ func HandleConnection(conn *websocket.Conn) {
 					"users": users,
 				})
 			}
+		case "messaging":
+			sender, err := repositories.GetUserByName(msg["sender"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			receiver, err := repositories.GetUserByName(msg["receiver"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "send_on"}, receiver.ID, sender.ID, html.EscapeString(msg["message"]))
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			sendJSON(conn, map[string]any{
+				"type":    "messaging",
+				"status":  "ok",
+				"message": html.EscapeString(msg["message"]),
+			})
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
