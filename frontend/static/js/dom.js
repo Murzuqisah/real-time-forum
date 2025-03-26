@@ -78,7 +78,7 @@ export function RealTime(user, session) {
                     if (data.reaction === 'like') {
                         reaction.likecount.textContent = reaction.likecount + data.reaction
                     }
-                    break
+                    break;
                 case 'getusers':
                     document.getElementById("chatListContainer").style.display = "none";
                     let userlist = document.getElementById("userListContainer")
@@ -89,6 +89,16 @@ export function RealTime(user, session) {
                         userlist.appendChild(item)
                     });
                     userlist.style.display = 'flex'
+                    break;
+                case 'onlineusers':
+                    document.getElementById("userListContainer").style.display = "none";
+                    let online = document.getElementById("onlineStatus")
+                    data.users.forEach(user => {
+                        let onlineUser = document.createElement('div')
+                        onlineUser.classList.add('user-item')
+                        onlineUser.textContent = user.username
+                        online.appendChild(onlineUser)
+                    })
                 default:
                     console.log("Unknown message type:", data.type);
             }
