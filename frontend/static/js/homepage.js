@@ -145,7 +145,6 @@ export const HomePage = () => {
 
     let profile = document.createElement('aside');
     profile.classList.add('profile');
-    profile.innerHTML = `<h2>Profile</h2>`;
     profile = chat(profile)
     document.body.appendChild(profile);
 };
@@ -296,45 +295,118 @@ export function renderPosts(data, postsContainer) {
 }
 
 function chat(profile) {
-    const style = document.createElement("style");
-    style.textContent = `
-                    body { font-family: Arial, sans-serif; }
-                    .profile { padding: 20px; border-radius: 10px; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
-                    .profile img { border-radius: 50%; width: 50px; }
-                    .status { color: green; }
-                    .stats { display: flex; gap: 10px; margin-top: 10px; }
-                    .stats div { padding: 10px; background: #f1f1f1; border-radius: 5px; }
-                    .messages { margin-top: 20px; }
-                    .message-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #ddd; }
-                    .message-item img { border-radius: 50%; width: 40px; margin-right: 10px; }
-                    .message-text { flex-grow: 1; }
-                    .unread { background: purple; color: white; border-radius: 50%; padding: 5px 10px; }
-                `;
-    profile.appendChild(style);
+    let chatListContainer = document.createElement('div')
+    chatListContainer.classList.add('chat-list-container')
+    chatListContainer.id = 'chatListContainer'
+    let header = document.createElement('div')
+    header.classList.add('header')
+    header.textContent = "Chats"
+    let chatlist = document.createElement('div')
+    chatlist.classList.add('chat-list')
+    chatlist.id = 'chatList'
+    let newchat = document.createElement('div')
+    newchat.classList.add('new-chat')
+    newchat.textContent = 'Start New Chat'
+    newchat.addEventListener('click', (e) => {
+        e.preventDefault()
+        showUserList()
+    })
+    chatListContainer.appendChild(header)
+    chatListContainer.appendChild(chatlist)
+    chatListContainer.appendChild(newchat)
+    profile.appendChild(chatListContainer)
 
-    const profileDiv = document.createElement("div");
-    profileDiv.classList.add("profile");
-    profileDiv.innerHTML = `
-                    <h2>$Username</h2>
-                    <p class="status">Online</p>
-                    <div class="stats">
-                        <div>Active Chats</div>
-                    </div>
-                `;
+    let userlist = document.createElement('div')
+    userlist.classList.add('user-list-container')
+    userlist.id = 'userListContainer'
+    userlist.style.display = 'none'
 
-    const messagesDiv = document.createElement("div");
-    messagesDiv.classList.add("messages");
+    let back = document.createElement('div')
+    back.classList.add('header')
+    let button = document.createElement('button')
+    button.classList.add('back-button')
+    button.textContent = 'Back'
+    button.addEventListener('click', (e) => {
+        e.preventDefault()
+        goBackToChats()
+    })
+    back.appendChild(button)
+    back.textContent = 'Select User'
 
-    const heading = document.createElement("h3");
-    heading.textContent = "Messages";
+   let list = document.createElement('div')
+   list.classList.add('user-list')
+   list.id = 'userList'
 
-    const searchInput = document.createElement("input");
-    searchInput.setAttribute("type", "text");
-    searchInput.setAttribute("placeholder", "Search");
+   userlist.appendChild(back)
+   userlist.appendChild(list)
+   profile.appendChild(userlist)
 
-    messagesDiv.prepend(searchInput, heading);
+  
+    let chatcontainer = document.createElement('div')
+    chatcontainer.classList.add('chat-container')
+    chatcontainer.id = 'chatContainer'
+    chatcontainer.style.display = 'none'
 
-    profile.appendChild(profileDiv);
-    profile.appendChild(messagesDiv);
+    let backbutton = document.createElement('div')
+    backbutton.classList.add('header')
+    let bcbutton = document.createElement('button')
+    bcbutton.classList.add('back-button')
+    bcbutton.textContent = 'Back'
+    bcbutton.addEventListener('click', (e) => {
+        goBack()
+    })
+    let span = document.createElement('span')
+    span.id = 'chatHeader'
+    backbutton.appendChild(bcbutton)
+    backbutton.appendChild(span)
+    let chatbox = document.createElement('div')
+    chatbox.classList.add('chat-box')
+    chatbox.id = 'chatBox'
+    let chatinput = document.createElement('div')
+    chatinput.classList.add('chat-input')
+    let input = document.createElement('input')
+    input.type = 'text'
+    input.id = 'messageInput'
+    input.placeholder = 'Type a message...'
+    let send = document.createElement('button')
+    send.addEventListener('click', (e) =>{
+        e.preventDefault()
+        sendMessage()
+    })
+    chatinput.appendChild(input)
+    chatinput.appendChild(send)
+
+    chatcontainer.appendChild(backbutton)
+    chatcontainer.appendChild(chatbox)
+    chatcontainer.appendChild(chatinput)
+    profile.appendChild(chatcontainer)
+
     return profile
+}
+
+function showUserList() {
+    document.getElementById("chatListContainer").style.display = "none";
+    document.getElementById("userListContainer").style.display = "flex";
+}
+
+function goBack() {
+    document.getElementById("chatContainer").style.display = "none";
+    document.getElementById("chatListContainer").style.display = "flex";
+}
+
+function sendMessage() {
+    let messageInput = document.getElementById("messageInput");
+    let messageText = messageInput.value.trim();
+    if (messageText !== "") {
+        let messageElement = document.createElement("div");
+        messageElement.classList.add("message", "sent");
+        messageElement.innerText = messageText;
+        document.getElementById("chatBox").appendChild(messageElement);
+        messageInput.value = "";
+    }
+}
+
+function goBackToChats() {
+    document.getElementById("userListContainer").style.display = "none";
+    document.getElementById("chatListContainer").style.display = "flex";
 }
