@@ -306,11 +306,12 @@ function chat(profile) {
     chatlist.id = 'chatList'
     let newchat = document.createElement('div')
     newchat.classList.add('new-chat')
+    newchat.id = 'newChat'
     newchat.textContent = 'Start New Chat'
-    newchat.addEventListener('click', (e) => {
-        e.preventDefault()
-        showUserList()
-    })
+    // newchat.addEventListener('click', (e) => {
+    //     e.preventDefault()
+    //     showUserList()
+    // })
     chatListContainer.appendChild(header)
     chatListContainer.appendChild(chatlist)
     chatListContainer.appendChild(newchat)
