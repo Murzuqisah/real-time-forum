@@ -78,6 +78,17 @@ export function RealTime(user, session) {
                     if (data.reaction === 'like') {
                         reaction.likecount.textContent = reaction.likecount + data.reaction
                     }
+                    break
+                case 'getusers':
+                    document.getElementById("chatListContainer").style.display = "none";
+                    let userlist = document.getElementById("userListContainer")
+                    data.users.forEach(user => {
+                        let item = document.createElement('div')
+                        item.classList.add('user-item')
+                        item.textContent = user.username
+                        userlist.appendChild(item)
+                    });
+                    userlist.style.display = 'flex'
                 default:
                     console.log("Unknown message type:", data.type);
             }
@@ -92,6 +103,14 @@ export function RealTime(user, session) {
             console.error("WebSocket encountered an error:", err);
             socket.close();
         });
+
+        let newChat = document.getElementById('newChat')
+        if (newChat) {
+            newChat.addEventListener('click', (e) => {
+                e.preventDefault()
+                socket.send(JSON.stringify({type: 'getusers'}))
+            })
+        }
     }
 
     connectWebSocket();
