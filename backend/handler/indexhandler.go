@@ -19,6 +19,11 @@ func HandleWebsocket(ws *websocket.Conn) {
 	HandleConnection(ws)
 }
 
+// store online users
+var (
+	onlineUsers = make(map[string]*websocket.Conn)
+)
+
 func HandleConnection(conn *websocket.Conn) {
 	for {
 		var rawMessage string
@@ -124,6 +129,14 @@ func HandleConnection(conn *websocket.Conn) {
 					"users": users,
 				})
 			}
+		case "onlineusers":
+			mu.Lock()
+			onlineUsers[msg["username"]] = conn
+			mu.Unlock()
+			sendJSON(conn, map[string]any{
+				"type":         "onlineusers",
+				"online_users": onlineUsers,
+			})
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
