@@ -308,10 +308,6 @@ function chat(profile) {
     newchat.classList.add('new-chat')
     newchat.id = 'newChat'
     newchat.textContent = 'Start New Chat'
-    // newchat.addEventListener('click', (e) => {
-    //     e.preventDefault()
-    //     showUserList()
-    // })
     chatListContainer.appendChild(header)
     chatListContainer.appendChild(chatlist)
     chatListContainer.appendChild(newchat)
@@ -383,11 +379,6 @@ function chat(profile) {
     profile.appendChild(chatcontainer)
 
     return profile
-}
-
-function showUserList() {
-    document.getElementById("chatListContainer").style.display = "none";
-    document.getElementById("userListContainer").style.display = "flex";
 }
 
 function goBack() {
