@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-export function RealTime(user, session) {
+export function RealTime(User, session) {
     HomePage();
     let socket;
 
@@ -34,7 +34,7 @@ export function RealTime(user, session) {
     if (likebutton) {
         likebutton.addEventListener('click', (e) => {
             e.preventDefault()
-            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: user.id, reaction: 'like' }))
+            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like' }))
         })
     }
 
@@ -45,6 +45,13 @@ export function RealTime(user, session) {
             console.log("WebSocket connected.");
             socket.send(JSON.stringify({ type: 'getposts' }));
         });
+
+        if (!User) {
+            waitForSocket(() => {
+                let session = sessionStorage.getItem('session');
+                socket.send(JSON.stringify({ type: 'getuser', session: session }));
+            })
+        }
 
         socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
@@ -69,7 +76,7 @@ export function RealTime(user, session) {
                     break;
                 case 'getuser':
                     console.log('Got user data');
-                    user = data.user;
+                    User = data.user;
                     console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts' }));
                     break;
@@ -83,50 +90,53 @@ export function RealTime(user, session) {
                 case 'getusers':
                     document.getElementById("chatListContainer").style.display = "none";
                     let userlist = document.getElementById("userListContainer")
+                    userlist.innerHTML = ""
                     data.users.forEach(elem => {
-                        let item = document.createElement('div')
-                        item.classList.add('user-item')
-                        item.textContent = elem.username
-                        item.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            document.getElementById("userListContainer").style.display = 'none';
-                            let chatheader = document.getElementById(`chatHeader`)
-                            chatheader.innerHTML = ""
-                            let bcbutton = document.createElement('button')
-                            bcbutton.classList.add('back-button')
-                            bcbutton.textContent = 'Back'
-                            bcbutton.addEventListener('click', (e) => {
-                                goBack()
-                            })
-                            let span = document.createElement('span')
-                            span.id = 'chatHeader'
-                            chatheader.appendChild(bcbutton)
-                            chatheader.appendChild(span)
-                            let name = document.createElement('div')
-                            name.textContent = elem.username
-                            name.style.color = 'white'
-                            name.style.display = 'flex'
-                            name.style.position = 'relative'
-                            name.style.alignItems = 'center'
-                            name.style.padding = '0 15px'
-                            name.style.marginRight = '150px'
-                            name.style.flexDirection = 'columnf'
-                            name.style.justifyContent = 'spacebetween'
-                            name.style.textAlign = 'center'
-                            name.style.whitespace = 'nowrap'
-                            chatheader.appendChild(name)
-                            let chatContainer = document.getElementById('chatContainer');
-                            chatContainer.style.display = 'flex';
+                        if (elem.username !== User.username) {
+                            let item = document.createElement('div')
+                            item.classList.add('user-item')
+                            item.textContent = elem.username
+                            item.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                document.getElementById("userListContainer").style.display = 'none';
+                                let chatheader = document.getElementById(`chatHeader`)
+                                chatheader.innerHTML = ""
+                                let bcbutton = document.createElement('button')
+                                bcbutton.classList.add('back-button')
+                                bcbutton.textContent = 'Back'
+                                bcbutton.addEventListener('click', (e) => {
+                                    goBack()
+                                })
+                                let span = document.createElement('span')
+                                span.id = 'chatHeader'
+                                chatheader.appendChild(bcbutton)
+                                chatheader.appendChild(span)
+                                let name = document.createElement('div')
+                                name.textContent = elem.username
+                                name.style.color = 'white'
+                                name.style.display = 'flex'
+                                name.style.position = 'relative'
+                                name.style.alignItems = 'center'
+                                name.style.padding = '0 15px'
+                                name.style.marginRight = '150px'
+                                name.style.flexDirection = 'columnf'
+                                name.style.justifyContent = 'spacebetween'
+                                name.style.textAlign = 'center'
+                                name.style.whitespace = 'nowrap'
+                                chatheader.appendChild(name)
+                                let chatContainer = document.getElementById('chatContainer');
+                                chatContainer.style.display = 'flex';
 
-                            let send = document.getElementById('send')
-                            send.addEventListener('click', (e) => {
-                                e.preventDefault()
-                                let msg = document.getElementById('messageInput').value
-                                socket.send(JSON.stringify({type: 'messaging', sender: user.username, receiver: elem.username, message: msg }))
-                            })
-                        });
-                        userlist.appendChild(item)
-
+                                let send = document.getElementById('send')
+                                send.addEventListener('click', (e) => {
+                                    e.preventDefault()
+                                    let msg = document.getElementById('messageInput').value
+                                    console.log(User)
+                                    socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: elem.username, message: msg }))
+                                })
+                            });
+                            userlist.appendChild(item)
+                        }
                     });
                     userlist.style.display = 'flex'
                     break
@@ -136,6 +146,9 @@ export function RealTime(user, session) {
                         messageElement.classList.add("message", "sent");
                         messageElement.innerText = data.message;
                         document.getElementById("chatBox").appendChild(messageElement)
+                        let input = document.getElementById('messageInput')
+                        input.value = ""
+                        input.placeholder = 'Type a message...'
                     }
                     break
                 default:
@@ -173,17 +186,6 @@ export function RealTime(user, session) {
     let state = sessionStorage.getItem('pageState');
     console.log(`state is ${state}`);
 
-    if (state === 'home') {
-
-        console.log('Getting user...');
-        waitForSocket(() => {
-            console.log('State found');
-            let session = sessionStorage.getItem('session');
-            sessionStorage.setItem('pageState', '');
-            socket.send(JSON.stringify({ type: 'getuser', session: session }));
-        });
-    }
-
     window.addEventListener('beforeunload', () => {
         let currentPage = "home";
         sessionStorage.setItem('pageState', currentPage);
@@ -215,7 +217,7 @@ async function checksession(session) {
         .then(data => {
             console.log(data.error)
             if (data.error === 'ok') {
-                RealTime()
+                RealTime("", session)
             } else {
                 sessionStorage.setItem('pageState', '')
                 SignInPage()
