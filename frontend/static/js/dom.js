@@ -1,5 +1,6 @@
 import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
+import { goBack } from './homepage.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
@@ -90,6 +91,17 @@ export function RealTime(user, session) {
                             e.preventDefault();
                             document.getElementById("userListContainer").style.display = 'none';
                             let chatheader = document.getElementById(`chatHeader`)
+                            chatheader.innerHTML = ""
+                            let bcbutton = document.createElement('button')
+                            bcbutton.classList.add('back-button')
+                            bcbutton.textContent = 'Back'
+                            bcbutton.addEventListener('click', (e) => {
+                                goBack()
+                            })
+                            let span = document.createElement('span')
+                            span.id = 'chatHeader'
+                            chatheader.appendChild(bcbutton)
+                            chatheader.appendChild(span)
                             let name = document.createElement('div')
                             name.textContent = user.username
                             name.style.color = 'white'
