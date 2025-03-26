@@ -143,6 +143,14 @@ export const HomePage = () => {
 
     document.body.appendChild(postsContainer);
 
+    // online status indicator
+    let onlineStatus = document.createElement('div')
+    onlineStatus.classList.add('online-status')
+    let status = document.createElement('div')
+    status.textContent = 'Online Users'
+    status.classList.add('status')
+    onlineStatus.appendChild(status)
+
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile = chat(profile)
