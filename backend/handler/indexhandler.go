@@ -133,10 +133,45 @@ func HandleConnection(conn *websocket.Conn) {
 			mu.Lock()
 			onlineUsers[msg["username"]] = conn
 			mu.Unlock()
-			sendJSON(conn, map[string]any{
-				"type":         "onlineusers",
-				"online_users": onlineUsers,
-			})
+
+			// Notify all users about the updated online users list
+			go func() {
+				for username, userConn := range onlineUsers {
+					if userConn != nil {
+						sendJSON(userConn, map[string]any{
+							"type":         "onlineusers",
+							"online_users": GetOnlineUsernames(),
+						})
+					}
+				}
+			}()
+
+			// Monitor the connection and remove the user when it closes
+			go func(username string, userConn *websocket.Conn) {
+				defer func() {
+					mu.Lock()
+					delete(onlineUsers, username)
+					mu.Unlock()
+
+					// Notify all users about the updated online users list
+					for _, conn := range onlineUsers {
+						if conn != nil {
+							sendJSON(conn, map[string]any{
+								"type":         "onlineusers",
+								"online_users": getOnlineUsernames(),
+							})
+						}
+					}
+				}()
+
+				// Wait for the connection to close
+				buf := make([]byte, 1)
+				for {
+					if _, err := userConn.Read(buf); err != nil {
+						break
+					}
+				}
+			}(msg["username"], conn)
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
