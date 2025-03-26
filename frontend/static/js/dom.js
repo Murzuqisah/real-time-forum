@@ -86,7 +86,14 @@ export function RealTime(user, session) {
                         let item = document.createElement('div')
                         item.classList.add('user-item')
                         item.textContent = user.username
+                        item.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            document.getElementById("userListContainer").style.display = 'none';
+                            let chatContainer = document.getElementById('chatContainer');
+                            chatContainer.style.display = 'flex';
+                        });
                         userlist.appendChild(item)
+
                     });
                     userlist.style.display = 'flex'
                 default:
@@ -108,7 +115,7 @@ export function RealTime(user, session) {
         if (newChat) {
             newChat.addEventListener('click', (e) => {
                 e.preventDefault()
-                socket.send(JSON.stringify({type: 'getusers'}))
+                socket.send(JSON.stringify({ type: 'getusers' }))
             })
         }
     }
