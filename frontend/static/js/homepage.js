@@ -382,7 +382,7 @@ function chat(profile) {
     return profile
 }
 
-function goBack() {
+export function goBack() {
     document.getElementById("chatContainer").style.display = "none";
     document.getElementById("chatListContainer").style.display = "flex";
 }
