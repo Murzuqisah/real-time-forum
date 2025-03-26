@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
     console.log(`previous state ${previousState}`)
     if (previousState === 'home') {
-        sessionStorage.setItem('pageState', 'new')
+        sessionStorage.setItem('pageState', '')
         let session = sessionStorage.getItem('session')
-        checksession(session, previousState)
+        checksession(session)
     } else {
         SignInPage();
     }
@@ -105,13 +105,13 @@ export function RealTime(user, session) {
     let state = sessionStorage.getItem('pageState');
     console.log(`state is ${state}`);
 
-    if (state === 'new') {
+    if (state === 'home') {
 
         console.log('Getting user...');
         waitForSocket(() => {
             console.log('State found');
             let session = sessionStorage.getItem('session');
-            sessionStorage.setItem('pageState', 'home');
+            sessionStorage.setItem('pageState', '');
             socket.send(JSON.stringify({ type: 'getuser', session: session }));
         });
     }
@@ -145,19 +145,10 @@ async function checksession(session) {
             return response.json()
         })
         .then(data => {
+            console.log(data.error)
             if (data.error === 'ok') {
                 RealTime()
             } else {
-                let email = document.getElementById('email').value;
-                let password = document.getElementById('password').value;
-                if (email && password) {
-                    if (email.value !== "" && password.value !== ""){
-                        login(email, password)
-                    }else {
-                       sessionStorage.setItem('pageState', '')
-                       SignInPage()
-                    }
-                }
                 sessionStorage.setItem('pageState', '')
                 SignInPage()
             }
