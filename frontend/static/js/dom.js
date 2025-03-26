@@ -83,10 +83,10 @@ export function RealTime(user, session) {
                 case 'getusers':
                     document.getElementById("chatListContainer").style.display = "none";
                     let userlist = document.getElementById("userListContainer")
-                    data.users.forEach(user => {
+                    data.users.forEach(elem => {
                         let item = document.createElement('div')
                         item.classList.add('user-item')
-                        item.textContent = user.username
+                        item.textContent = elem.username
                         item.addEventListener('click', (e) => {
                             e.preventDefault();
                             document.getElementById("userListContainer").style.display = 'none';
@@ -103,7 +103,7 @@ export function RealTime(user, session) {
                             chatheader.appendChild(bcbutton)
                             chatheader.appendChild(span)
                             let name = document.createElement('div')
-                            name.textContent = user.username
+                            name.textContent = elem.username
                             name.style.color = 'white'
                             name.style.display = 'flex'
                             name.style.position = 'relative'
@@ -117,11 +117,27 @@ export function RealTime(user, session) {
                             chatheader.appendChild(name)
                             let chatContainer = document.getElementById('chatContainer');
                             chatContainer.style.display = 'flex';
+
+                            let send = document.getElementById('send')
+                            send.addEventListener('click', (e) => {
+                                e.preventDefault()
+                                let msg = document.getElementById('messageInput').value
+                                socket.send(JSON.stringify({type: 'messaging', sender: user.username, receiver: elem.username, message: msg }))
+                            })
                         });
                         userlist.appendChild(item)
 
                     });
                     userlist.style.display = 'flex'
+                    break
+                case 'messaging':
+                    if (data.status === "ok") {
+                        let messageElement = document.createElement("div");
+                        messageElement.classList.add("message", "sent");
+                        messageElement.innerText = data.message;
+                        document.getElementById("chatBox").appendChild(messageElement)
+                    }
+                    break
                 default:
                     console.log("Unknown message type:", data.type);
             }
