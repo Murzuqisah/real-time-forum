@@ -1,30 +1,20 @@
 package handler
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/gofrs/uuid"
 )
 
-func CreateSession() string {
+func CreateSession(id int) string {
+	mu.Lock()
+	defer mu.Unlock()
 	sessionID := uuid.Must(uuid.NewV4()).String()
-	SessionStore[sessionID] = make(map[string]interface{})
+	SessionStore[sessionID] = id
+	log.Println(SessionStore)
 	return sessionID
-}
-
-func SetSessionCookie(w http.ResponseWriter, sessionID string) {
-	cookie := &http.Cookie{
-		Name:     "session_token",
-		Value:    sessionID,
-		Path:     "/",
-		Expires:  time.Now().UTC().Add(24 * time.Hour),
-		HttpOnly: true,
-		Secure:   true,
-	}
-	http.SetCookie(w, cookie)
 }
 
 func getSessionID(r *http.Request) (string, error) {
@@ -33,18 +23,6 @@ func getSessionID(r *http.Request) (string, error) {
 		return "", err
 	}
 	return cookie.Value, nil
-}
-
-func getSessionData(sessionID string) (map[string]interface{}, error) {
-	sessionData, exists := SessionStore[sessionID]
-	if !exists {
-		return nil, fmt.Errorf("session not found")
-	}
-	return sessionData, nil
-}
-
-func SetSessionData(sessionID string, key string, value interface{}) {
-	SessionStore[sessionID][key] = value
 }
 
 func EnableCors(w http.ResponseWriter) {
@@ -64,14 +42,8 @@ func DeleteSession(userId int) {
 		return
 	}
 	for k := range SessionStore {
-		sessionData, _ := getSessionData(k)
-		if len(sessionData) == 0 {
-			continue
-		}
-		id := sessionData["userId"].(int)
-		if id == userId {
+		if SessionStore[k] == userId {
 			delete(SessionStore, k)
-			return
 		}
 	}
 }

@@ -46,3 +46,14 @@ CREATE TABLE IF NOT EXISTS tblSessions (
   expires_at TIMESTAMP NULL,
   FOREIGN KEY (user_id) REFERENCES tblUsers (id)
 );
+
+CREATE TABLE IF NOT EXISTS tblMessages (
+  id INTEGER PRIMARY KEY,
+  receiver_id   INTEGER NOT NULL,
+  sender_id INTEGER NOT Null,
+  body TEXT NOT NULL,
+  conversation_id TEXT NOT NULL,
+  sent_on TIMESTAMP CURRENT_TIMESTAMP,
+  FOREIGN KEY (receiver_id) REFERENCES tblUsers(id)
+  FOREIGN KEY (sender_id) REFERENCES tblUsers(id)
+)

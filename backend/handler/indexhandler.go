@@ -15,24 +15,26 @@ type Response struct {
 }
 
 func HandleWebsocket(ws *websocket.Conn) {
+	defer ws.Close()
 	HandleConnection(ws)
 }
 
 func HandleConnection(conn *websocket.Conn) {
 	for {
-		// Receive raw JSON as a string
 		var rawMessage string
 		err := websocket.Message.Receive(conn, &rawMessage)
 		if err != nil {
+			if err.Error() == "EOF" {
+				continue
+			}
 			log.Println("WebSocket closed: ", err)
 			break
 		}
 
-		// Parse JSON into a map
 		var msg map[string]string
 		if err := json.Unmarshal([]byte(rawMessage), &msg); err != nil {
 			log.Println("Error decoding message:", err)
-			sendJSON(conn, map[string]interface{}{
+			sendJSON(conn, map[string]any{
 				"type":    "error",
 				"message": "Invalid JSON format",
 			})
@@ -41,13 +43,12 @@ func HandleConnection(conn *websocket.Conn) {
 
 		log.Printf("Received Message: %v", msg)
 
-		// Handle different message types
 		switch msg["type"] {
 		case "getposts":
 			posts, err := repositories.GetPosts(util.DB)
 			if err != nil {
 				log.Println("Error fetching posts:", err)
-				sendJSON(conn, map[string]interface{}{
+				sendJSON(conn, map[string]any{
 					"type":    "error",
 					"message": "An unexpected error occurred. Try again later.",
 				})
@@ -57,20 +58,75 @@ func HandleConnection(conn *websocket.Conn) {
 			posts, err = PostDetails(posts)
 			if err != nil {
 				log.Println("Error processing posts:", err)
-				sendJSON(conn, map[string]interface{}{
+				sendJSON(conn, map[string]any{
 					"type":    "error",
 					"message": err.Error(),
 				})
 				break
 			}
 
-			sendJSON(conn, map[string]interface{}{
+			sendJSON(conn, map[string]any{
 				"type":  "posts",
 				"posts": posts,
 			})
+		case "reaction":
+			action, err := ReactionHandler(msg["userid"], msg["postid"], msg["reaction"])
+			if err != nil {
+				log.Println("Error adding reaction")
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": err.Error(),
+				})
+			} else {
+				log.Println("Reaction added")
+				sendJSON(conn, map[string]any{
+					"type":     "reaction",
+					"id":       msg["postid"],
+					"action":   action,
+					"reaction": msg["reaction"],
+				})
+			}
+		case "getuser":
+			_, ok := SessionStore[msg["session"]]
+			if !ok {
+				log.Println(msg["session"])
+				log.Println("no session found")
+				log.Println(SessionStore)
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "invalid session",
+				})
+			} else {
+				user, err := repositories.GetUserBySession(msg["session"])
+				if err != nil {
+					sendJSON(conn, map[string]any{
+						"type":    "error",
+						"message": "invalid session",
+					})
+				} else {
+					sendJSON(conn, map[string]any{
+						"type": "getuser",
+						"user": user,
+					})
+				}
+
+			}
+		case "getusers":
+			users, err := repositories.GetUsers()
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			} else {
+				sendJSON(conn, map[string]any{
+					"type":  "getusers",
+					"users": users,
+				})
+			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
-			sendJSON(conn, map[string]interface{}{
+			sendJSON(conn, map[string]any{
 				"type":    "error",
 				"message": "Invalid message type",
 			})
@@ -79,7 +135,7 @@ func HandleConnection(conn *websocket.Conn) {
 }
 
 // Helper function to send JSON response
-func sendJSON(conn *websocket.Conn, data interface{}) {
+func sendJSON(conn *websocket.Conn, data any) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		log.Println("Error encoding JSON:", err)

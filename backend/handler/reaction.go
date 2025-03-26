@@ -1,75 +1,42 @@
 package handler
 
 import (
+	"errors"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
-func ReactionHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		log.Println("Method not allowed", r.Method)
-		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func ReactionHandler(userid, postid, reactionType string) (string, error) {
+	postID, _ := strconv.Atoi(postid)
+	userId, _ := strconv.Atoi(userid)
 
-	err := r.ParseForm()
-	if err != nil {
-		log.Println("error parsing form:", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-		return
-	}
-
-	reactionType := r.FormValue("reaction")
-	postID, _ := strconv.Atoi(r.FormValue("post_id"))
-
-	cookie, err := getSessionID(r)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	sessionData, err := getSessionData(cookie)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
-	check, reaction := repositories.CheckReactions(util.DB, sessionData["userId"].(int), postID)
+	check, reaction := repositories.CheckReactions(util.DB, userId, postID)
 
 	if !check {
-		_, err := repositories.InsertRecord(util.DB, "tblReactions", []string{"user_id", "post_id", "reaction"}, sessionData["userId"].(int), postID, reactionType)
+		_, err := repositories.InsertRecord(util.DB, "tblReactions", []string{"user_id", "post_id", "reaction"}, userId, postID, reactionType)
 		if err != nil {
 			log.Println("Failed to insert record:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return "", errors.New("an unexpected error occurred. try again later")
 		}
-		http.Redirect(w, r, "/home", http.StatusSeeOther)
-		return
+		return "+1", nil
 	}
 
 	if reactionType == reaction {
-		err := repositories.UpdateReactionStatus(util.DB, sessionData["userId"].(int), postID)
+		err := repositories.UpdateReactionStatus(util.DB, userId, postID)
 		if err != nil {
 			log.Println("Failed to update reaction status:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return "", errors.New("an unexpected error occurred. try again later")
 		}
-
-		http.Redirect(w, r, "/home", http.StatusSeeOther)
-		return
+		return "-1", nil
 	} else {
-		err := repositories.UpdateReaction(util.DB, reactionType, sessionData["userId"].(int), postID)
+		err := repositories.UpdateReaction(util.DB, reactionType, userId, postID)
 		if err != nil {
 			log.Println("Failed to update reaction:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			return "", errors.New("an unexpected error occurred. try again later")
 		}
 	}
-	r.Method = http.MethodGet
-	http.Redirect(w, r, "/home", http.StatusSeeOther)
+	return "+1", nil
 }

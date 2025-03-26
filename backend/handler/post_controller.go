@@ -92,7 +92,6 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	categories := r.Form["category"]
-	filter := r.FormValue("filter")
 
 	if len(categories) != 0 {
 		posts, err := repositories.FilterPostsByCategories(util.DB, categories)
@@ -105,32 +104,6 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := getSessionID(r)
-	if err != nil {
-		log.Println("Invalid Session:", err)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	sessionData, err := getSessionData(cookie)
-	if err != nil {
-		log.Println("Invalid Session:", err)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-
 	posts := []models.Post{}
-
-	if filter == "created" {
-		posts, err = repositories.FilterPostsByUser(util.DB, sessionData["userId"].(int))
-	}
-	if filter == "liked" {
-		posts, err = repositories.FilterPostsByLikes(util.DB, sessionData["userId"].(int))
-	}
-	if err != nil {
-		log.Println(err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-		return
-	}
-
 	PostDetails(posts)
 }

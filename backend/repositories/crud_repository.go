@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -10,6 +11,10 @@ import (
 	"github.com/jesee-kuya/forum/backend/util"
 	_ "github.com/mattn/go-sqlite3" // SQLite3 driver
 )
+
+type Session struct {
+	UserId int `json:"user_id"`
+}
 
 // insertPost inserts a Post into the tblPosts table
 func InsertRecord(db *sql.DB, table string, columns []string, values ...interface{}) (int64, error) {
@@ -71,7 +76,6 @@ func GetUserByEmail(email string) (models.User, error) {
 		&user.Email,
 		&password,
 	)
-
 	if err != nil {
 		return user, err
 	}
@@ -89,6 +93,52 @@ func GetUserByName(name string) (models.User, error) {
 	row := util.DB.QueryRow(query, name)
 	user, err := UserDetails(row)
 	return user, err
+}
+
+func GetUserBYId(id int) (models.User, error) {
+	query := "SELECT id, username, email, user_password FROM tblUsers WHERE id = ?"
+	row := util.DB.QueryRow(query, id)
+	user, err := UserDetails(row)
+	return user, err
+}
+
+func GetUserBySession(session string) (models.User, error) {
+	var ses Session
+	var user models.User
+	query := "SELECT user_id FROM tblSessions Where session_token = ?"
+	row := util.DB.QueryRow(query, session)
+	err := row.Scan(&ses.UserId)
+	if err != nil {
+		return user, errors.New("invalid session")
+	}
+	user, err = GetUserBYId(ses.UserId)
+	if err != nil {
+		return user, errors.New("invalid session")
+	}
+	return user, nil
+}
+
+func GetUsers() ([]models.User, error) {
+	var users []models.User
+	rows, err := util.DB.Query("SELECT id, username FROM tblUsers")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Username); err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return users, nil
 }
 
 func UserDetails(row *sql.Row) (models.User, error) {

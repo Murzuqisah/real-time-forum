@@ -588,6 +588,135 @@ body.dark-theme .profile p {
   color: var(--dark-text-color);
 }
 
+.chat-list-container,
+.chat-container,
+.user-list-container {
+  width: 400px;
+  height: 600px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: var(--primary-color);
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: block;
+}
+
+.chat-list,
+.user-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-item,
+.user-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.chat-item:hover,
+.user-item:hover {
+  background: #f5f5f5;
+}
+
+.chat-item img,
+.user-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.chat-info,
+.user-info {
+  flex: 1;
+}
+
+.chat-info .name,
+.user-info .name {
+  font-weight: bold;
+}
+
+.new-chat {
+  padding: 15px;
+  text-align: center;
+  background: var(--primary-color);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background: #e5ddd5;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background: #ffffff;
+  border-top: 1px solid #ccc;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.chat-input button {
+  background: var(--secondary-color);
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.message {
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
+  max-width: 70%;
+}
+
+.message.received {
+  background: #f0f0f0;
+  align-self: flex-start;
+}
+
+.message.sent {
+  background: var(--neutral-color);
+  color: white;
+  align-self: flex-end;
+}
+
 .session-status {
   font-size: 1rem;
   color: var(--utility-color);

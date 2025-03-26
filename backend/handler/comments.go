@@ -11,6 +11,7 @@ import (
 )
 
 func CommentHandler(w http.ResponseWriter, r *http.Request) {
+	var userId, id string
 	if r.URL.Path != "/comments" {
 		log.Println("url not found", r.URL.Path)
 		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
@@ -22,20 +23,8 @@ func CommentHandler(w http.ResponseWriter, r *http.Request) {
 		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	cookie, err := getSessionID(r)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	sessionData, err := getSessionData(cookie)
-	if err != nil {
-		log.Println("Invalid Session")
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	id := r.FormValue("id")
-	userId := sessionData["userId"].(int)
+	
+	
 	comment := r.FormValue("comment")
 	comment = html.EscapeString(comment)
 	if len(strings.TrimSpace(comment)) == 0 {
