@@ -127,15 +127,14 @@ export function RealTime(User, session) {
                                 chatheader.appendChild(name)
                                 let chatContainer = document.getElementById('chatContainer');
                                 chatContainer.style.display = 'flex';
-
-                                let send = document.getElementById('send')
-                                send.addEventListener('click', (e) => {
-                                    e.preventDefault()
-                                    let msg = document.getElementById('messageInput').value
-                                    console.log(User)
-                                    socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: elem.username, message: msg }))
-                                })
                             });
+                            let send = document.getElementById('send')
+                            send.addEventListener('click', (e) => {
+                                e.preventDefault()
+                                let msg = document.getElementById('messageInput').value
+                                console.log(User)
+                                socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: elem.username, message: msg }))
+                            })
                             userlist.appendChild(item)
                         }
                     });
@@ -180,43 +179,50 @@ export function RealTime(User, session) {
                         chatbox.innerHTML = ""
                         data.conversation.forEach(elem => {
                             let chatheader = document.getElementById(`chatHeader`)
-                                chatheader.innerHTML = ""
-                                let bcbutton = document.createElement('button')
-                                bcbutton.classList.add('back-button')
-                                bcbutton.textContent = 'Back'
-                                bcbutton.addEventListener('click', (e) => {
-                                    goBack()
-                                })
-                                let span = document.createElement('span')
-                                span.id = 'chatHeader'
-                                chatheader.appendChild(bcbutton)
-                                chatheader.appendChild(span)
-                                let name = document.createElement('div')
-                                name.textContent = data.user.username
-                                name.style.color = 'white'
-                                name.style.display = 'flex'
-                                name.style.position = 'relative'
-                                name.style.alignItems = 'center'
-                                name.style.padding = '0 15px'
-                                name.style.marginRight = '150px'
-                                name.style.flexDirection = 'column'
-                                name.style.justifyContent = 'spacebetween'
-                                name.style.textAlign = 'center'
-                                name.style.whitespace = 'nowrap'
-                                chatheader.appendChild(name)
-                                let chatContainer = document.getElementById('chatContainer');
-                                chatContainer.style.display = 'flex';
-                            if (elem.sender_id === User.id || elem.receiver_id === User.id) {
+                            chatheader.innerHTML = ""
+                            let bcbutton = document.createElement('button')
+                            bcbutton.classList.add('back-button')
+                            bcbutton.textContent = 'Back'
+                            bcbutton.addEventListener('click', (e) => {
+                                goBack()
+                            })
+                            let span = document.createElement('span')
+                            span.id = 'chatHeader'
+                            chatheader.appendChild(bcbutton)
+                            chatheader.appendChild(span)
+                            let name = document.createElement('div')
+                            name.textContent = data.user.username
+                            name.style.color = 'white'
+                            name.style.display = 'flex'
+                            name.style.position = 'relative'
+                            name.style.alignItems = 'center'
+                            name.style.padding = '0 15px'
+                            name.style.marginRight = '150px'
+                            name.style.flexDirection = 'column'
+                            name.style.justifyContent = 'spacebetween'
+                            name.style.textAlign = 'center'
+                            name.style.whitespace = 'nowrap'
+                            chatheader.appendChild(name)
+                            let chatContainer = document.getElementById('chatContainer');
+                            chatContainer.style.display = 'flex';
+                            if (elem.sender_id === User.id) {
                                 let sent = document.createElement('div')
+                                sent.classList.add("message", "sent");
                                 sent.textContent = elem.body
-                                sent.style.backgroundColor = 'blue'
                                 chatbox.appendChild(sent)
                             } else {
                                 let receive = document.createElement('div')
                                 receive.textContent = elem.body
-                                receive.style.backgroundColor = 'grey'
+                                receive.classList.add('message', 'received')
                                 chatbox.appendChild(receive)
                             }
+
+                        })
+                        let send = document.getElementById('send')
+                        send.addEventListener('click', (e) => {
+                            e.preventDefault()
+                            let msg = document.getElementById('messageInput').value
+                            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: data.user.username, message: msg }))
                         })
                         break
                     }
