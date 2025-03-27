@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
@@ -154,6 +155,26 @@ func HandleConnection(conn *websocket.Conn) {
 				"status":  "ok",
 				"message": html.EscapeString(msg["message"]),
 			})
+		case "chats":
+			id, err := strconv.Atoi(msg["sender"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			users, err := repositories.GetActiveChats(id)
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			} else {
+				sendJSON(conn, map[string]any{
+					"type":  "chats",
+					"users": users,
+				})
+			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
