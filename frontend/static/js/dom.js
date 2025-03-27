@@ -44,6 +44,7 @@ export function RealTime(User, session) {
         socket.addEventListener('open', () => {
             console.log("WebSocket connected.");
             socket.send(JSON.stringify({ type: 'getposts' }));
+            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString() }))
         });
 
         if (!User) {
@@ -119,7 +120,7 @@ export function RealTime(User, session) {
                                 name.style.alignItems = 'center'
                                 name.style.padding = '0 15px'
                                 name.style.marginRight = '150px'
-                                name.style.flexDirection = 'columnf'
+                                name.style.flexDirection = 'column'
                                 name.style.justifyContent = 'spacebetween'
                                 name.style.textAlign = 'center'
                                 name.style.whitespace = 'nowrap'
@@ -151,6 +152,74 @@ export function RealTime(User, session) {
                         input.placeholder = 'Type a message...'
                     }
                     break
+                case "chats":
+                    if (data.users.length > 0) {
+                        console.log(data.users)
+                        let chatlist = document.getElementById('chatList')
+                        chatlist.innerHTML = ""
+                        data.users.forEach(elem => {
+                            let chat = document.createElement('div')
+                            chat.classList.add('chat')
+                            chat.textContent = elem.username
+                            chatlist.appendChild(chat)
+                            chat.addEventListener('click', (e) => {
+                                e.preventDefault()
+                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString() }))
+                            })
+                        })
+
+                    }
+                    break
+                case 'conversation':
+                    if (data.conversation.length > 0) {
+                        document.getElementById('chatListContainer').style.display = 'none'
+                        let chat = document.getElementById('chatContainer')
+                        chat.style.display = 'flex'
+
+                        let chatbox = document.getElementById('chatBox')
+                        chatbox.innerHTML = ""
+                        data.conversation.forEach(elem => {
+                            let chatheader = document.getElementById(`chatHeader`)
+                                chatheader.innerHTML = ""
+                                let bcbutton = document.createElement('button')
+                                bcbutton.classList.add('back-button')
+                                bcbutton.textContent = 'Back'
+                                bcbutton.addEventListener('click', (e) => {
+                                    goBack()
+                                })
+                                let span = document.createElement('span')
+                                span.id = 'chatHeader'
+                                chatheader.appendChild(bcbutton)
+                                chatheader.appendChild(span)
+                                let name = document.createElement('div')
+                                name.textContent = data.user.username
+                                name.style.color = 'white'
+                                name.style.display = 'flex'
+                                name.style.position = 'relative'
+                                name.style.alignItems = 'center'
+                                name.style.padding = '0 15px'
+                                name.style.marginRight = '150px'
+                                name.style.flexDirection = 'column'
+                                name.style.justifyContent = 'spacebetween'
+                                name.style.textAlign = 'center'
+                                name.style.whitespace = 'nowrap'
+                                chatheader.appendChild(name)
+                                let chatContainer = document.getElementById('chatContainer');
+                                chatContainer.style.display = 'flex';
+                            if (elem.sender_id === User.id || elem.receiver_id === User.id) {
+                                let sent = document.createElement('div')
+                                sent.textContent = elem.body
+                                sent.style.backgroundColor = 'blue'
+                                chatbox.appendChild(sent)
+                            } else {
+                                let receive = document.createElement('div')
+                                receive.textContent = elem.body
+                                receive.style.backgroundColor = 'grey'
+                                chatbox.appendChild(receive)
+                            }
+                        })
+                        break
+                    }
                 default:
                     console.log("Unknown message type:", data.type);
             }
