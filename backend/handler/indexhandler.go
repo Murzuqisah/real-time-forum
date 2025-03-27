@@ -175,6 +175,41 @@ func HandleConnection(conn *websocket.Conn) {
 					"users": users,
 				})
 			}
+		case "conversation":
+			senderid, err := strconv.Atoi(msg["sender"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			receiverid, err := strconv.Atoi(msg["receiver"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			receiver, err := repositories.GetUserBYId(receiverid)
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			messages, err := repositories.GetConversation(senderid, receiverid)
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			} else {
+				sendJSON(conn, map[string]any{
+					"type":         "conversation",
+					"conversation": messages,
+					"user":         receiver,
+				})
+			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
