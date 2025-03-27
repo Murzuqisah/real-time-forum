@@ -53,6 +53,6 @@ CREATE TABLE IF NOT EXISTS tblMessages (
   sender_id INTEGER NOT Null,
   body TEXT NOT NULL,
   sent_on TIMESTAMP CURRENT_TIMESTAMP,
-  FOREIGN KEY (receiver_id) REFERENCES tblUsers(id)
+  FOREIGN KEY (receiver_id) REFERENCES tblUsers(id),
   FOREIGN KEY (sender_id) REFERENCES tblUsers(id)
 )
