@@ -140,6 +140,7 @@ func HandleConnection(conn *websocket.Conn) {
 					"message": "unexpected error occured",
 				})
 			}
+			log.Println("check receiver ", msg["receiver"])
 			receiver, err := repositories.GetUserByName(msg["receiver"])
 			if err != nil {
 				sendJSON(conn, map[string]any{
@@ -149,7 +150,6 @@ func HandleConnection(conn *websocket.Conn) {
 			}
 			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "sent_on"}, receiver.ID, sender.ID, html.EscapeString(msg["message"]), time.Now())
 			if err != nil {
-				log.Println(err)
 				sendJSON(conn, map[string]any{
 					"type":    "error",
 					"message": "unexpected error occured",
