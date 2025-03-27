@@ -93,9 +93,18 @@ export function RealTime(user, session) {
                 case 'onlineusers':
                     document.getElementById("userListContainer").style.display = "none";
                     let online = document.getElementById("onlineStatus")
+                    online.innerHTML = ''
                     data.users.forEach(user => {
                         let onlineUser = document.createElement('div')
                         onlineUser.classList.add('user-item')
+
+                        let usernameSpan = document.createElement('span')
+                        usernameSpan.textContent = user.username
+                        let statusDot = document.createElement('span')
+                        statusDot.classList.add('status-dot')
+                        statusDot.style.backgroundColor = user.online ? 'green' : 'red'
+                        onlineUser.appendChild(usernameSpan)
+                        onlineUser.appendChild(statusDot)
                         onlineUser.textContent = user.username
                         online.appendChild(onlineUser)
                     })
