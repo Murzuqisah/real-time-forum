@@ -128,14 +128,6 @@ export function RealTime(User, session) {
                                 let chatContainer = document.getElementById('chatContainer');
                                 chatContainer.style.display = 'flex';
                             });
-                            let send = document.getElementById('send')
-                            send.addEventListener('click', (e) => {
-                                e.preventDefault()
-                                let msg = document.getElementById('messageInput').value
-                                console.log(User)
-                                socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: elem.username, message: msg }))
-                            })
-                            userlist.appendChild(item)
                         }
                     });
                     userlist.style.display = 'flex'
@@ -191,6 +183,7 @@ export function RealTime(User, session) {
                             chatheader.appendChild(bcbutton)
                             chatheader.appendChild(span)
                             let name = document.createElement('div')
+                            name.id = "name"
                             name.textContent = data.user.username
                             name.style.color = 'white'
                             name.style.display = 'flex'
@@ -217,12 +210,6 @@ export function RealTime(User, session) {
                                 chatbox.appendChild(receive)
                             }
 
-                        })
-                        let send = document.getElementById('send')
-                        send.addEventListener('click', (e) => {
-                            e.preventDefault()
-                            let msg = document.getElementById('messageInput').value
-                            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: data.user.username, message: msg }))
                         })
                         break
                     }
@@ -267,6 +254,14 @@ export function RealTime(User, session) {
                 socket.send(JSON.stringify({ type: 'getusers' }))
             })
         }
+
+        let send = document.getElementById('send')
+        send.addEventListener('click', (e) => {
+            e.preventDefault()
+            let msg = document.getElementById('messageInput').value
+            let user = document.getElementById('name')
+            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: user.textContent, message: msg }))
+        })
     }
 
     connectWebSocket();
