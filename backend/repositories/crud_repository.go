@@ -155,19 +155,20 @@ func UserDetails(row *sql.Row) (models.User, error) {
 
 func GetActiveChats(senderid int) ([]models.User, error) {
 	var users []models.User
-	query := "SELECT receiver_id FROM tblSessions WHERE sender_id = ?"
+	query := "SELECT receiver_id FROM tblMessages WHERE sender_id = ?"
 	rows, err := util.DB.Query(query, senderid)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("unexpected error occured")
 	}
+	defer rows.Close()
 	for rows.Next() {
-		var id int
-		if err := rows.Scan(&id); err != nil {
+		var message models.Message
+		if err := rows.Scan(&message.ReceiverId); err != nil {
 			log.Println(err)
 			return nil, errors.New("unexpected error occured")
 		}
-		user, err := GetUserBYId(id)
+		user, err := GetUserBYId(message.ReceiverId)
 		if err != nil {
 			log.Println(err)
 			return nil, errors.New("unexpected error occured")
@@ -175,4 +176,38 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 		users = append(users, user)
 	}
 	return users, nil
+}
+
+func GetConversation(senderid, receiverid int) ([]models.Message, error) {
+	var messages []models.Message
+
+	query := `
+		SELECT receiver_id , sender_id, body, sent_on 
+		FROM tblMessages 
+		WHERE (receiver_id  = ? AND sender_id = ?) 
+		   OR (receiver_id  = ? AND sender_id = ?)
+		ORDER BY sent_on ASC` // Ensures chronological order
+
+	rows, err := util.DB.Query(query, receiverid, senderid, senderid, receiverid)
+	if err != nil {
+		log.Println("DB Query Error:", err)
+		return nil, errors.New("failed to fetch conversation")
+	}
+	defer rows.Close() // Ensure rows are closed
+
+	for rows.Next() {
+		var message models.Message
+		if err := rows.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn); err != nil {
+			log.Println("Row Scan Error:", err)
+			return nil, errors.New("unexpected error occured")
+		}
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Rows Iteration Error:", err)
+		return nil, errors.New("error iterating through messages")
+	}
+
+	return messages, nil
 }
