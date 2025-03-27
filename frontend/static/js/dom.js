@@ -1,5 +1,6 @@
 import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
+import { goBack } from './homepage.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-export function RealTime(user, session) {
+export function RealTime(User, session) {
     HomePage();
     let socket;
 
@@ -33,7 +34,7 @@ export function RealTime(user, session) {
     if (likebutton) {
         likebutton.addEventListener('click', (e) => {
             e.preventDefault()
-            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: user.id, reaction: 'like' }))
+            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like' }))
         })
     }
 
@@ -43,7 +44,15 @@ export function RealTime(user, session) {
         socket.addEventListener('open', () => {
             console.log("WebSocket connected.");
             socket.send(JSON.stringify({ type: 'getposts' }));
+            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString() }))
         });
+
+        if (!User) {
+            waitForSocket(() => {
+                let session = sessionStorage.getItem('session');
+                socket.send(JSON.stringify({ type: 'getuser', session: session }));
+            })
+        }
 
         socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
@@ -68,7 +77,7 @@ export function RealTime(user, session) {
                     break;
                 case 'getuser':
                     console.log('Got user data');
-                    user = data.user;
+                    User = data.user;
                     console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts' }));
                     break;
@@ -82,13 +91,141 @@ export function RealTime(user, session) {
                 case 'getusers':
                     document.getElementById("chatListContainer").style.display = "none";
                     let userlist = document.getElementById("userListContainer")
-                    data.users.forEach(user => {
-                        let item = document.createElement('div')
-                        item.classList.add('user-item')
-                        item.textContent = user.username
-                        userlist.appendChild(item)
+                    userlist.innerHTML = ""
+                    data.users.forEach(elem => {
+                        if (elem.username !== User.username) {
+                            let item = document.createElement('div')
+                            item.classList.add('user-item')
+                            item.textContent = elem.username
+                            item.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                document.getElementById("userListContainer").style.display = 'none';
+                                let chatheader = document.getElementById(`chatHeader`)
+                                chatheader.innerHTML = ""
+                                let bcbutton = document.createElement('button')
+                                bcbutton.classList.add('back-button')
+                                bcbutton.textContent = 'Back'
+                                bcbutton.addEventListener('click', (e) => {
+                                    goBack()
+                                })
+                                let span = document.createElement('span')
+                                span.id = 'chatHeader'
+                                chatheader.appendChild(bcbutton)
+                                chatheader.appendChild(span)
+                                let name = document.createElement('div')
+                                name.textContent = elem.username
+                                name.style.color = 'white'
+                                name.style.display = 'flex'
+                                name.style.position = 'relative'
+                                name.style.alignItems = 'center'
+                                name.style.padding = '0 15px'
+                                name.style.marginRight = '150px'
+                                name.style.flexDirection = 'column'
+                                name.style.justifyContent = 'spacebetween'
+                                name.style.textAlign = 'center'
+                                name.style.whitespace = 'nowrap'
+                                chatheader.appendChild(name)
+                                let chatContainer = document.getElementById('chatContainer');
+                                chatContainer.style.display = 'flex';
+                            });
+                            let send = document.getElementById('send')
+                            send.addEventListener('click', (e) => {
+                                e.preventDefault()
+                                let msg = document.getElementById('messageInput').value
+                                console.log(User)
+                                socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: elem.username, message: msg }))
+                            })
+                            userlist.appendChild(item)
+                        }
                     });
                     userlist.style.display = 'flex'
+                    break
+                case 'messaging':
+                    if (data.status === "ok") {
+                        let messageElement = document.createElement("div");
+                        messageElement.classList.add("message", "sent");
+                        messageElement.innerText = data.message;
+                        document.getElementById("chatBox").appendChild(messageElement)
+                        let input = document.getElementById('messageInput')
+                        input.value = ""
+                        input.placeholder = 'Type a message...'
+                    }
+                    break
+                case "chats":
+                    if (data.users.length > 0) {
+                        console.log(data.users)
+                        let chatlist = document.getElementById('chatList')
+                        chatlist.innerHTML = ""
+                        data.users.forEach(elem => {
+                            let chat = document.createElement('div')
+                            chat.classList.add('chat')
+                            chat.textContent = elem.username
+                            chatlist.appendChild(chat)
+                            chat.addEventListener('click', (e) => {
+                                e.preventDefault()
+                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString() }))
+                            })
+                        })
+
+                    }
+                    break
+                case 'conversation':
+                    if (data.conversation.length > 0) {
+                        document.getElementById('chatListContainer').style.display = 'none'
+                        let chat = document.getElementById('chatContainer')
+                        chat.style.display = 'flex'
+
+                        let chatbox = document.getElementById('chatBox')
+                        chatbox.innerHTML = ""
+                        data.conversation.forEach(elem => {
+                            let chatheader = document.getElementById(`chatHeader`)
+                            chatheader.innerHTML = ""
+                            let bcbutton = document.createElement('button')
+                            bcbutton.classList.add('back-button')
+                            bcbutton.textContent = 'Back'
+                            bcbutton.addEventListener('click', (e) => {
+                                goBack()
+                            })
+                            let span = document.createElement('span')
+                            span.id = 'chatHeader'
+                            chatheader.appendChild(bcbutton)
+                            chatheader.appendChild(span)
+                            let name = document.createElement('div')
+                            name.textContent = data.user.username
+                            name.style.color = 'white'
+                            name.style.display = 'flex'
+                            name.style.position = 'relative'
+                            name.style.alignItems = 'center'
+                            name.style.padding = '0 15px'
+                            name.style.marginRight = '150px'
+                            name.style.flexDirection = 'column'
+                            name.style.justifyContent = 'spacebetween'
+                            name.style.textAlign = 'center'
+                            name.style.whitespace = 'nowrap'
+                            chatheader.appendChild(name)
+                            let chatContainer = document.getElementById('chatContainer');
+                            chatContainer.style.display = 'flex';
+                            if (elem.sender_id === User.id) {
+                                let sent = document.createElement('div')
+                                sent.classList.add("message", "sent");
+                                sent.textContent = elem.body
+                                chatbox.appendChild(sent)
+                            } else {
+                                let receive = document.createElement('div')
+                                receive.textContent = elem.body
+                                receive.classList.add('message', 'received')
+                                chatbox.appendChild(receive)
+                            }
+
+                        })
+                        let send = document.getElementById('send')
+                        send.addEventListener('click', (e) => {
+                            e.preventDefault()
+                            let msg = document.getElementById('messageInput').value
+                            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: data.user.username, message: msg }))
+                        })
+                        break
+                    }
                     break;
                 case 'onlineusers':
                     document.getElementById("userListContainer").style.display = "none";
@@ -115,7 +252,7 @@ export function RealTime(user, session) {
 
         socket.addEventListener('close', () => {
             console.log("WebSocket closed. Attempting to reconnect...");
-            setTimeout(connectWebSocket, 3000); // Reconnect after 3 seconds
+            setTimeout(connectWebSocket, 3000);
         });
 
         socket.addEventListener('error', (err) => {
@@ -127,7 +264,7 @@ export function RealTime(user, session) {
         if (newChat) {
             newChat.addEventListener('click', (e) => {
                 e.preventDefault()
-                socket.send(JSON.stringify({type: 'getusers'}))
+                socket.send(JSON.stringify({ type: 'getusers' }))
             })
         }
     }
@@ -142,17 +279,6 @@ export function RealTime(user, session) {
 
     let state = sessionStorage.getItem('pageState');
     console.log(`state is ${state}`);
-
-    if (state === 'home') {
-
-        console.log('Getting user...');
-        waitForSocket(() => {
-            console.log('State found');
-            let session = sessionStorage.getItem('session');
-            sessionStorage.setItem('pageState', '');
-            socket.send(JSON.stringify({ type: 'getuser', session: session }));
-        });
-    }
 
     window.addEventListener('beforeunload', () => {
         let currentPage = "home";
@@ -185,7 +311,7 @@ async function checksession(session) {
         .then(data => {
             console.log(data.error)
             if (data.error === 'ok') {
-                RealTime()
+                RealTime("", session)
             } else {
                 sessionStorage.setItem('pageState', '')
                 SignInPage()

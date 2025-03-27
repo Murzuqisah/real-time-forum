@@ -354,6 +354,7 @@ function chat(profile) {
 
     let backbutton = document.createElement('div')
     backbutton.classList.add('header')
+    backbutton.id = 'chatHeader'
     let bcbutton = document.createElement('button')
     bcbutton.classList.add('back-button')
     bcbutton.textContent = 'Back'
@@ -374,10 +375,7 @@ function chat(profile) {
     input.id = 'messageInput'
     input.placeholder = 'Type a message...'
     let send = document.createElement('button')
-    send.addEventListener('click', (e) =>{
-        e.preventDefault()
-        sendMessage()
-    })
+    send.id = 'send'
     chatinput.appendChild(input)
     chatinput.appendChild(send)
 
@@ -389,22 +387,11 @@ function chat(profile) {
     return profile
 }
 
-function goBack() {
+export function goBack() {
     document.getElementById("chatContainer").style.display = "none";
     document.getElementById("chatListContainer").style.display = "flex";
 }
 
-function sendMessage() {
-    let messageInput = document.getElementById("messageInput");
-    let messageText = messageInput.value.trim();
-    if (messageText !== "") {
-        let messageElement = document.createElement("div");
-        messageElement.classList.add("message", "sent");
-        messageElement.innerText = messageText;
-        document.getElementById("chatBox").appendChild(messageElement);
-        messageInput.value = "";
-    }
-}
 
 function goBackToChats() {
     document.getElementById("userListContainer").style.display = "none";

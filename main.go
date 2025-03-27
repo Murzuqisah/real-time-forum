@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/route"
@@ -11,6 +12,7 @@ import (
 )
 
 func main() {
+	os.Create(".env")
 	err := util.LoadEnv(".env")
 	if err != nil {
 		fmt.Println("Error loading .env file:", err)

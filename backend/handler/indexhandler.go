@@ -3,9 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
+	"golang.org/x/net/html"
 	"golang.org/x/net/websocket"
 )
 
@@ -127,6 +130,89 @@ func HandleConnection(conn *websocket.Conn) {
 				sendJSON(conn, map[string]any{
 					"type":  "getusers",
 					"users": users,
+				})
+			}
+		case "messaging":
+			sender, err := repositories.GetUserByName(msg["sender"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			receiver, err := repositories.GetUserByName(msg["receiver"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "sent_on"}, receiver.ID, sender.ID, html.EscapeString(msg["message"]), time.Now())
+			if err != nil {
+				log.Println(err)
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			sendJSON(conn, map[string]any{
+				"type":    "messaging",
+				"status":  "ok",
+				"message": html.EscapeString(msg["message"]),
+			})
+		case "chats":
+			id, err := strconv.Atoi(msg["sender"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			users, err := repositories.GetActiveChats(id)
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			} else {
+				sendJSON(conn, map[string]any{
+					"type":  "chats",
+					"users": users,
+				})
+			}
+		case "conversation":
+			senderid, err := strconv.Atoi(msg["sender"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			receiverid, err := strconv.Atoi(msg["receiver"])
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			receiver, err := repositories.GetUserBYId(receiverid)
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			}
+			messages, err := repositories.GetConversation(senderid, receiverid)
+			if err != nil {
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+			} else {
+				sendJSON(conn, map[string]any{
+					"type":         "conversation",
+					"conversation": messages,
+					"user":         receiver,
 				})
 			}
 		case "onlineusers":

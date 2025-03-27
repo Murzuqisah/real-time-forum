@@ -152,3 +152,79 @@ func UserDetails(row *sql.Row) (models.User, error) {
 	}
 	return user, nil
 }
+
+func GetActiveChats(senderid int) ([]models.User, error) {
+	check := make(map[int]bool) // Initialize map
+	var users []models.User
+
+	query := `
+		SELECT DISTINCT receiver_id FROM tblMessages WHERE sender_id = ?
+		UNION
+		SELECT DISTINCT sender_id FROM tblMessages WHERE receiver_id = ?`
+	rows, err := util.DB.Query(query, senderid, senderid)
+	if err != nil {
+		log.Println("DB Query Error:", err)
+		return nil, errors.New("failed to fetch active chats")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var userid int
+		if err := rows.Scan(&userid); err != nil {
+			log.Println("Row Scan Error:", err)
+			continue 
+		}
+
+		if !check[userid] { 
+			check[userid] = true
+			user, err := GetUserBYId(userid)
+			if err != nil {
+				log.Println("GetUserBYId Error for ID", userid, ":", err)
+				continue 
+			}
+			users = append(users, user)
+		}
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Rows Iteration Error:", err)
+		return nil, errors.New("error iterating through chat records")
+	}
+
+	return users, nil
+}
+
+
+func GetConversation(senderid, receiverid int) ([]models.Message, error) {
+	var messages []models.Message
+
+	query := `
+		SELECT receiver_id , sender_id, body, sent_on 
+		FROM tblMessages 
+		WHERE (receiver_id  = ? AND sender_id = ?) 
+		   OR (receiver_id  = ? AND sender_id = ?)
+		ORDER BY sent_on ASC` // Ensures chronological order
+
+	rows, err := util.DB.Query(query, receiverid, senderid, senderid, receiverid)
+	if err != nil {
+		log.Println("DB Query Error:", err)
+		return nil, errors.New("failed to fetch conversation")
+	}
+	defer rows.Close() // Ensure rows are closed
+
+	for rows.Next() {
+		var message models.Message
+		if err := rows.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn); err != nil {
+			log.Println("Row Scan Error:", err)
+			return nil, errors.New("unexpected error occured")
+		}
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Rows Iteration Error:", err)
+		return nil, errors.New("error iterating through messages")
+	}
+
+	return messages, nil
+}

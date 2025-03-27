@@ -49,3 +49,11 @@ type Reaction struct {
 	UserID         int    `json:"user_id"`
 	PostID         int    `json:"post_id"`
 }
+
+type Message struct {
+	ID         int    `json:"id"`
+	ReceiverId int    `json:"receiver_id"`
+	SenderId   int    `json:"sender_id"`
+	Body       string `json:"body"`
+	SentOn     string `json:"sent_on"`
+}
