@@ -152,3 +152,27 @@ func UserDetails(row *sql.Row) (models.User, error) {
 	}
 	return user, nil
 }
+
+func GetActiveChats(senderid int) ([]models.User, error) {
+	var users []models.User
+	query := "SELECT receiver_id FROM tblSessions WHERE sender_id = ?"
+	rows, err := util.DB.Query(query, senderid)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("unexpected error occured")
+	}
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			log.Println(err)
+			return nil, errors.New("unexpected error occured")
+		}
+		user, err := GetUserBYId(id)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("unexpected error occured")
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
