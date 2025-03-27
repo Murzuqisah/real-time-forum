@@ -612,13 +612,16 @@ body.dark-theme .profile p {
 .chat-container,
 .user-list-container {
   width: 400px;
-  height: 600px;
+  height: calc(80vh - 80px);
   border: 1px solid #ccc;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
   background: white;
   display: flex;
   flex-direction: column;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  transition: var(--transition);
 }
 
 .header {
