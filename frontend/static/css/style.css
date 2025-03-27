@@ -588,6 +588,26 @@ body.dark-theme .profile p {
   color: var(--dark-text-color);
 }
 
+/* status */
+.status-dot {
+  width: 04rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background-color: green;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
+  display: inline-block;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  font-size: 2rem;
+  padding: 15px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
 .chat-list-container,
 .chat-container,
 .user-list-container {
