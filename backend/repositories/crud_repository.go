@@ -154,29 +154,46 @@ func UserDetails(row *sql.Row) (models.User, error) {
 }
 
 func GetActiveChats(senderid int) ([]models.User, error) {
+	check := make(map[int]bool) // Initialize map
 	var users []models.User
-	query := "SELECT receiver_id FROM tblMessages WHERE sender_id = ?"
-	rows, err := util.DB.Query(query, senderid)
+
+	query := `
+		SELECT DISTINCT receiver_id FROM tblMessages WHERE sender_id = ?
+		UNION
+		SELECT DISTINCT sender_id FROM tblMessages WHERE receiver_id = ?`
+	rows, err := util.DB.Query(query, senderid, senderid)
 	if err != nil {
-		log.Println(err)
-		return nil, errors.New("unexpected error occured")
+		log.Println("DB Query Error:", err)
+		return nil, errors.New("failed to fetch active chats")
 	}
 	defer rows.Close()
+
 	for rows.Next() {
-		var message models.Message
-		if err := rows.Scan(&message.ReceiverId); err != nil {
-			log.Println(err)
-			return nil, errors.New("unexpected error occured")
+		var userid int
+		if err := rows.Scan(&userid); err != nil {
+			log.Println("Row Scan Error:", err)
+			continue 
 		}
-		user, err := GetUserBYId(message.ReceiverId)
-		if err != nil {
-			log.Println(err)
-			return nil, errors.New("unexpected error occured")
+
+		if !check[userid] { 
+			check[userid] = true
+			user, err := GetUserBYId(userid)
+			if err != nil {
+				log.Println("GetUserBYId Error for ID", userid, ":", err)
+				continue 
+			}
+			users = append(users, user)
 		}
-		users = append(users, user)
 	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Rows Iteration Error:", err)
+		return nil, errors.New("error iterating through chat records")
+	}
+
 	return users, nil
 }
+
 
 func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 	var messages []models.Message
