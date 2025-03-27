@@ -136,11 +136,11 @@ func HandleConnection(conn *websocket.Conn) {
 
 			// Notify all users about the updated online users list
 			go func() {
-				for username, userConn := range onlineUsers {
+				for _, userConn := range onlineUsers {
 					if userConn != nil {
 						sendJSON(userConn, map[string]any{
 							"type":         "onlineusers",
-							"online_users": GetOnlineUsernames(),
+							"online_users": onlineUsers,
 						})
 					}
 				}
@@ -154,11 +154,11 @@ func HandleConnection(conn *websocket.Conn) {
 					mu.Unlock()
 
 					// Notify all users about the updated online users list
-					for _, conn := range onlineUsers {
-						if conn != nil {
-							sendJSON(conn, map[string]any{
-								"type":         "onlineusers",
-								"online_users": getOnlineUsernames(),
+					for _, userConn := range onlineUsers {
+						if userConn != nil {
+							sendJSON(userConn, map[string]any{
+								"type":        "onlineUsers",
+								"onlineUsers": onlineUsers,
 							})
 						}
 					}
