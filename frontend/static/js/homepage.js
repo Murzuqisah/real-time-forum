@@ -241,25 +241,41 @@ export function renderPosts(data, postsContainer) {
         return;
     }
 
+    const createPostTop = document.querySelector('.create-post-top');
     postsContainer.innerHTML = "";
+
+    if (createPostTop) {
+        postsContainer.appendChild(createPostTop);
+    }
 
     data.posts.forEach(item => {
         item = item || {};
 
         let article = document.createElement('article');
-        article.classList.add('post');
+        article.classList.add('post','animate-slide-in');
 
         let headerDiv = document.createElement('div');
+        headerDiv.classList.add('post-header');
         headerDiv.innerHTML = `
             <p class="post-author">@${item.username || "Unknown"}</p>
             <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
         `;
         article.appendChild(headerDiv);
 
-        article.innerHTML += `
-            <h3>${item.post_title || "Untitled"}</h3>
-            <p>${item.body || "No content"}</p>
-        `;
+        let title = document.createElement('h2');
+        // title.classList.add('post-title');
+        title.textContent = item.post_title || "Untitled";
+        article.appendChild(title);
+
+        // article.innerHTML += `
+        //     <h3>${item.post_title || "Untitled"}</h3>
+        //     <p>${item.body || "No content"}</p>
+        // `;
+
+        let content = document.createElement('p');
+        // content.classList.add('post-content');
+        content.textContent = item.body || "No content";
+        article.appendChild(content);
 
         if (item.imageurl) {
             let img = document.createElement('img');
@@ -287,7 +303,7 @@ export function renderPosts(data, postsContainer) {
 
         let likebutton = document.createElement('button')
         likebutton.classList.add('like-button')
-        likebutton.id = item.id
+        likebutton.id = `like-${item.id}`;
         likebutton.ariaLabel = 'like this post'
         let likeimg = document.createElement('img')
         likeimg.classList.add('icon')
@@ -295,32 +311,33 @@ export function renderPosts(data, postsContainer) {
         likeimg.alt = 'thumbs-up-regular'
         likeimg.style.height = '25px'
         likeimg.style.width = '1.2rem'
-        likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        likeimg.style.marginRight = '5px'
+        // likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        // likeimg.style.marginRight = '5px'
         likebutton.appendChild(likeimg)
         let likecount = document.createElement('span')
         likecount.classList.add('like-count')
-        likecount.textContent = item.likes
-        likebutton.appendChild(likecount)
-        article.appendChild(likebutton)
+        likecount.textContent = item.likes || 0;
+        likebutton.appendChild(likecount);
+        article.appendChild(likebutton);
 
         let dislikebutton = document.createElement('button')
-        dislikebutton.id = item.id
+        dislikebutton.classList.add('dislike-button');
+        dislikebutton.id = `dislike-${item.id}`;
         dislikebutton.ariaLabel = 'Dislike this post'
         let dislikeimg = document.createElement('img')
         dislikeimg.classList.add('icon')
         dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
         dislikeimg.style.height = '25px'
         dislikeimg.style.width = '1.2rem'
-        dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        dislikeimg.style.marginRight = '5px'
+        // dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        // dislikeimg.style.marginRight = '5px'
         dislikeimg.alt = 'thumbs-down-regular'
         dislikebutton.appendChild(dislikeimg)
         let dislikecount = document.createElement('span')
         dislikecount.classList.add('dislike-count')
-        dislikecount.textContent = item.dislikes
-        dislikebutton.appendChild(dislikecount)
-        article.appendChild(dislikebutton)
+        dislikecount.textContent = item.dislikes || 0;
+        dislikebutton.appendChild(dislikecount);
+        article.appendChild(dislikebutton);
 
         let commentbutton = document.createElement('button')
         commentbutton.classList.add('comment-button')
@@ -329,26 +346,28 @@ export function renderPosts(data, postsContainer) {
         commentimg.classList.add('icon')
         commentimg.style.height = '25px'
         commentimg.style.width = '1.2rem'
-        commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        commentimg.style.marginRight = '5px'
+        // commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        // commentimg.style.marginRight = '5px'
         commentimg.src = '/frontend/static/assets/comment-regular.svg'
         commentimg.alt = 'comment-regular'
         let commentcount = document.createElement('span')
         commentcount.classList.add('comment-count')
-        commentcount.textContent = item.comment_count
+        commentcount.textContent = item.comment_count || 0;
         commentbutton.appendChild(commentimg)
         commentbutton.append(commentcount)
         article.appendChild(commentbutton)
 
-        let commentsection = document.createElement('div')
-        commentsection.classList.add('comments-section')
-        let h4 = document.createElement('h4')
-        h4.textContent = 'Comments'
-        commentsection.appendChild(h4)
+        article.appendChild(postactions);
+
+        let commentList = document.createElement('div');
+        commentList.classList.add('comment-list');
+        commentList.id = `comment-list-${item.id}`;
+        commentsection.appendChild(commentList);
 
         let commentinput = document.createElement('comment-input')
         commentinput.classList.add('comment-input')
         let addcomment = document.createElement('form')
+        addcomment.id = `comment-form-${item.id}`;
         let input = document.createElement('input')
         input.type = 'hidden'
         input.name = 'id'
@@ -358,22 +377,22 @@ export function renderPosts(data, postsContainer) {
         comment.type = 'text'
         comment.name = 'comment'
         comment.classList.add('comment-box')
-        comment.placeholder = 'Write a comment...'
-        addcomment.appendChild(comment)
+        comment.placeholder = 'Write a comment...';
+        addcomment.appendChild(comment);
         let addbutton = document.createElement('button')
-        addbutton.classList.add('submit-comment')
+        addbutton.classList.add('submit-comment');
+        addbutton.type = 'submit';
         let addimg = document.createElement('img')
-        addimg.style.height = '20px'
-        addimg.style.margin = '0'
         addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
         addimg.alt = 'paper-plane-regular'
+        // addimg.style.height = '20px'
+        // addimg.style.margin = '0'
         addbutton.appendChild(addimg)
         addcomment.appendChild(addbutton)
         commentsection.appendChild(addcomment)
+        commentsection.appendChild(commentinput)
 
         article.appendChild(commentsection)
-
-
         postsContainer.appendChild(article);
     });
 }
