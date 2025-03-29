@@ -76,11 +76,40 @@ export const HomePage = () => {
     let postsContainer = document.createElement('main');
     postsContainer.classList.add('posts');
 
+    // Add create post button at the top of the page
+    let createPostTop = document.createElement('div');
+    createPostTop.classList.add('create-post-top');
+    let createIcon = document.createElement('img');
+    createIcon.src = '/frontend/static/assets/plus-solid.svg';
+    createIcon.alt = 'Create Post';
+    let createText = document.createElement('p');
+    createText.textContent = 'Create a Post';
+    createPostTop.appendChild(createIcon);
+    createPostTop.appendChild(createText);
+    postsContainer.appendChild(createPostTop);
+
+    // post modal form
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
+    let overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    document.body.appendChild(overlay);
 
     let postdiv = document.createElement('div')
     postdiv.classList.add('post-popup')
+
+    let closeBtn = document.createElement('button');
+    closeBtn.classList.add('close-modal');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', () => {
+        postForm.classList.add('hidden');
+        overlay.classList.remove('active');
+    });
+    postdiv.appendChild(closeBtn);
+
+    let postTitle = document.createElement('h2');
+    postTitle.textContent = 'Create a New Post';
+    postdiv.appendChild(postTitle);
 
     let upload = document.createElement('form');
     upload.name = "upload";
@@ -125,8 +154,12 @@ export const HomePage = () => {
     postForm.appendChild(postdiv);
     postsContainer.appendChild(postForm);
 
+    document.body.appendChild(postsContainer);
+
+    // Hide the floating create post button when the modal is open
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
+    floating.style.display = 'none'
     let createPost = document.createElement('p')
     createPost.textContent = 'Create a Post'
     let floatingButton = document.createElement('button')
@@ -141,7 +174,16 @@ export const HomePage = () => {
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
 
-    document.body.appendChild(postsContainer);
+    // Add event listener to the floating create post button
+    createPostTop.addEventListener('click', () => {
+        postForm.classList.remove('hidden');
+        overlay.classList.add('active');
+    });
+
+    floatingButton.addEventListener('click', () => {
+        postForm.classList.remove('hidden');
+        overlay.classList.add('active');
+    });
 
     // online status indicator
     let onlineStatus = document.createElement('div')
