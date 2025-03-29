@@ -11,6 +11,7 @@ import (
 func CreateSession(id int) string {
 	mu.Lock()
 	defer mu.Unlock()
+
 	sessionID := uuid.Must(uuid.NewV4()).String()
 	SessionStore[sessionID] = id
 	log.Println(SessionStore)
@@ -20,7 +21,7 @@ func CreateSession(id int) string {
 func getSessionID(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		return "", err
+		return "", http.ErrNoCookie
 	}
 	return cookie.Value, nil
 }
@@ -28,7 +29,8 @@ func getSessionID(r *http.Request) (string, error) {
 func EnableCors(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:9000")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 }
 
 func isValidEmail(email string) bool {
@@ -38,12 +40,16 @@ func isValidEmail(email string) bool {
 }
 
 func DeleteSession(userId int) {
+	mu.Lock()
+	defer mu.Unlock()
+
 	if len(SessionStore) == 0 {
 		return
 	}
-	for k := range SessionStore {
-		if SessionStore[k] == userId {
+	for k, v := range SessionStore {
+		if v == userId {
 			delete(SessionStore, k)
+			break
 		}
 	}
 }
