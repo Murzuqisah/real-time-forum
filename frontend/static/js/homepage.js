@@ -400,8 +400,8 @@ export function renderPosts(data, postsContainer) {
 function chat(profile) {
     let chatListContainer = document.createElement('div')
     chatListContainer.classList.add('chat-list-container')
-    chatListContainer.id = 'chatListContainer'
-    let header = document.createElement('div')
+    chatListContainer.id = 'chatListContainer';
+    let header = document.createElement('div');
     header.classList.add('header')
     header.textContent = "Chats"
     let chatlist = document.createElement('div')
@@ -471,6 +471,7 @@ function chat(profile) {
     input.placeholder = 'Type a message...'
     let send = document.createElement('button')
     send.id = 'send'
+    send.innerHTML = '<img src="/frontend/static/assets/paper-plane-regular.svg" alt="Send" style="height: 16px; filter: invert(100%)">';
     chatinput.appendChild(input)
     chatinput.appendChild(send)
 
@@ -491,4 +492,17 @@ export function goBack() {
 function goBackToChats() {
     document.getElementById("userListContainer").style.display = "none";
     document.getElementById("chatListContainer").style.display = "flex";
+}
+
+// Helper to format time
+function formatTime(timestamp) {
+    if (!timestamp) return 'Unknown';
+    
+    try {
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+    } catch (e) {
+        console.error('Error formatting time:', e);
+        return timestamp;
+    }
 }
