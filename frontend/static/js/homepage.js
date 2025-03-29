@@ -193,8 +193,42 @@ export const HomePage = () => {
     status.classList.add('status')
     onlineStatus.appendChild(status)
 
+    // container for online users
+    let onlineUsersList = document.createElement('div')
+    onlineUsersList.classList.add('online-users-list')
+    onlineUsersList.id = 'onlineUsersList'
+    onlineStatus.appendChild(onlineUsersList);
+
     let profile = document.createElement('aside');
     profile.classList.add('profile');
+
+    let profileSection = document.createElement('div');
+    profileSection.classList.add('profile-section');
+
+    let profileHeader = document.createElement('div');
+    profileHeader.classList.add('profile-header');
+
+    let profileImg = document.createElement('img');
+    profileImg.src = '/frontend/static/assets/user-solid.svg';
+    profileImg.alt = 'User Icon';
+    profileHeader.appendChild(profileImg);
+
+    let profileName = document.createElement('h3');
+    profileName.id = 'profileName';
+    profileName.textContent = 'Username';
+
+    let profileEmail = document.createElement('p');
+    profileEmail.id = 'profileEmail';
+    profileEmail.textContent = 'email';
+
+    profileSection.appendChild(profileHeader);
+    profileSection.appendChild(profileImg);
+    profileSection.appendChild(profileName);
+    profileSection.appendChild(profileEmail);
+
+    profile.appendChild(profileSection);
+    profile.appendChild(onlineStatus);
+
     profile = chat(profile)
     document.body.appendChild(profile);
 };
