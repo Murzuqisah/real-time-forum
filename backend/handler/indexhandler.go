@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
@@ -25,6 +26,7 @@ func HandleWebsocket(ws *websocket.Conn) {
 // store online users
 var (
 	onlineUsers = make(map[string]*websocket.Conn)
+	msgMutex    sync.Mutex
 )
 
 func HandleConnection(conn *websocket.Conn) {
@@ -132,22 +134,18 @@ func HandleConnection(conn *websocket.Conn) {
 					"users": users,
 				})
 			}
-		case "messaging":
-			sender, err := repositories.GetUserByName(msg["sender"])
+		case "createpost":
+			user, err := repositories.GetUserBySession(msg["session"])
 			if err != nil {
 				sendJSON(conn, map[string]any{
 					"type":    "error",
-					"message": "unexpected error occured",
+					"message": "invalid session",
 				})
+				break
 			}
-			receiver, err := repositories.GetUserByName(msg["receiver"])
-			if err != nil {
-				sendJSON(conn, map[string]any{
-					"type":    "error",
-					"message": "unexpected error occured",
-				})
-			}
-			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "sent_on"}, receiver.ID, sender.ID, html.EscapeString(msg["message"]), time.Now())
+
+			postBody := html.EscapeString(msg["body"])
+			_, err = repositories.InsertRecord(util.DB, "tblPosts", []string{"user_id", "body", "created_on"}, user.ID, postBody, time.Now())
 			if err != nil {
 				log.Println(err)
 				sendJSON(conn, map[string]any{
@@ -155,11 +153,75 @@ func HandleConnection(conn *websocket.Conn) {
 					"message": "unexpected error occured",
 				})
 			}
+
+			sendJSON(conn, map[string]any{
+				"type":   "createpost",
+				"status": "ok",
+				"post":   postBody,
+			})
+
+			// update users about the new post
+			for _, userConn := range onlineUsers {
+				if userConn != nil {
+					posts, _ := repositories.GetPosts(util.DB)
+					posts, _ = PostDetails(posts)
+					sendJSON(userConn, map[string]any{
+						"type":  "posts",
+						"posts": posts,
+					})
+				}
+			}
+
+		case "messaging":
+			msgMutex.Lock()
+
+			sender, err := repositories.GetUserByName(msg["sender"])
+			if err != nil {
+				msgMutex.Unlock()
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+				break
+			}
+
+			receiver, err := repositories.GetUserByName(msg["receiver"])
+			if err != nil {
+				msgMutex.Unlock()
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+				break
+			}
+
+			messageBody := html.EscapeString(msg["message"])
+			_, err = repositories.InsertRecord(util.DB, " tblMessages", []string{"receiver_id", "sender_id", "body", "sent_on"}, receiver.ID, sender.ID, messageBody, time.Now())
+			if err != nil {
+				log.Println(err)
+				sendJSON(conn, map[string]any{
+					"type":    "error",
+					"message": "unexpected error occured",
+				})
+				break
+			}
+
 			sendJSON(conn, map[string]any{
 				"type":    "messaging",
 				"status":  "ok",
-				"message": html.EscapeString(msg["message"]),
+				"message": messageBody,
 			})
+
+			// If receiver is online, send them the message
+			if receiverConn, ok := onlineUsers[receiver.Username]; ok && receiverConn != nil {
+				sendJSON(receiverConn, map[string]any{
+					"type":    "newMessage",
+					"message": messageBody,
+					"sender":  sender.Username,
+				})
+			}
+
+			msgMutex.Unlock()
 		case "chats":
 			id, err := strconv.Atoi(msg["sender"])
 			if err != nil {
