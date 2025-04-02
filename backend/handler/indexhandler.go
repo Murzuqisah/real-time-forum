@@ -12,11 +12,6 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-type Response struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-}
-
 func HandleWebsocket(ws *websocket.Conn) {
 	defer ws.Close()
 	HandleConnection(ws)
