@@ -12,15 +12,12 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+var onlineUsers = make(map[string]*websocket.Conn)
+
 func HandleWebsocket(ws *websocket.Conn) {
 	defer ws.Close()
 	HandleConnection(ws)
 }
-
-// store online users
-var (
-	onlineUsers = make(map[string]*websocket.Conn)
-)
 
 func HandleConnection(conn *websocket.Conn) {
 	for {
@@ -45,6 +42,56 @@ func HandleConnection(conn *websocket.Conn) {
 		}
 
 		log.Printf("Received Message: %v", msg)
+
+		_, ok := msg["username"]
+
+		_, check := onlineUsers[msg["username"]]
+
+		if ok && !check {
+			mu.Lock()
+			onlineUsers[msg["username"]] = conn
+			mu.Unlock()
+
+			// Notify all users about the updated online users list
+			go func() {
+				for _, userConn := range onlineUsers {
+					if userConn != nil {
+						sendJSON(userConn, map[string]any{
+							"type":         "onlineusers",
+							"online_users": onlineUsers,
+						})
+					}
+				}
+			}()
+
+			// Monitor the connection and remove the user when it closes
+			go func(username string, userConn *websocket.Conn) {
+				defer func() {
+					mu.Lock()
+					delete(onlineUsers, username)
+					mu.Unlock()
+
+					// Notify all users about the updated online users list
+					for _, userConn := range onlineUsers {
+						if userConn != nil {
+							sendJSON(userConn, map[string]any{
+								"type":        "onlineUsers",
+								"onlineUsers": onlineUsers,
+							})
+						}
+					}
+				}()
+
+				// Wait for the connection to close
+				buf := make([]byte, 1)
+				for {
+					if _, err := userConn.Read(buf); err != nil {
+						break
+					}
+				}
+			}(msg["username"], conn)
+
+		}
 
 		switch msg["type"] {
 		case "getposts":
@@ -210,49 +257,6 @@ func HandleConnection(conn *websocket.Conn) {
 					"user":         receiver,
 				})
 			}
-		case "onlineusers":
-			mu.Lock()
-			onlineUsers[msg["username"]] = conn
-			mu.Unlock()
-
-			// Notify all users about the updated online users list
-			go func() {
-				for _, userConn := range onlineUsers {
-					if userConn != nil {
-						sendJSON(userConn, map[string]any{
-							"type":         "onlineusers",
-							"online_users": onlineUsers,
-						})
-					}
-				}
-			}()
-
-			// Monitor the connection and remove the user when it closes
-			go func(username string, userConn *websocket.Conn) {
-				defer func() {
-					mu.Lock()
-					delete(onlineUsers, username)
-					mu.Unlock()
-
-					// Notify all users about the updated online users list
-					for _, userConn := range onlineUsers {
-						if userConn != nil {
-							sendJSON(userConn, map[string]any{
-								"type":        "onlineUsers",
-								"onlineUsers": onlineUsers,
-							})
-						}
-					}
-				}()
-
-				// Wait for the connection to close
-				buf := make([]byte, 1)
-				for {
-					if _, err := userConn.Read(buf); err != nil {
-						break
-					}
-				}
-			}(msg["username"], conn)
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
