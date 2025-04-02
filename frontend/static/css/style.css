@@ -738,6 +738,7 @@ body.dark-theme .profile p {
   background: var(--neutral-color);
   color: white;
   align-self: flex-end;
+  justify-items: flex-end;
 }
 
 .session-status {
