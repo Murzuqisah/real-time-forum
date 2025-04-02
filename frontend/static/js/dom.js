@@ -34,7 +34,7 @@ export function RealTime(User, session) {
     if (likebutton) {
         likebutton.addEventListener('click', (e) => {
             e.preventDefault()
-            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like' }))
+            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like', username: User.username }))
         })
     }
 
@@ -43,14 +43,14 @@ export function RealTime(User, session) {
 
         socket.addEventListener('open', () => {
             console.log("WebSocket connected.");
-            socket.send(JSON.stringify({ type: 'getposts' }));
-            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString() }))
+            socket.send(JSON.stringify({ type: 'getposts', username: User.id.toString() }));
+            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
         });
 
         if (!User) {
             waitForSocket(() => {
                 let session = sessionStorage.getItem('session');
-                socket.send(JSON.stringify({ type: 'getuser', session: session }));
+                socket.send(JSON.stringify({ type: 'getuser', session: session, username: User.username}));
             })
         }
 
@@ -79,8 +79,8 @@ export function RealTime(User, session) {
                     console.log('Got user data');
                     User = data.user;
                     console.log(data.user)
-                    socket.send(JSON.stringify({ type: 'getposts' }));
-                    socket.send(JSON.stringify({ type: "chats", sender: User.id.toString() }))
+                    socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
+                    socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
                     break;
                 case 'reaction':
                     console.log('adding reaction')
@@ -156,7 +156,7 @@ export function RealTime(User, session) {
                             chatlist.appendChild(chat)
                             chat.addEventListener('click', (e) => {
                                 e.preventDefault()
-                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString() }))
+                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString(), username: User.username}))
                             })
                         })
 
@@ -216,7 +216,6 @@ export function RealTime(User, session) {
                     }
                     break;
                 case 'onlineusers':
-                    document.getElementById("userListContainer").style.display = "none";
                     let online = document.getElementById("onlineStatus")
                     online.innerHTML = ''
                     data.users.forEach(user => {
@@ -252,7 +251,7 @@ export function RealTime(User, session) {
         if (newChat) {
             newChat.addEventListener('click', (e) => {
                 e.preventDefault()
-                socket.send(JSON.stringify({ type: 'getusers' }))
+                socket.send(JSON.stringify({ type: 'getusers', username: User.username }))
             })
         }
 
@@ -261,7 +260,7 @@ export function RealTime(User, session) {
             e.preventDefault()
             let msg = document.getElementById('messageInput').value
             let user = document.getElementById('name')
-            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: user.textContent, message: msg }))
+            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: user.textContent, message: msg, username: User.username }))
         })
     }
 
