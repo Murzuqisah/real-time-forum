@@ -80,6 +80,7 @@ export function RealTime(User, session) {
                     User = data.user;
                     console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts' }));
+                    socket.send(JSON.stringify({ type: "chats", sender: User.id.toString() }))
                     break;
                 case 'reaction':
                     console.log('adding reaction')
