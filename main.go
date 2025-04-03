@@ -36,7 +36,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Printf("Server started at ws://localhost%s\n", port)
+	log.Printf("Server started at http://localhost%s\n", port)
 	if err = server.ListenAndServe(); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
