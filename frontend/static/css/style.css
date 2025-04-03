@@ -543,17 +543,6 @@ body.dark-theme .comment-actions span {
   color: var(--utility-color);
 }
 
-.profile {
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  height: calc(80vh - 80px);
-  display: grid;
-  align-items: center;
-  text-align: center;
-  transition: var(--transition);
-}
-
 body.dark-theme .profile {
   background-color: var(--dark-neutral-color);
   border-left: 1px solid var(--dark-border-color);
@@ -567,21 +556,6 @@ body.dark-theme .profile {
 
 body.dark-theme .profile h2 {
   color: var(--dark-text-color);
-}
-
-.profile img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 auto 1rem;
-  border: 2px solid var(--primary-color);
-}
-
-.profile p {
-  color: #333;
-  line-height: 1.5;
-  font-weight: 500;
 }
 
 body.dark-theme .profile p {
@@ -622,6 +596,18 @@ body.dark-theme .profile p {
   padding: 1rem;
   background-color: #f9f9f9;
   transition: var(--transition);
+  flex-grow: 1;
+  overflow: auto;
+}
+
+.chat-container {
+  display: none; /* Initially hidden */
+}
+
+.chat-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .header {
