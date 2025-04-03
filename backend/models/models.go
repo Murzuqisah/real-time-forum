@@ -55,5 +55,5 @@ type Message struct {
 	ReceiverId int    `json:"receiver_id"`
 	SenderId   int    `json:"sender_id"`
 	Body       string `json:"body"`
-	SentOn     string `json:"sent_on"`
+	SentOn     time.Time `json:"sent_on"`
 }
