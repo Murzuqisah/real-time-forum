@@ -1,4 +1,4 @@
-import { HomePage, renderPosts } from './homepage.js';
+import { goBackToChats, HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
 import { goBack } from './homepage.js';
 
@@ -50,7 +50,7 @@ export function RealTime(User, session) {
         if (!User) {
             waitForSocket(() => {
                 let session = sessionStorage.getItem('session');
-                socket.send(JSON.stringify({ type: 'getuser', session: session, username: User.username}));
+                socket.send(JSON.stringify({ type: 'getuser', session: session, username: User.username }));
             })
         }
 
@@ -93,6 +93,19 @@ export function RealTime(User, session) {
                     document.getElementById("chatListContainer").style.display = "none";
                     let userlist = document.getElementById("userListContainer")
                     userlist.innerHTML = ""
+                    let hd = document.createElement('div');
+                    hd.classList.add('header');
+                    hd.textContent = "Users"
+                    let bcbutton = document.createElement('button')
+                    bcbutton.classList.add('back-button')
+                    bcbutton.textContent = 'Back'
+                    bcbutton.addEventListener('click', (e) => {
+                        goBackToChats()
+                    })
+                    hd.appendChild(bcbutton)
+                    userlist.appendChild(hd)
+                    let chatlist = document.createElement('div')
+                    chatlist.classList.add('chat-list')
                     data.users.forEach(elem => {
                         if (elem.username !== User.username) {
                             let item = document.createElement('div')
@@ -129,8 +142,10 @@ export function RealTime(User, session) {
                                 let chatContainer = document.getElementById('chatContainer');
                                 chatContainer.style.display = 'flex';
                             });
+                            chatlist.appendChild(item)
                         }
                     });
+                    userlist.appendChild(chatlist)
                     userlist.style.display = 'flex'
                     break
                 case 'messaging':
@@ -156,7 +171,7 @@ export function RealTime(User, session) {
                             chatlist.appendChild(chat)
                             chat.addEventListener('click', (e) => {
                                 e.preventDefault()
-                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString(), username: User.username}))
+                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString(), username: User.username }))
                             })
                         })
 
