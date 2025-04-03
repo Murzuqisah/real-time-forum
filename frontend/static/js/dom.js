@@ -109,8 +109,19 @@ export function RealTime(User, session) {
                     data.users.forEach(elem => {
                         if (elem.username !== User.username) {
                             let item = document.createElement('div')
-                            item.classList.add('user-item')
+                            item.classList.add('chat')
                             item.textContent = elem.username
+                            if (status(data.online, elem.username)) {
+                                let statusIndicator = document.createElement('p');
+                                statusIndicator.classList.add('status'); 
+                                statusIndicator.textContent = "Online";
+                                item.appendChild(statusIndicator); 
+                            } else {
+                                let statusIndicator = document.createElement('p');
+                                statusIndicator.classList.add('status'); 
+                                statusIndicator.textContent = "Offline";
+                                item.appendChild(statusIndicator); 
+                            }
                             item.addEventListener('click', (e) => {
                                 e.preventDefault();
                                 document.getElementById("userListContainer").style.display = 'none';
@@ -168,6 +179,17 @@ export function RealTime(User, session) {
                             let chat = document.createElement('div')
                             chat.classList.add('chat')
                             chat.textContent = elem.username
+                            if (status(data.online, elem.username)) {
+                                let statusIndicator = document.createElement('p');
+                                statusIndicator.classList.add('status'); 
+                                statusIndicator.textContent = "Online";
+                                chat.appendChild(statusIndicator); 
+                            } else {
+                                let statusIndicator = document.createElement('p');
+                                statusIndicator.classList.add('status'); 
+                                statusIndicator.textContent = "Offline";
+                                chat.appendChild(statusIndicator); 
+                            }
                             chatlist.appendChild(chat)
                             chat.addEventListener('click', (e) => {
                                 e.preventDefault()
@@ -231,7 +253,7 @@ export function RealTime(User, session) {
                     }
                     break;
                 case 'onlineusers':
-                    let online = document.getElementById("onlineStatus")
+                    let online = document.getElementById("chat status")
                     online.innerHTML = ''
                     data.users.forEach(user => {
                         let onlineUser = document.createElement('div')
@@ -327,4 +349,15 @@ async function checksession(session) {
                 SignInPage()
             }
         })
+}
+
+function status(users, user) {
+    console.log("userssssssssssss")
+    console.log(users)
+    for (let i = 0 ; i < users.length; i++) {
+        if (users[i] === user) {
+            return true
+        }
+    }
+    return false
 }
