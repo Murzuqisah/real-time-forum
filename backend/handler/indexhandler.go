@@ -171,6 +171,7 @@ func HandleConnection(conn *websocket.Conn) {
 				sendJSON(conn, map[string]any{
 					"type":  "getusers",
 					"users": users,
+					"online": online(),
 				})
 			}
 		case "messaging":
@@ -219,6 +220,7 @@ func HandleConnection(conn *websocket.Conn) {
 				sendJSON(conn, map[string]any{
 					"type":  "chats",
 					"users": users,
+					"online": online(),
 				})
 			}
 		case "conversation":
@@ -277,4 +279,11 @@ func sendJSON(conn *websocket.Conn, data any) {
 	if err != nil {
 		log.Println("Error sending message:", err)
 	}
+}
+
+func online() (users []string) {
+	for key := range onlineUsers {
+		users = append(users, key)
+	}
+	return
 }
