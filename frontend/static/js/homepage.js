@@ -393,7 +393,7 @@ export function goBack() {
 }
 
 
-function goBackToChats() {
+export function goBackToChats() {
     document.getElementById("userListContainer").style.display = "none";
     document.getElementById("chatListContainer").style.display = "flex";
 }
