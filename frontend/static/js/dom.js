@@ -1,6 +1,5 @@
-import { goBackToChats, HomePage, renderPosts } from './homepage.js';
+import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
-import { goBack } from './homepage.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
@@ -30,13 +29,13 @@ export function RealTime(User, session) {
     HomePage();
     let socket;
 
-    let likebutton = document.querySelector('.like-button')
-    if (likebutton) {
-        likebutton.addEventListener('click', (e) => {
-            e.preventDefault()
-            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like', username: User.username }))
-        })
-    }
+    // let likebutton = document.querySelector('.like-button')
+    // if (likebutton) {
+    //     likebutton.addEventListener('click', (e) => {
+    //         e.preventDefault()
+    //         socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like', username: User.username }))
+    //     })
+    // }
 
     function connectWebSocket() {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
@@ -44,7 +43,9 @@ export function RealTime(User, session) {
         socket.addEventListener('open', () => {
             console.log("WebSocket connected.");
             socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
-            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
+            setTimeout(() => {
+                socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
+            }, 50);
         });
 
         if (!User) {
@@ -69,6 +70,8 @@ export function RealTime(User, session) {
                     break;
                 case 'error':
                     if (data.message === 'invalid session') {
+                        sessionStorage.setItem('pageState', '')
+                        sessionStorage.setItem('session', '')
                         SignInPage();
                         alert(data.message);
                     } else {
@@ -79,8 +82,10 @@ export function RealTime(User, session) {
                     console.log('Got user data');
                     User = data.user;
                     console.log(data.user)
-                    socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
                     socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
+                    setTimeout(() => {
+                        socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
+                    }, 50);
                     break;
                 case 'reaction':
                     console.log('adding reaction')
@@ -100,7 +105,8 @@ export function RealTime(User, session) {
                     bcbutton.classList.add('back-button')
                     bcbutton.textContent = 'Back'
                     bcbutton.addEventListener('click', (e) => {
-                        goBackToChats()
+                        e.preventDefault()
+                        socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
                     })
                     hd.appendChild(bcbutton)
                     userlist.appendChild(hd)
@@ -145,6 +151,9 @@ export function RealTime(User, session) {
                     }
                     break
                 case "chats":
+                    document.getElementById('userListContainer').style.display = 'none'
+                    document.getElementById("chatContainer").style.display = "none";
+                    document.getElementById("chatListContainer").style.display = "flex";
                     if (data.users.length > 0) {
                         console.log(data.users)
                         let chatlist = document.getElementById('chatList')
@@ -190,7 +199,7 @@ export function RealTime(User, session) {
                         bcbutton.classList.add('back-button')
                         bcbutton.textContent = 'Back'
                         bcbutton.addEventListener('click', (e) => {
-                            goBack()
+                            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
                         })
                         let span = document.createElement('span')
                         span.id = 'chatHeader'
@@ -238,7 +247,7 @@ export function RealTime(User, session) {
                         bcbutton.classList.add('back-button')
                         bcbutton.textContent = 'Back'
                         bcbutton.addEventListener('click', (e) => {
-                            goBack()
+                            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
                         })
                         let span = document.createElement('span')
                         span.id = 'chatHeader'
@@ -298,7 +307,7 @@ export function RealTime(User, session) {
         if (newChat) {
             newChat.addEventListener('click', (e) => {
                 e.preventDefault()
-                socket.send(JSON.stringify({ type: 'getusers'}))
+                socket.send(JSON.stringify({ type: 'getusers' }))
             })
         }
 
