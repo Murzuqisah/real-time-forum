@@ -51,9 +51,9 @@ type Reaction struct {
 }
 
 type Message struct {
-	ID         int    `json:"id"`
-	ReceiverId int    `json:"receiver_id"`
-	SenderId   int    `json:"sender_id"`
-	Body       string `json:"body"`
+	ID         int       `json:"id"`
+	ReceiverId int       `json:"receiver_id"`
+	SenderId   int       `json:"sender_id"`
+	Body       string    `json:"body"`
 	SentOn     time.Time `json:"sent_on"`
 }
