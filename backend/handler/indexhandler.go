@@ -44,17 +44,7 @@ func HandleConnection(conn *websocket.Conn) {
 
 		_, ok := msg["username"]
 
-		val, check := onlineUsers[msg["username"]]
-
-		if check {
-			if val != conn {
-				mu.Lock()
-				onlineUsers[msg["username"]] = conn
-				mu.Unlock()
-			}
-		}
-
-		if ok && !check {
+		if ok {
 			mu.Lock()
 			onlineUsers[msg["username"]] = conn
 			mu.Unlock()
@@ -65,7 +55,7 @@ func HandleConnection(conn *websocket.Conn) {
 					if userConn != nil {
 						sendJSON(userConn, map[string]any{
 							"type":   "onlineusers",
-							"online": onlineUsers,
+							"online": online(),
 						})
 					}
 				}
@@ -82,8 +72,8 @@ func HandleConnection(conn *websocket.Conn) {
 					for _, userConn := range onlineUsers {
 						if userConn != nil {
 							sendJSON(userConn, map[string]any{
-								"type":   "onlineUsers",
-								"online": onlineUsers,
+								"type":   "onlineusers",
+								"online": online(),
 							})
 						}
 					}
