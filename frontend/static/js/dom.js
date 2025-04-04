@@ -125,34 +125,7 @@ export function RealTime(User, session) {
                             }
                             item.addEventListener('click', (e) => {
                                 e.preventDefault();
-                                document.getElementById("userListContainer").style.display = 'none';
-                                let chatheader = document.getElementById(`chatHeader`)
-                                chatheader.innerHTML = ""
-                                let bcbutton = document.createElement('button')
-                                bcbutton.classList.add('back-button')
-                                bcbutton.textContent = 'Back'
-                                bcbutton.addEventListener('click', (e) => {
-                                    goBack()
-                                })
-                                let span = document.createElement('span')
-                                span.id = 'chatHeader'
-                                chatheader.appendChild(bcbutton)
-                                chatheader.appendChild(span)
-                                let name = document.createElement('div')
-                                name.textContent = elem.username
-                                name.style.color = 'white'
-                                name.style.display = 'flex'
-                                name.style.position = 'relative'
-                                name.style.alignItems = 'center'
-                                name.style.padding = '0 15px'
-                                name.style.marginRight = '150px'
-                                name.style.flexDirection = 'column'
-                                name.style.justifyContent = 'spacebetween'
-                                name.style.textAlign = 'center'
-                                name.style.whitespace = 'nowrap'
-                                chatheader.appendChild(name)
-                                let chatContainer = document.getElementById('chatContainer');
-                                chatContainer.style.display = 'flex';
+                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString(), username: User.username }))
                             });
                             chatlist.appendChild(item)
                         }
@@ -202,40 +175,42 @@ export function RealTime(User, session) {
                     }
                     break
                 case 'conversation':
-                    if (data.conversation.length > 0) {
+                    if (data.conversation) {
                         document.getElementById('chatListContainer').style.display = 'none'
+                        document.getElementById('userListContainer').style.display = 'none'
+
                         let chat = document.getElementById('chatContainer')
                         chat.style.display = 'flex'
 
                         let chatbox = document.getElementById('chatBox')
                         chatbox.innerHTML = ""
+                        let chatheader = document.getElementById(`chatHeader`)
+                        chatheader.innerHTML = ""
+                        let bcbutton = document.createElement('button')
+                        bcbutton.classList.add('back-button')
+                        bcbutton.textContent = 'Back'
+                        bcbutton.addEventListener('click', (e) => {
+                            goBack()
+                        })
+                        let span = document.createElement('span')
+                        span.id = 'chatHeader'
+                        chatheader.appendChild(bcbutton)
+                        chatheader.appendChild(span)
+                        let name = document.createElement('div')
+                        name.id = "name"
+                        name.textContent = data.user.username
+                        name.style.color = 'white'
+                        name.style.display = 'flex'
+                        name.style.position = 'relative'
+                        name.style.alignItems = 'center'
+                        name.style.padding = '0 15px'
+                        name.style.marginRight = '150px'
+                        name.style.flexDirection = 'column'
+                        name.style.justifyContent = 'spacebetween'
+                        name.style.textAlign = 'center'
+                        name.style.whitespace = 'nowrap'
+                        chatheader.appendChild(name)
                         data.conversation.forEach(elem => {
-                            let chatheader = document.getElementById(`chatHeader`)
-                            chatheader.innerHTML = ""
-                            let bcbutton = document.createElement('button')
-                            bcbutton.classList.add('back-button')
-                            bcbutton.textContent = 'Back'
-                            bcbutton.addEventListener('click', (e) => {
-                                goBack()
-                            })
-                            let span = document.createElement('span')
-                            span.id = 'chatHeader'
-                            chatheader.appendChild(bcbutton)
-                            chatheader.appendChild(span)
-                            let name = document.createElement('div')
-                            name.id = "name"
-                            name.textContent = data.user.username
-                            name.style.color = 'white'
-                            name.style.display = 'flex'
-                            name.style.position = 'relative'
-                            name.style.alignItems = 'center'
-                            name.style.padding = '0 15px'
-                            name.style.marginRight = '150px'
-                            name.style.flexDirection = 'column'
-                            name.style.justifyContent = 'spacebetween'
-                            name.style.textAlign = 'center'
-                            name.style.whitespace = 'nowrap'
-                            chatheader.appendChild(name)
                             let chatContainer = document.getElementById('chatContainer');
                             chatContainer.style.display = 'flex';
                             if (elem.sender_id === User.id) {
@@ -252,6 +227,37 @@ export function RealTime(User, session) {
 
                         })
                         break
+                    } else {
+                        document.getElementById('chatListContainer').style.display = 'none';
+                        document.getElementById('userListContainer').style.display = 'none';
+                        let chat = document.getElementById('chatContainer');
+                        chat.style.display = 'flex';
+                        let chatheader = document.getElementById(`chatHeader`)
+                        chatheader.innerHTML = ""
+                        let bcbutton = document.createElement('button')
+                        bcbutton.classList.add('back-button')
+                        bcbutton.textContent = 'Back'
+                        bcbutton.addEventListener('click', (e) => {
+                            goBack()
+                        })
+                        let span = document.createElement('span')
+                        span.id = 'chatHeader'
+                        chatheader.appendChild(bcbutton)
+                        chatheader.appendChild(span)
+                        let name = document.createElement('div')
+                        name.id = "name"
+                        name.textContent = data.user.username
+                        name.style.color = 'white'
+                        name.style.display = 'flex'
+                        name.style.position = 'relative'
+                        name.style.alignItems = 'center'
+                        name.style.padding = '0 15px'
+                        name.style.marginRight = '150px'
+                        name.style.flexDirection = 'column'
+                        name.style.justifyContent = 'spacebetween'
+                        name.style.textAlign = 'center'
+                        name.style.whitespace = 'nowrap'
+                        chatheader.appendChild(name)
                     }
                     break;
                 case 'onlineusers':
@@ -292,7 +298,7 @@ export function RealTime(User, session) {
         if (newChat) {
             newChat.addEventListener('click', (e) => {
                 e.preventDefault()
-                socket.send(JSON.stringify({ type: 'getusers', username: User.username }))
+                socket.send(JSON.stringify({ type: 'getusers'}))
             })
         }
 
