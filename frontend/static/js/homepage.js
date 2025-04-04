@@ -386,14 +386,3 @@ function chat(profile) {
 
     return profile
 }
-
-export function goBack() {
-    document.getElementById("chatContainer").style.display = "none";
-    document.getElementById("chatListContainer").style.display = "flex";
-}
-
-
-export function goBackToChats() {
-    document.getElementById("userListContainer").style.display = "none";
-    document.getElementById("chatListContainer").style.display = "flex";
-}
