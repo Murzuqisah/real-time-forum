@@ -43,7 +43,7 @@ export function RealTime(User, session) {
 
         socket.addEventListener('open', () => {
             console.log("WebSocket connected.");
-            socket.send(JSON.stringify({ type: 'getposts', username: User.id.toString() }));
+            socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
             socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
         });
 
@@ -111,16 +111,17 @@ export function RealTime(User, session) {
                             let item = document.createElement('div')
                             item.classList.add('chat')
                             item.textContent = elem.username
+                            item.dataset.username = elem.username
                             if (status(data.online, elem.username)) {
                                 let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status'); 
+                                statusIndicator.classList.add('status');
                                 statusIndicator.textContent = "Online";
-                                item.appendChild(statusIndicator); 
+                                item.appendChild(statusIndicator);
                             } else {
                                 let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status'); 
+                                statusIndicator.classList.add('status');
                                 statusIndicator.textContent = "Offline";
-                                item.appendChild(statusIndicator); 
+                                item.appendChild(statusIndicator);
                             }
                             item.addEventListener('click', (e) => {
                                 e.preventDefault();
@@ -179,16 +180,17 @@ export function RealTime(User, session) {
                             let chat = document.createElement('div')
                             chat.classList.add('chat')
                             chat.textContent = elem.username
+                            chat.dataset.username = elem.username
                             if (status(data.online, elem.username)) {
                                 let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status'); 
+                                statusIndicator.classList.add('status');
                                 statusIndicator.textContent = "Online";
-                                chat.appendChild(statusIndicator); 
+                                chat.appendChild(statusIndicator);
                             } else {
                                 let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status'); 
+                                statusIndicator.classList.add('status');
                                 statusIndicator.textContent = "Offline";
-                                chat.appendChild(statusIndicator); 
+                                chat.appendChild(statusIndicator);
                             }
                             chatlist.appendChild(chat)
                             chat.addEventListener('click', (e) => {
@@ -253,22 +255,24 @@ export function RealTime(User, session) {
                     }
                     break;
                 case 'onlineusers':
-                    let online = document.getElementById("chat status")
-                    online.innerHTML = ''
-                    data.users.forEach(user => {
-                        let onlineUser = document.createElement('div')
-                        onlineUser.classList.add('user-item')
-
-                        let usernameSpan = document.createElement('span')
-                        usernameSpan.textContent = user.username
-                        let statusDot = document.createElement('span')
-                        statusDot.classList.add('status-dot')
-                        statusDot.style.backgroundColor = user.online ? 'green' : 'red'
-                        onlineUser.appendChild(usernameSpan)
-                        onlineUser.appendChild(statusDot)
-                        onlineUser.textContent = user.username
-                        online.appendChild(onlineUser)
-                    })
+                    let chats = document.querySelectorAll('.chat')
+                    chats.forEach(chat => {
+                        let username = chat.dataset.username; // <- use this
+                        if (status(data.online, username)) {
+                            chat.innerHTML = username;
+                            let statusIndicator = document.createElement('p');
+                            statusIndicator.classList.add('status');
+                            statusIndicator.textContent = "Online";
+                            chat.appendChild(statusIndicator);
+                        } else {
+                            chat.innerHTML = username;
+                            let statusIndicator = document.createElement('p');
+                            statusIndicator.classList.add('status');
+                            statusIndicator.textContent = "Offline";
+                            chat.appendChild(statusIndicator);
+                        }
+                    });
+                    break;
                 default:
                     console.log("Unknown message type:", data.type);
             }
@@ -354,7 +358,7 @@ async function checksession(session) {
 function status(users, user) {
     console.log("userssssssssssss")
     console.log(users)
-    for (let i = 0 ; i < users.length; i++) {
+    for (let i = 0; i < users.length; i++) {
         if (users[i] === user) {
             return true
         }
