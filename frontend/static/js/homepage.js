@@ -132,11 +132,29 @@ export const HomePage = () => {
     let floatingButton = document.createElement('button')
     floatingButton.type = 'submit'
     floatingButton.classList.add('floating-create-post-btn')
+    floatingButton.ariaLabel = 'Create a new post'
     let img = document.createElement('img')
     img.classList.add('web-icon')
     img.src = '/frontend/static/assets/plus-solid.svg'
     img.alt = 'create-post'
     floatingButton.appendChild(img)
+
+    floatingButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        const createPostForm = document.querySelector('.create-post');
+        if (createPostForm.classList.contains('hidden')) {
+            createPostForm.classList.remove('hidden');
+            createPostForm.style.opacity = 1;
+            createPostForm.style.visibility = 'visible';
+          } else {
+            createPostForm.style.opacity = 0;
+            createPostForm.style.visibility = 'hidden';
+            setTimeout(() => createPostForm.classList.add('hidden'), 500); // Delay hiding with a timeout to allow opacity transition
+          }
+        console.log('clicked post add')
+    });
+
+
     floating.appendChild(createPost)
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
@@ -335,15 +353,15 @@ function chat(profile) {
     back.appendChild(button)
     back.textContent = 'Select User'
 
-   let list = document.createElement('div')
-   list.classList.add('user-list')
-   list.id = 'userList'
+    let list = document.createElement('div')
+    list.classList.add('user-list')
+    list.id = 'userList'
 
-   userlist.appendChild(back)
-   userlist.appendChild(list)
-   profile.appendChild(userlist)
+    userlist.appendChild(back)
+    userlist.appendChild(list)
+    profile.appendChild(userlist)
 
-  
+
     let chatcontainer = document.createElement('div')
     chatcontainer.classList.add('chat-container')
     chatcontainer.id = 'chatContainer'
