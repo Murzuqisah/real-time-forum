@@ -20,7 +20,7 @@ type LoginData struct {
 
 var (
 	SessionStore = make(map[string]int)
-	mu           sync.Mutex
+	Mu          sync.Mutex
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
