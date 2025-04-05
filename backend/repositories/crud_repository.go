@@ -172,15 +172,15 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 		var userid int
 		if err := rows.Scan(&userid); err != nil {
 			log.Println("Row Scan Error:", err)
-			continue 
+			continue
 		}
 
-		if !check[userid] { 
+		if !check[userid] {
 			check[userid] = true
 			user, err := GetUserBYId(userid)
 			if err != nil {
 				log.Println("GetUserBYId Error for ID", userid, ":", err)
-				continue 
+				continue
 			}
 			users = append(users, user)
 		}
@@ -193,7 +193,6 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 
 	return users, nil
 }
-
 
 func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 	var messages []models.Message
