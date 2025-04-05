@@ -9,8 +9,8 @@ import (
 )
 
 func CreateSession(id int) string {
-	mu.Lock()
-	defer mu.Unlock()
+	Mu.Lock()
+	defer Mu.Unlock()
 	sessionID := uuid.Must(uuid.NewV4()).String()
 	SessionStore[sessionID] = id
 	log.Println(SessionStore)
