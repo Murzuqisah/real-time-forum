@@ -2,23 +2,22 @@ import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    let previousState = sessionStorage.getItem('pageState');
+    const previousState = sessionStorage.getItem('pageState');
     if (previousState === 'home') {
-        sessionStorage.setItem('pageState', '')
-        let session = sessionStorage.getItem('session')
-        checksession(session)
+        sessionStorage.setItem('pageState', '');
+        const session = sessionStorage.getItem('session');
+        checksession(session);
     } else {
         SignInPage();
     }
 
-    let signin = document.getElementById('sign-in-btn');
-
-    if (signin) {
-        signin.addEventListener('click', (e) => {
+    const signinBtn = document.getElementById('sign-in-btn');
+    if (signinBtn) {
+        signinBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            let email = document.getElementById('email').value;
-            let password = document.getElementById('password').value;
-            login(email, password)
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            login(email, password);
         });
     }
 });
@@ -27,414 +26,407 @@ export function RealTime(User, session) {
     HomePage();
     let socket;
 
-    // let likebutton = document.querySelector('.like-button')
-    // if (likebutton) {
-    //     likebutton.addEventListener('click', (e) => {
-    //         e.preventDefault()
-    //         socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like', username: User.username }))
-    //     })
-    // }
-
-    function connectWebSocket() {
+    const connectWebSocket = () => {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
 
         socket.addEventListener('open', () => {
-            socket.send(JSON.stringify({ type: "register", username: User.username, sender: User.id.toString() }))
+            if (!User) {
+                waitForSocket(() => {
+                    const session = sessionStorage.getItem('session');
+                    socket.send(JSON.stringify({
+                        type: 'getuser',
+                        session,
+                        username: User.username
+                    }));
+                });
+            }
+            
+            socket.send(JSON.stringify({
+                type: "register",
+                username: User.username,
+                sender: User.id.toString()
+            }));
         });
 
-
-
-
-
-        if (!User) {
-            waitForSocket(() => {
-                let session = sessionStorage.getItem('session');
-                socket.send(JSON.stringify({ type: 'getuser', session: session, username: User.username }));
-            })
-        }
 
         socket.addEventListener('message', (event) => {
             const data = JSON.parse(event.data);
             console.log('Received message:', data);
-
-            switch (data.type) {
-                case "posts":
-                    let postContainer = document.querySelector('.posts');
-                    if (postContainer) {
-                        renderPosts(data, postContainer);
-                    }
-                    break;
-                case 'error':
-                    if (data.message === 'invalid session') {
-                        sessionStorage.setItem('pageState', '')
-                        sessionStorage.setItem('session', '')
-                        SignInPage();
-                        alert(data.message);
-                    } else {
-                        alert(data.message);
-                    }
-                    break;
-                case 'getuser':
-                    User = data.user;
-                    socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
-                    socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
-                    break;
-                case 'reaction':
-                    console.log('adding reaction')
-                    let reaction = document.getElementById(data.id)
-                    if (data.reaction === 'like') {
-                        reaction.likecount.textContent = reaction.likecount + data.reaction
-                    }
-                    break;
-                case 'getusers':
-                    document.getElementById("chatListContainer").style.display = "none";
-                    let userlist = document.getElementById("userListContainer")
-                    userlist.innerHTML = ""
-                    let hd = document.createElement('div');
-                    hd.classList.add('header');
-                    hd.textContent = "Users"
-                    let bcbutton = document.createElement('button')
-                    bcbutton.classList.add('back-button')
-                    bcbutton.textContent = 'Back'
-                    bcbutton.addEventListener('click', (e) => {
-                        e.preventDefault()
-                        socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
-                    })
-                    hd.appendChild(bcbutton)
-                    userlist.appendChild(hd)
-                    let chatlist = document.createElement('div')
-                    chatlist.classList.add('chat-list')
-                    data.users.forEach(elem => {
-                        if (elem.username !== User.username) {
-                            let item = document.createElement('div')
-                            item.classList.add('chat')
-                            item.textContent = elem.username
-                            item.dataset.username = elem.username
-                            if (status(data.online, elem.username)) {
-                                let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status');
-                                statusIndicator.textContent = "Online";
-                                item.appendChild(statusIndicator);
-                            } else {
-                                let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status');
-                                statusIndicator.textContent = "Offline";
-                                item.appendChild(statusIndicator);
-                            }
-                            item.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString(), username: User.username }))
-                            });
-                            chatlist.appendChild(item)
-                        }
-                    });
-                    userlist.appendChild(chatlist)
-                    userlist.style.display = 'flex'
-                    break
-                case 'messaging':
-                    if (data.status === "ok") {
-                        let messageElement = document.createElement("div");
-                        if (data.sender.username == User.username) {
-                            messageElement.classList.add("message", "sent");
-                            messageElement.innerText = data.message;
-                        } else {
-                            messageElement.classList.add("message", "received");
-                            messageElement.innerText = data.message;
-                        }
-                        document.getElementById("chatBox").appendChild(messageElement)
-                        let input = document.getElementById('messageInput')
-                        input.value = ""
-                        input.placeholder = 'Type a message...'
-                    }
-                    break
-                case "chats":
-                    document.getElementById('userListContainer').style.display = 'none'
-                    document.getElementById("chatContainer").style.display = "none";
-                    document.getElementById("chatListContainer").style.display = "flex";
-                    if (data.users.length > 0) {
-                        let chatlist = document.getElementById('chatList')
-                        chatlist.innerHTML = ""
-                        data.users.forEach(elem => {
-                            let chat = document.createElement('div')
-                            chat.classList.add('chat')
-                            chat.textContent = elem.username
-                            chat.dataset.username = elem.username
-                            if (status(data.online, elem.username)) {
-                                let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status');
-                                statusIndicator.textContent = "Online";
-                                chat.appendChild(statusIndicator);
-                            } else {
-                                let statusIndicator = document.createElement('p');
-                                statusIndicator.classList.add('status');
-                                statusIndicator.textContent = "Offline";
-                                chat.appendChild(statusIndicator);
-                            }
-                            chatlist.appendChild(chat)
-                            chat.addEventListener('click', (e) => {
-                                e.preventDefault()
-                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString(), username: User.username }))
-                            })
-                        })
-
-                    }
-                    break
-                case 'conversation':
-                    if (data.conversation) {
-                        document.getElementById('chatListContainer').style.display = 'none'
-                        document.getElementById('userListContainer').style.display = 'none'
-
-                        let chat = document.getElementById('chatContainer')
-                        chat.style.display = 'flex'
-
-                        let chatbox = document.getElementById('chatBox')
-                        chatbox.innerHTML = ""
-                        let chatheader = document.getElementById(`chatHeader`)
-                        chatheader.innerHTML = ""
-                        let bcbutton = document.createElement('button')
-                        bcbutton.classList.add('back-button')
-                        bcbutton.textContent = 'Back'
-                        bcbutton.addEventListener('click', (e) => {
-                            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
-                        })
-                        let span = document.createElement('span')
-                        span.id = 'chatHeader'
-                        chatheader.appendChild(bcbutton)
-                        chatheader.appendChild(span)
-                        let name = document.createElement('div')
-                        name.id = "name"
-                        name.textContent = data.user.username
-                        name.style.color = 'white'
-                        name.style.display = 'flex'
-                        name.style.position = 'relative'
-                        name.style.alignItems = 'center'
-                        name.style.padding = '0 15px'
-                        name.style.marginRight = '150px'
-                        name.style.flexDirection = 'column'
-                        name.style.justifyContent = 'spacebetween'
-                        name.style.textAlign = 'center'
-                        name.style.whitespace = 'nowrap'
-                        chatheader.appendChild(name)
-                        data.conversation.forEach(elem => {
-                            let chatContainer = document.getElementById('chatContainer');
-                            chatContainer.style.display = 'flex';
-                            if (elem.sender_id === User.id) {
-                                let sent = document.createElement('div')
-                                sent.classList.add("message", "sent");
-                                sent.textContent = elem.body
-                                chatbox.appendChild(sent)
-                            } else {
-                                let receive = document.createElement('div')
-                                receive.textContent = elem.body
-                                receive.classList.add('message', 'received')
-                                chatbox.appendChild(receive)
-                            }
-
-                        })
-                        break
-                    } else {
-                        document.getElementById('chatListContainer').style.display = 'none';
-                        document.getElementById('userListContainer').style.display = 'none';
-                        let chat = document.getElementById('chatContainer');
-                        chat.style.display = 'flex';
-                        let chatheader = document.getElementById(`chatHeader`)
-                        chatheader.innerHTML = ""
-                        let bcbutton = document.createElement('button')
-                        bcbutton.classList.add('back-button')
-                        bcbutton.textContent = 'Back'
-                        bcbutton.addEventListener('click', (e) => {
-                            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }))
-                        })
-                        let span = document.createElement('span')
-                        span.id = 'chatHeader'
-                        chatheader.appendChild(bcbutton)
-                        chatheader.appendChild(span)
-                        let name = document.createElement('div')
-                        name.id = "name"
-                        name.textContent = data.user.username
-                        name.style.color = 'white'
-                        name.style.display = 'flex'
-                        name.style.position = 'relative'
-                        name.style.alignItems = 'center'
-                        name.style.padding = '0 15px'
-                        name.style.marginRight = '150px'
-                        name.style.flexDirection = 'column'
-                        name.style.justifyContent = 'spacebetween'
-                        name.style.textAlign = 'center'
-                        name.style.whitespace = 'nowrap'
-                        chatheader.appendChild(name)
-                    }
-                    break;
-                case 'onlineusers':
-                    let chats = document.querySelectorAll('.chat')
-                    chats.forEach(chat => {
-                        let username = chat.dataset.username; // <- use this
-                        if (status(data.online, username)) {
-                            chat.innerHTML = username;
-                            let statusIndicator = document.createElement('p');
-                            statusIndicator.classList.add('status');
-                            statusIndicator.textContent = "Online";
-                            chat.appendChild(statusIndicator);
-                        } else {
-                            chat.innerHTML = username;
-                            let statusIndicator = document.createElement('p');
-                            statusIndicator.classList.add('status');
-                            statusIndicator.textContent = "Offline";
-                            chat.appendChild(statusIndicator);
-                        }
-                    });
-                    break;
-                default:
-                    console.log("Unknown message type:", data.type);
-            }
+            handleSocketMessage(data);
         });
 
         socket.addEventListener('close', () => {
-            console.log("WebSocket closed. Attempting to reconnect...");
+            console.log("WebSocket closed. Reconnecting...");
             setTimeout(connectWebSocket, 3000);
         });
 
         socket.addEventListener('error', (err) => {
-            console.error("WebSocket encountered an error:", err);
+            console.error("WebSocket error:", err);
             socket.close();
         });
 
-        let newChat = document.getElementById('newChat')
+        attachUIEventListeners();
+    };
+
+    const handleSocketMessage = (data) => {
+        switch (data.type) {
+            case "posts":
+                const postContainer = document.querySelector('.posts');
+                if (postContainer) renderPosts(data, postContainer);
+                break;
+            case 'error':
+                if (data.message === 'invalid session') {
+                    sessionStorage.setItem('pageState', '');
+                    sessionStorage.setItem('session', '');
+                    SignInPage();
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+                break;
+            case 'getuser':
+                User = data.user;
+                socket.send(JSON.stringify({
+                    type: 'getposts',
+                    username: User.username
+                }));
+                socket.send(JSON.stringify({
+                    type: "chats",
+                    sender: User.id.toString(),
+                    username: User.username
+                }));
+                break;
+            case 'reaction':
+                console.log('adding reaction');
+                const reaction = document.getElementById(data.id);
+                if (data.reaction === 'like' && reaction?.likecount) {
+                    reaction.likecount.textContent = reaction.likecount + data.reaction;
+                }
+                break;
+            case 'getusers':
+                showUsersList(data);
+                break;
+            case 'messaging':
+                if (data.status === "ok") {
+                    displayMessage(data);
+                }
+                break;
+            case "chats":
+                showChatList(data);
+                break;
+            case 'conversation':
+                if (data.conversation) {
+                    showConversation(data);
+                } else {
+                    showConversation({ ...data, conversation: [] });
+                }
+                break;
+            case 'onlineusers':
+                updateChatStatuses(data);
+                break;
+            default:
+                console.log("Unknown message type:", data.type);
+        }
+    };
+
+    const attachUIEventListeners = () => {
+        // New chat button event
+        const newChat = document.getElementById('newChat');
         if (newChat) {
             newChat.addEventListener('click', (e) => {
-                e.preventDefault()
-                socket.send(JSON.stringify({ type: 'getusers' }))
-            })
+                e.preventDefault();
+                socket.send(JSON.stringify({ type: 'getusers' }));
+            });
         }
 
-        let send = document.getElementById('send')
-        send.addEventListener('click', (e) => {
-            e.preventDefault()
-            let msg = document.getElementById('messageInput').value
-            let user = document.getElementById('name')
-            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: user.textContent, message: msg, username: User.username }))
-        })
-
-        let post = document.getElementById('posting');
-
-if (post) {
-    post.addEventListener('click', (e) => {
-        console.log('posting');
-        e.preventDefault();
-
-        let posttitle = document.getElementById('post-title').value;
-        let postbody = document.getElementById('post-content').value;
-        let postfile = document.getElementById('uploaded-file').files[0];
-
-        if (!posttitle || !postbody) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        const createPostForm = document.querySelector('.create-post');
-        createPostForm.classList.add('hidden');
-
-        if (postfile) {
-            const filetype = postfile.type.split('/')[0];
-            if (filetype !== 'image' && filetype !== 'video') {
-                alert('Please upload an image or video file');
-                return;
-            }
-
-            if (postfile.size > 10485760) {
-                alert('File size exceeds 10MB limit');
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const base64String = e.target.result.split(',')[1];
-                waitForSocket(() => {
-                    console.log('sending post with file');
-                    socket.send(JSON.stringify({
-                        type: 'createpost',
-                        title: posttitle,
-                        body: postbody,
-                        file: base64String,
-                        userid: User.id.toString()
-                    }));
-                });
-            };
-            reader.readAsDataURL(postfile);  // <- Fixed typo here
-        } else {
-            waitForSocket(() => {
-                console.log('sending post without file');
+        // Send message event
+        const sendBtn = document.getElementById('send');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const msg = document.getElementById('messageInput').value;
+                const receiverElem = document.getElementById('name');
                 socket.send(JSON.stringify({
-                    type: 'createpost',
-                    title: posttitle,
-                    body: postbody,
-                    file: null,
-                    userid: User.id.toString()
+                    type: 'messaging',
+                    sender: User.username,
+                    receiver: receiverElem?.textContent,
+                    message: msg,
+                    username: User.username
                 }));
             });
         }
-    });
-}
 
-    }
+        // Post event listener
+        const postBtn = document.getElementById('posting');
+        if (postBtn) {
+            postBtn.addEventListener('click', (e) => {
+                console.log('posting');
+                e.preventDefault();
+                const postTitle = document.getElementById('post-title').value;
+                const postBody = document.getElementById('post-content').value;
+                const postFile = document.getElementById('uploaded-file').files[0];
 
-    connectWebSocket();
+                if (!postTitle || !postBody) {
+                    alert('Please fill in all fields');
+                    return;
+                }
 
-    window.addEventListener('load', () => {
-        if (!socket || socket.readyState === WebSocket.CLOSED) {
-            connectWebSocket();
+                document.querySelector('.create-post').classList.add('hidden');
+
+                if (postFile) {
+                    const filetype = postFile.type.split('/')[0];
+                    if (filetype !== 'image' && filetype !== 'video') {
+                        alert('Please upload an image or video file');
+                        return;
+                    }
+                    if (postFile.size > 10485760) {
+                        alert('File size exceeds 10MB limit');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const base64String = e.target.result.split(',')[1];
+                        waitForSocket(() => {
+                            console.log('sending post with file');
+                            socket.send(JSON.stringify({
+                                type: 'createpost',
+                                title: postTitle,
+                                body: postBody,
+                                file: base64String,
+                                userid: User.id.toString()
+                            }));
+                        });
+                    };
+                    reader.readAsDataURL(postFile);
+                } else {
+                    waitForSocket(() => {
+                        console.log('sending post without file');
+                        try {
+                            socket.send(JSON.stringify({
+                                type: 'createpost',
+                                title: postTitle,
+                                body: postBody,
+                                file: null,
+                                userid: User.id.toString()
+                            }));
+                            console.log('Post sent successfully');
+                        } catch (error) {
+                            console.error('Error sending post:', error);
+                        }
+                    });
+                }
+            });
         }
-    });
+    };
 
-    let state = sessionStorage.getItem('pageState');
-    console.log(`state is ${state}`);
-
-    window.addEventListener('beforeunload', () => {
-        let currentPage = "home";
-        sessionStorage.setItem('pageState', currentPage);
-        sessionStorage.setItem('session', session);
-    });
-
-    function waitForSocket(callback) {
+    const waitForSocket = (callback) => {
         if (socket.readyState === WebSocket.OPEN) {
             callback();
         } else {
             console.log('Socket not ready, retrying...');
             setTimeout(() => waitForSocket(callback), 50);
         }
-    }
+    };
+
+    const updateChatStatuses = (data) => {
+        const chats = document.querySelectorAll('.chat');
+        chats.forEach(chat => {
+            const username = chat.dataset.username;
+            // Clear previous content and set username as base content.
+            chat.innerHTML = username;
+            const statusIndicator = document.createElement('p');
+            statusIndicator.classList.add('status');
+            // Use the helper status() to determine if the user is online.
+            statusIndicator.textContent = status(data.online, username) ? "Online" : "Offline";
+            chat.appendChild(statusIndicator);
+        });
+    };
+
+    // Helper functions for UI updates
+    const showUsersList = (data) => {
+        document.getElementById("chatListContainer").style.display = "none";
+        const userList = document.getElementById("userListContainer");
+        userList.innerHTML = "";
+        const header = document.createElement('div');
+        header.classList.add('header');
+        header.textContent = "Users";
+        const backBtn = createBackButton(() => {
+            socket.send(JSON.stringify({
+                type: "chats",
+                sender: User.id.toString(),
+                username: User.username
+            }));
+        });
+        header.appendChild(backBtn);
+        userList.appendChild(header);
+        const chatList = document.createElement('div');
+        chatList.classList.add('chat-list');
+        data.users.forEach(elem => {
+            if (elem.username !== User.username) {
+                const item = document.createElement('div');
+                item.classList.add('chat');
+                item.textContent = elem.username;
+                item.dataset.username = elem.username;
+                const statusIndicator = document.createElement('p');
+                statusIndicator.classList.add('status');
+                statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                item.appendChild(statusIndicator);
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    socket.send(JSON.stringify({
+                        type: "conversation",
+                        sender: User.id.toString(),
+                        receiver: elem.id.toString(),
+                        username: User.username
+                    }));
+                });
+                chatList.appendChild(item);
+            }
+        });
+        userList.appendChild(chatList);
+        userList.style.display = 'flex';
+    };
+
+    const showChatList = (data) => {
+        document.getElementById('userListContainer').style.display = 'none';
+        document.getElementById("chatContainer").style.display = "none";
+        document.getElementById("chatListContainer").style.display = "flex";
+        if (data.users.length > 0) {
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = "";
+            data.users.forEach(elem => {
+                const chat = document.createElement('div');
+                chat.classList.add('chat');
+                chat.textContent = elem.username;
+                chat.dataset.username = elem.username;
+                const statusIndicator = document.createElement('p');
+                statusIndicator.classList.add('status');
+                statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                chat.appendChild(statusIndicator);
+                chat.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    socket.send(JSON.stringify({
+                        type: "conversation",
+                        sender: User.id.toString(),
+                        receiver: elem.id.toString(),
+                        username: User.username
+                    }));
+                });
+                chatList.appendChild(chat);
+            });
+        }
+    };
+
+    const showConversation = (data) => {
+        document.getElementById('chatListContainer').style.display = 'none';
+        document.getElementById('userListContainer').style.display = 'none';
+        const chat = document.getElementById('chatContainer');
+        chat.style.display = 'flex';
+
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = "";
+        const chatHeader = document.getElementById('chatHeader');
+        chatHeader.innerHTML = "";
+        const backBtn = createBackButton(() => {
+            socket.send(JSON.stringify({
+                type: "chats",
+                sender: User.id.toString(),
+                username: User.username
+            }));
+        });
+        chatHeader.appendChild(backBtn);
+        const headerSpan = document.createElement('span');
+        headerSpan.id = 'chatHeader';
+        chatHeader.appendChild(headerSpan);
+        const nameDiv = document.createElement('div');
+        nameDiv.id = "name";
+        nameDiv.textContent = data.user.username;
+        Object.assign(nameDiv.style, {
+            color: 'white',
+            display: 'flex',
+            position: 'relative',
+            alignItems: 'center',
+            padding: '0 15px',
+            marginRight: '150px',
+            flexDirection: 'column',
+            justifyContent: 'spacebetween',
+            textAlign: 'center',
+            whitespace: 'nowrap'
+        });
+        chatHeader.appendChild(nameDiv);
+        data.conversation.forEach(elem => {
+            if (elem.sender_id === User.id) {
+                const sent = document.createElement('div');
+                sent.classList.add("message", "sent");
+                sent.textContent = elem.body;
+                chatBox.appendChild(sent);
+            } else {
+                const received = document.createElement('div');
+                received.classList.add("message", "received");
+                received.textContent = elem.body;
+                chatBox.appendChild(received);
+            }
+        });
+    };
+
+    const displayMessage = (data) => {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add("message", data.sender.username === User.username ? "sent" : "received");
+        messageElement.innerText = data.message;
+        document.getElementById("chatBox").appendChild(messageElement);
+        const input = document.getElementById('messageInput');
+        if (input) {
+            input.value = "";
+            input.placeholder = 'Type a message...';
+        }
+    };
+
+    const createBackButton = (onClick) => {
+        const btn = document.createElement('button');
+        btn.classList.add('back-button');
+        btn.textContent = 'Back';
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            onClick();
+        });
+        return btn;
+    };
+
+
+    const status = (onlineUsersList, username) => {
+        return onlineUsersList.includes(username);
+    };
+
+    connectWebSocket();
+
+    window.addEventListener('load', () => {
+        if (!socket || socket.readyState === WebSocket.CLOSED) connectWebSocket();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        sessionStorage.setItem('pageState', "home");
+        sessionStorage.setItem('session', session);
+    });
 }
 
 async function checksession(session) {
-    await fetch('/check', {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session: session })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('unexpected error occured')
-            }
-            return response.json()
-        })
-        .then(data => {
-            console.log(data.error)
-            if (data.error === 'ok') {
-                RealTime("", session)
-            } else {
-                sessionStorage.setItem('pageState', '')
-                SignInPage()
-            }
-        })
-}
-
-function status(users, user) {
-    console.log("userssssssssssss")
-    console.log(users)
-    for (let i = 0; i < users.length; i++) {
-        if (users[i] === user) {
-            return true
+    try {
+        const response = await fetch('/check', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session })
+        });
+        if (!response.ok) throw new Error('Unexpected error occurred');
+        const data = await response.json();
+        if (data.error === 'ok') {
+            RealTime("", session);
+        } else {
+            sessionStorage.setItem('pageState', '');
+            SignInPage();
         }
+    } catch (error) {
+        console.error(error);
+        SignInPage();
     }
-    return false
 }
