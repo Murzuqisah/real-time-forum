@@ -42,11 +42,12 @@ export function RealTime(User, session) {
 
         socket.addEventListener('open', () => {
             console.log("WebSocket connected.");
-            socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
-            setTimeout(() => {
-                socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
-            }, 50);
+            socket.send(JSON.stringify({ type: "register", username: User.username, sender: User.id.toString() }))
         });
+
+
+
+
 
         if (!User) {
             waitForSocket(() => {
@@ -83,9 +84,7 @@ export function RealTime(User, session) {
                     User = data.user;
                     console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
-                    setTimeout(() => {
-                        socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
-                    }, 50);
+                    socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
                     break;
                 case 'reaction':
                     console.log('adding reaction')
@@ -141,9 +140,16 @@ export function RealTime(User, session) {
                     break
                 case 'messaging':
                     if (data.status === "ok") {
+                        console.log("sender")
+                        console.log(data.sender)
                         let messageElement = document.createElement("div");
-                        messageElement.classList.add("message", "sent");
-                        messageElement.innerText = data.message;
+                        if (data.sender.username == User.username) {
+                            messageElement.classList.add("message", "sent");
+                            messageElement.innerText = data.message;
+                        } else {
+                            messageElement.classList.add("message", "received");
+                            messageElement.innerText = data.message;
+                        }
                         document.getElementById("chatBox").appendChild(messageElement)
                         let input = document.getElementById('messageInput')
                         input.value = ""
