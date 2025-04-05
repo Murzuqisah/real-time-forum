@@ -771,6 +771,7 @@ body.dark-theme .profile p {
   background: #f0f0f0;
   align-self: flex-start;
   text-align: left;
+  border-top-left-radius: 0;
 }
 
 .message.sent {
@@ -778,6 +779,7 @@ body.dark-theme .profile p {
   color: white;
   align-self: flex-end;
   text-align: right;
+  border-top-right-radius: 0;
 }
 
 .session-status {
