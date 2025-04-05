@@ -196,10 +196,23 @@ func HandleConnection(conn *websocket.Conn) {
 				})
 			}
 			sendJSON(conn, map[string]any{
-				"type":    "messaging",
-				"status":  "ok",
-				"message": html.EscapeString(msg["message"]),
+				"type":     "messaging",
+				"status":   "ok",
+				"message":  html.EscapeString(msg["message"]),
+				"sender":   sender,
+				"receiver": receiver,
 			})
+
+			_, ok := onlineUsers[receiver.Username]
+			if ok {
+				sendJSON(onlineUsers[receiver.Username], map[string]any{
+					"type":     "messaging",
+					"status":   "ok",
+					"message":  html.EscapeString(msg["message"]),
+					"sender":   sender,
+					"receiver": receiver,
+				})
+			}
 		case "chats":
 			id, err := strconv.Atoi(msg["sender"])
 			if err != nil {
@@ -256,6 +269,8 @@ func HandleConnection(conn *websocket.Conn) {
 					"user":         receiver,
 				})
 			}
+		case "register":
+			register(msg["sender"], conn)
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendJSON(conn, map[string]any{
@@ -284,4 +299,52 @@ func online() (users []string) {
 		users = append(users, key)
 	}
 	return
+}
+
+func register(sender string, conn *websocket.Conn) {
+	posts, err := repositories.GetPosts(util.DB)
+	if err != nil {
+		log.Println("Error fetching posts:", err)
+		sendJSON(conn, map[string]any{
+			"type":    "error",
+			"message": "An unexpected error occurred. Try again later.",
+		})
+		return
+	}
+
+	posts, err = PostDetails(posts)
+	if err != nil {
+		log.Println("Error processing posts:", err)
+		sendJSON(conn, map[string]any{
+			"type":    "error",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	sendJSON(conn, map[string]any{
+		"type":  "posts",
+		"posts": posts,
+	})
+
+	id, err := strconv.Atoi(sender)
+	if err != nil {
+		sendJSON(conn, map[string]any{
+			"type":    "error",
+			"message": "unexpected error occured",
+		})
+	}
+	users, err := repositories.GetActiveChats(id)
+	if err != nil {
+		sendJSON(conn, map[string]any{
+			"type":    "error",
+			"message": "unexpected error occured",
+		})
+	} else {
+		sendJSON(conn, map[string]any{
+			"type":   "chats",
+			"users":  users,
+			"online": online(),
+		})
+	}
 }
