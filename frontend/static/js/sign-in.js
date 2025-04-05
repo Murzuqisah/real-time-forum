@@ -151,11 +151,6 @@ export function navigate(event, page) {
 
 export function renderPage() {
   let page = location.pathname;
-  console.log("Current page:", page);
-
-  if (!page || page === "/") {
-      page = "/sign-in";
-  }
 
   switch (page) {
       case "/sign-up":

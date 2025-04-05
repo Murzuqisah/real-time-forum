@@ -158,10 +158,7 @@ export const HomePage = () => {
 };
 
 export function renderPosts(data, postsContainer) {
-    console.log('Rendering posts:', data);
-
     if (!data || !Array.isArray(data.posts)) {
-        console.error("Invalid posts data:", data.posts);
         return;
     }
 

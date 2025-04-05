@@ -156,8 +156,6 @@ export const SignUpPage = () => {
   button3.textContent = 'Create Account';
   button3.addEventListener('click', (e) => {
     e.preventDefault()
-    console.log('Signing up...');
-
     let username = document.getElementById('username').value;
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;

@@ -3,7 +3,6 @@ import { SignInPage, login } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let previousState = sessionStorage.getItem('pageState');
-    console.log(`previous state ${previousState}`)
     if (previousState === 'home') {
         sessionStorage.setItem('pageState', '')
         let session = sessionStorage.getItem('session')
@@ -17,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signin) {
         signin.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Signing in...');
             let email = document.getElementById('email').value;
             let password = document.getElementById('password').value;
             login(email, password)
@@ -41,7 +39,6 @@ export function RealTime(User, session) {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
 
         socket.addEventListener('open', () => {
-            console.log("WebSocket connected.");
             socket.send(JSON.stringify({ type: "register", username: User.username, sender: User.id.toString() }))
         });
 
@@ -65,8 +62,6 @@ export function RealTime(User, session) {
                     let postContainer = document.querySelector('.posts');
                     if (postContainer) {
                         renderPosts(data, postContainer);
-                    } else {
-                        console.error("Post container not found.");
                     }
                     break;
                 case 'error':
@@ -80,9 +75,7 @@ export function RealTime(User, session) {
                     }
                     break;
                 case 'getuser':
-                    console.log('Got user data');
                     User = data.user;
-                    console.log(data.user)
                     socket.send(JSON.stringify({ type: 'getposts', username: User.username }));
                     socket.send(JSON.stringify({ type: "chats", sender: User.id.toString(), username: User.username }));
                     break;
@@ -140,8 +133,6 @@ export function RealTime(User, session) {
                     break
                 case 'messaging':
                     if (data.status === "ok") {
-                        console.log("sender")
-                        console.log(data.sender)
                         let messageElement = document.createElement("div");
                         if (data.sender.username == User.username) {
                             messageElement.classList.add("message", "sent");
@@ -161,7 +152,6 @@ export function RealTime(User, session) {
                     document.getElementById("chatContainer").style.display = "none";
                     document.getElementById("chatListContainer").style.display = "flex";
                     if (data.users.length > 0) {
-                        console.log(data.users)
                         let chatlist = document.getElementById('chatList')
                         chatlist.innerHTML = ""
                         data.users.forEach(elem => {
