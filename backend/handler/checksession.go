@@ -7,8 +7,8 @@ import (
 )
 
 func CheckSession(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+	Mu.Lock()
+	defer Mu.Unlock()
 	log.Println(SessionStore)
 	log.Println("Length of session stote is 0")
 	if len(SessionStore) == 0 {
