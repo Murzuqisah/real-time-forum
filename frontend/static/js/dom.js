@@ -314,6 +314,68 @@ export function RealTime(User, session) {
             let user = document.getElementById('name')
             socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: user.textContent, message: msg, username: User.username }))
         })
+
+        let post = document.getElementById('posting');
+
+if (post) {
+    post.addEventListener('click', (e) => {
+        console.log('posting');
+        e.preventDefault();
+
+        let posttitle = document.getElementById('post-title').value;
+        let postbody = document.getElementById('post-content').value;
+        let postfile = document.getElementById('uploaded-file').files[0];
+
+        if (!posttitle || !postbody) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        const createPostForm = document.querySelector('.create-post');
+        createPostForm.classList.add('hidden');
+
+        if (postfile) {
+            const filetype = postfile.type.split('/')[0];
+            if (filetype !== 'image' && filetype !== 'video') {
+                alert('Please upload an image or video file');
+                return;
+            }
+
+            if (postfile.size > 10485760) {
+                alert('File size exceeds 10MB limit');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const base64String = e.target.result.split(',')[1];
+                waitForSocket(() => {
+                    console.log('sending post with file');
+                    socket.send(JSON.stringify({
+                        type: 'createpost',
+                        title: posttitle,
+                        body: postbody,
+                        file: base64String,
+                        userid: User.id.toString()
+                    }));
+                });
+            };
+            reader.readAsDataURL(postfile);  // <- Fixed typo here
+        } else {
+            waitForSocket(() => {
+                console.log('sending post without file');
+                socket.send(JSON.stringify({
+                    type: 'createpost',
+                    title: posttitle,
+                    body: postbody,
+                    file: null,
+                    userid: User.id.toString()
+                }));
+            });
+        }
+    });
+}
+
     }
 
     connectWebSocket();
