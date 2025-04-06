@@ -342,6 +342,7 @@ function chat(profile) {
 function postingform() {
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
+    postForm.id = 'post-form'
 
     let postdiv = document.createElement('div')
     postdiv.classList.add('post-popup')
