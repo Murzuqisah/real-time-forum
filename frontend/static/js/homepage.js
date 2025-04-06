@@ -139,22 +139,6 @@ export const HomePage = () => {
     img.alt = 'create-post'
     floatingButton.appendChild(img)
 
-    floatingButton.addEventListener('click', function (e) {
-        e.preventDefault();
-        const createPostForm = document.querySelector('.create-post');
-        if (createPostForm.classList.contains('hidden')) {
-            createPostForm.classList.remove('hidden');
-            createPostForm.style.opacity = 1;
-            createPostForm.style.visibility = 'visible';
-          } else {
-            createPostForm.style.opacity = 0;
-            createPostForm.style.visibility = 'hidden';
-            setTimeout(() => createPostForm.classList.add('hidden'), 500); // Delay hiding with a timeout to allow opacity transition
-          }
-        console.log('clicked post add')
-    });
-
-
     floating.appendChild(createPost)
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
@@ -174,6 +158,7 @@ export const HomePage = () => {
     profile = chat(profile)
     document.body.appendChild(profile);
 };
+
 
 export function renderPosts(data, postsContainer) {
     if (!data || !Array.isArray(data.posts)) {
@@ -315,6 +300,22 @@ export function renderPosts(data, postsContainer) {
 
         postsContainer.appendChild(article);
     });
+
+    let floatingButton = document.querySelector('.floating-create-post-btn');
+    floatingButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        const createPostForm = document.querySelector('.create-post');
+        if (createPostForm.classList.contains('hidden')) {
+            createPostForm.classList.remove('hidden');
+            createPostForm.style.opacity = 1;
+            createPostForm.style.visibility = 'visible';
+        } else {
+            createPostForm.style.opacity = 0;
+            createPostForm.style.visibility = 'hidden';
+            setTimeout(() => createPostForm.classList.add('hidden'), 500); // Delay hiding with a timeout to allow opacity transition
+        }
+        console.log('clicked post add')
+    });
 }
 
 function chat(profile) {
@@ -373,9 +374,7 @@ function chat(profile) {
     let bcbutton = document.createElement('button')
     bcbutton.classList.add('back-button')
     bcbutton.textContent = 'Back'
-    bcbutton.addEventListener('click', (e) => {
-        goBack()
-    })
+
     let span = document.createElement('span')
     span.id = 'chatHeader'
     backbutton.appendChild(bcbutton)
