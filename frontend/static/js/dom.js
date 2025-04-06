@@ -183,6 +183,61 @@ export function RealTime(User, session) {
                 console.log('clicked post add')
             });
         }
+
+        const  button = document.getElementById('posting');
+        if (button) {
+            button.addEventListener('click', (e) => {
+                console.log('event for posting called')
+                e.preventDefault();
+                console.log('event for posting called')
+
+                let postTitle = document.getElementById('post-title').value;
+                let postBody = document.getElementById('post-content').value;
+                let postFile = document.getElementById('uploaded-file').files[0];
+
+                if (!postTitle || !postBody) {
+                    alert('Please fill in all fields.');
+                    return;
+                }
+
+                const createPostForm = document.querySelector('.create-post');
+                createPostForm.classList.add('hidden');
+
+                if (postFile) {
+                    let filetype = postFile.type;
+                    let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!validTypes.includes(filetype)) {
+                        alert('Invalid file type. Please upload an image.');
+                        return;
+                    }
+                    if (postFile.size > 20 * 1024 * 1024) {
+                        alert('File size exceeds 20MB. Please upload a smaller image.');
+                        return;
+                    }
+
+                    let reader = new FileReader();
+
+                    reader.onloadend = function () {
+                        let base64data = reader.result.split(',')[1];
+                        socket.send(JSON.stringify({
+                            type: 'post',
+                            title: postTitle,
+                            body: postBody,
+                            file: base64data,
+                            sender: User.username
+                        }));
+                    }
+                } else {
+                    socket.send(JSON.stringify({
+                        type: 'post',
+                        title: postTitle,
+                        body: postBody,
+                        file: null,
+                        sender: User.username
+                    }));
+                }
+            })
+        }
     };
 
     const waitForSocket = (callback) => {
