@@ -46,6 +46,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	SetSessionCookie(w, session)
+
 	log.Println(SessionStore)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -97,6 +99,7 @@ func Login(password, email string) (models.User, string, error) {
 	sessionToken := CreateSession(user.ID)
 
 	expiryTime := time.Now().Add(24 * time.Hour)
+
 
 	err = repositories.StoreSession(user.ID, sessionToken, expiryTime)
 	if err != nil {
