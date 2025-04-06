@@ -51,11 +51,11 @@ export function RealTime(User, session) {
                     }));
                 });
             }
-            
+
             socket.send(JSON.stringify({
                 type: "register",
                 username: User.username,
-                sender: User.id.toString()
+                sender: User.id.toString(),
             }));
         });
 
@@ -98,13 +98,9 @@ export function RealTime(User, session) {
             case 'getuser':
                 User = data.user;
                 socket.send(JSON.stringify({
-                    type: 'getposts',
-                    username: User.username
-                }));
-                socket.send(JSON.stringify({
-                    type: "chats",
+                    type: "register",
+                    username: User.username,
                     sender: User.id.toString(),
-                    username: User.username
                 }));
                 break;
             case 'reaction':
