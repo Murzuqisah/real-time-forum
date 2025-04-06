@@ -187,7 +187,6 @@ export function RealTime(User, session) {
         const  button = document.getElementById('posting');
         if (button) {
             button.addEventListener('click', (e) => {
-                console.log('event for posting called')
                 e.preventDefault();
                 console.log('event for posting called')
 
@@ -227,6 +226,7 @@ export function RealTime(User, session) {
                             sender: User.username
                         }));
                     }
+                    reader.readAsDataURL(file);
                 } else {
                     socket.send(JSON.stringify({
                         type: 'post',
