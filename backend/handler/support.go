@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
@@ -46,4 +47,16 @@ func DeleteSession(userId int) {
 			delete(SessionStore, k)
 		}
 	}
+}
+
+func SetSessionCookie(w http.ResponseWriter, sessionID string) {
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  time.Now().UTC().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+	}
+	http.SetCookie(w, cookie)
 }
