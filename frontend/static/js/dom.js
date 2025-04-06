@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function RealTime(User, session) {
     HomePage();
+
+   
+
     let socket;
 
     const connectWebSocket = () => {
@@ -163,8 +166,8 @@ export function RealTime(User, session) {
             });
         }
 
-       
-        
+
+
     };
 
     const waitForSocket = (callback) => {
