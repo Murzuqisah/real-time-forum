@@ -377,7 +377,6 @@ function postingform() {
     postOperation.appendChild(fileInput);
     let button = document.createElement('button');
     button.id = 'posting'
-    button.type = "submit";
     button.textContent = "Post";
 
     upload.appendChild(labelTitle);
