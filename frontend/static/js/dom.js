@@ -29,6 +29,17 @@ export function RealTime(User, session) {
     const connectWebSocket = () => {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
 
+        if (!User) {
+            waitForSocket(() => {
+                const session = sessionStorage.getItem('session');
+                socket.send(JSON.stringify({
+                    type: 'getuser',
+                    session,
+                    username: User.username
+                }));
+            });
+        }
+
         socket.addEventListener('open', () => {
             if (!User) {
                 waitForSocket(() => {
@@ -156,68 +167,8 @@ export function RealTime(User, session) {
             });
         }
 
-        // Post event listener
-        const postBtn = document.getElementById('posting');
-        if (postBtn) {
-            postBtn.addEventListener('click', (e) => {
-                console.log('posting');
-                e.preventDefault();
-                const postTitle = document.getElementById('post-title').value;
-                const postBody = document.getElementById('post-content').value;
-                const postFile = document.getElementById('uploaded-file').files[0];
-
-                if (!postTitle || !postBody) {
-                    alert('Please fill in all fields');
-                    return;
-                }
-
-                document.querySelector('.create-post').classList.add('hidden');
-
-                if (postFile) {
-                    const filetype = postFile.type.split('/')[0];
-                    if (filetype !== 'image' && filetype !== 'video') {
-                        alert('Please upload an image or video file');
-                        return;
-                    }
-                    if (postFile.size > 10485760) {
-                        alert('File size exceeds 10MB limit');
-                        return;
-                    }
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const base64String = e.target.result.split(',')[1];
-                        waitForSocket(() => {
-                            console.log('sending post with file');
-                            socket.send(JSON.stringify({
-                                type: 'createpost',
-                                title: postTitle,
-                                body: postBody,
-                                file: base64String,
-                                userid: User.id.toString()
-                            }));
-                        });
-                    };
-                    reader.readAsDataURL(postFile);
-                } else {
-                    waitForSocket(() => {
-                        console.log('sending post without file');
-                        try {
-                            socket.send(JSON.stringify({
-                                type: 'createpost',
-                                title: postTitle,
-                                body: postBody,
-                                file: null,
-                                userid: User.id.toString()
-                            }));
-                            console.log('Post sent successfully');
-                        } catch (error) {
-                            console.error('Error sending post:', error);
-                        }
-                    });
-                }
-            });
-        }
+       
+        
     };
 
     const waitForSocket = (callback) => {
