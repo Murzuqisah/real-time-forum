@@ -397,7 +397,7 @@ export function RealTime(User, session) {
                         sender: User.id.toString(),
                     }));
                 }
-                console.log('event for posting called')
+                form.reset();
             })
         }
     }
