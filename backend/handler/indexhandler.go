@@ -226,20 +226,6 @@ func HandleConnection(client *Client) {
 			})
 		case "register":
 			register(msg["sender"], client)
-		case "post":
-			id, err := strconv.Atoi(msg["sender"])
-			if err != nil {
-				sendError(client, "unexpected error occured")
-				continue
-			}
-			err = CreatePost(msg["file"], msg["title"], msg["body"], id)
-			if err != nil {
-				log.Println(err)
-				sendError(client, "unexpected error occured")
-				continue
-			} else {
-				getposts(client)
-			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendError(client, "Invalid message type")
