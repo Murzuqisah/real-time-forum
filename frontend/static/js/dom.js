@@ -184,24 +184,23 @@ export function RealTime(User, session) {
             });
         }
 
-        const  button = document.getElementById('posting');
-        if (button) {
-            button.addEventListener('click', (e) => {
+        const  form = document.getElementById('upload');
+        if (form) {
+            form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                console.log('event for posting called')
-
+                
                 let postTitle = document.getElementById('post-title').value;
                 let postBody = document.getElementById('post-content').value;
                 let postFile = document.getElementById('uploaded-file').files[0];
-
+                
                 if (!postTitle || !postBody) {
                     alert('Please fill in all fields.');
                     return;
                 }
-
+                
                 const createPostForm = document.querySelector('.create-post');
                 createPostForm.classList.add('hidden');
-
+                
                 if (postFile) {
                     let filetype = postFile.type;
                     let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -213,9 +212,9 @@ export function RealTime(User, session) {
                         alert('File size exceeds 20MB. Please upload a smaller image.');
                         return;
                     }
-
+                    
                     let reader = new FileReader();
-
+                    
                     reader.onloadend = function () {
                         let base64data = reader.result.split(',')[1];
                         socket.send(JSON.stringify({
@@ -236,6 +235,7 @@ export function RealTime(User, session) {
                         sender: User.username
                     }));
                 }
+                console.log('event for posting called')
             })
         }
     };
