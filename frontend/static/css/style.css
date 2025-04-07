@@ -318,6 +318,21 @@ body.dark-theme .create-post-top p {
   color: var(--dark-text-color);
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
 .create-post {
   display: flex;
   position: fixed;
@@ -340,6 +355,21 @@ body.dark-theme .create-post-top p {
 .post-popup {
   position: relative;
   width: 100%;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+
+body.dark-theme .close-modal {
+  color: var(--dark-text-color);
 }
 
 body.dark-theme .create-post {
