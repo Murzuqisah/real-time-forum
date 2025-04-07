@@ -20,7 +20,7 @@ type LoginData struct {
 
 var (
 	SessionStore = make(map[string]int)
-	Mu          sync.Mutex
+	Mu           sync.Mutex
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +99,6 @@ func Login(password, email string) (models.User, string, error) {
 	sessionToken := CreateSession(user.ID)
 
 	expiryTime := time.Now().Add(24 * time.Hour)
-
 
 	err = repositories.StoreSession(user.ID, sessionToken, expiryTime)
 	if err != nil {

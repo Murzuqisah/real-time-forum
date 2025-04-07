@@ -23,8 +23,7 @@ func CommentHandler(w http.ResponseWriter, r *http.Request) {
 		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
-	
+
 	comment := r.FormValue("comment")
 	comment = html.EscapeString(comment)
 	if len(strings.TrimSpace(comment)) == 0 {
