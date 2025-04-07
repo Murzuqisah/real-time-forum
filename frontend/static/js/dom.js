@@ -11,15 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         SignInPage();
     }
 
-    const signinBtn = document.getElementById('sign-in-btn');
-    if (signinBtn) {
-        signinBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            login(email, password);
-        });
-    }
+    // We're now handling the form submission in the SignInPage component
+    // No need to add event listener here as it could cause duplicate submissions
 });
 
 export function RealTime(User, session) {
@@ -350,19 +343,19 @@ export function RealTime(User, session) {
         if (form) {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
+
                 let postTitle = document.getElementById('post-title').value;
                 let postBody = document.getElementById('post-content').value;
                 let postFile = document.getElementById('uploaded-file').files[0];
-                
+
                 if (!postTitle || !postBody) {
                     alert('Please fill in all fields.');
                     return;
                 }
-                
+
                 const createPostForm = document.querySelector('.create-post');
                 createPostForm.classList.add('hidden');
-                
+
                 if (postFile) {
                     let filetype = postFile.type;
                     let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -374,9 +367,9 @@ export function RealTime(User, session) {
                         alert('File size exceeds 20MB. Please upload a smaller image.');
                         return;
                     }
-                    
+
                     let reader = new FileReader();
-                    
+
                     reader.onloadend = function () {
                         let base64data = reader.result.split(',')[1];
                         socket.send(JSON.stringify({
