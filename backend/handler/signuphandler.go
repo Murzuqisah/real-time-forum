@@ -77,8 +77,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"error": "unknown error occured. Try again later",
 		})
+		return
 	}
 	log.Println("user added succesfully")
+
+	// Simply return success response without creating a session
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
