@@ -98,6 +98,63 @@ export const HomePage = () => {
 
     let closeButton = document.createElement('button');
     closeButton.classList.add('close-modal');
+    closeButton.innerHTML = '&times;';
+    closeButton.addEventListener('click', function () {
+        postForm.classList.add('hidden');
+        overlay.style.display = 'none'
+    });
+    postdiv.appendChild(closeButton);
+
+    let postTitle = document.createElement('h2')
+    postTitle.textContent = 'Create a Post';
+    postdiv.appendChild(postTitle)
+
+    let upload = document.createElement('form');
+    upload.name = "upload";
+    upload.id = "upload";
+    upload.enctype = "multipart/form-data";
+
+    let labelTitle = document.createElement('label');
+    labelTitle.htmlFor = "post-title";
+    labelTitle.textContent = "Title";
+    let inputTitle = document.createElement('input');
+    inputTitle.type = "text";
+    inputTitle.id = "post-title";
+    inputTitle.name = "post-title";
+    inputTitle.placeholder = "Enter your post title";
+    inputTitle.required = true;
+    let labelContent = document.createElement('label');
+    labelContent.htmlFor = "post-content";
+    labelContent.textContent = "Content";
+    let textarea = document.createElement('textarea');
+    textarea.id = "post-content";
+    textarea.name = "post-content";
+    textarea.placeholder = "Write your post here...";
+    textarea.required = true;
+    let postOperation = document.createElement('div');
+    postOperation.classList.add('post-operation');
+    let fileInput = document.createElement('input');
+    fileInput.type = "file";
+    fileInput.name = "uploaded-file";
+    fileInput.id = "uploaded-file";
+    postOperation.appendChild(fileInput);
+    let button = document.createElement('button');
+    button.type = "submit";
+    button.id = 'posting'
+    button.textContent = "Post";
+
+    upload.appendChild(labelTitle);
+    upload.appendChild(inputTitle);
+    upload.appendChild(labelContent);
+    upload.appendChild(textarea);
+    upload.appendChild(postOperation);
+    upload.appendChild(button);
+    postdiv.appendChild(upload)
+    postForm.appendChild(postdiv);
+    postsContainer.appendChild(postForm);
+
+    document.body.appendChild(postsContainer);
+
 
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
