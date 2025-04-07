@@ -16,6 +16,16 @@ export const SignInPage = () => {
   flex-direction: column;
   justify-content: center;
 }
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+  }
   </style>
   `
   let scriptFiles = [
@@ -72,7 +82,25 @@ export const SignInPage = () => {
   h2.textContent = 'Sign In'
   formContainer.appendChild(h2)
 
+  // Check if we're coming from the sign-up page
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('from') === 'signup') {
+    // Add success message
+    let successMessage = document.createElement('div');
+    successMessage.classList.add('success-message');
+    successMessage.textContent = 'Account created successfully! Please sign in.';
+    formContainer.appendChild(successMessage);
+  }
+
   let signinForm = document.createElement('form')
+  signinForm.id = 'signin-form'
+  // Prevent default form submission which would expose credentials in URL
+  signinForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const email = document.getElementById('email').value
+    const password = document.getElementById('password').value
+    login(email, password)
+  })
 
   let div1 = document.createElement('div');
   div1.classList.add('input-group');
@@ -113,7 +141,7 @@ export const SignInPage = () => {
 
   let button1 = document.createElement('button');
   button1.id = 'sign-in-btn'
-  button1.type = 'submit';
+  button1.type = 'submit'; // Keep as submit to work with form submission
   button1.classList.add('sign-in-btn', 'btn');
   button1.textContent = 'Sign In';
 
@@ -165,24 +193,33 @@ export function renderPage() {
 }
 
 export async function login(email, password) {
-  await fetch('/sign-in',{
-    method: "POST",
-    headers: { 'Content-Type': 'application/json'},
-    body: JSON.stringify({email:email, password: password})
-  } )
-  .then(response => {
+  try {
+    const response = await fetch('/sign-in', {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({email:email, password: password})
+    });
+
     if (!response.ok) {
-      throw new Error('unexpected error occured')
+      throw new Error('unexpected error occured');
     }
-    return response.json();
-  })
-  .then(data => {
+
+    const data = await response.json();
+
     if (data.error === 'ok') {
-      console.log(data)
-      RealTime(data.user, data.session)
+      console.log('Login successful:', data);
+      // Store session in sessionStorage
+      sessionStorage.setItem('session', data.session);
+      sessionStorage.setItem('pageState', 'home');
+      // Call RealTime to render the homepage
+      RealTime(data.user, data.session);
+      // Update URL without exposing credentials
+      history.pushState({}, '', '/');
     } else {
-      alert(data.error)
+      alert(data.error);
     }
-  })
-  .catch(error => alert(`Error: ${error.message}`))
+  } catch (error) {
+    console.error('Login error:', error);
+    alert(`Error: ${error.message}`);
+  }
 }
