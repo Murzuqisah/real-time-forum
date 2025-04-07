@@ -234,6 +234,7 @@ func HandleConnection(client *Client) {
 			}
 			err = CreatePost(msg["file"] ,msg["title"], msg["body"], id)
 			if err != nil {
+				log.Println(err)
 				sendError(client, "unexpected error occured")
 				continue
 			} else {
