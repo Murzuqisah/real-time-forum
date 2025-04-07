@@ -56,7 +56,11 @@ func SetSessionCookie(w http.ResponseWriter, sessionID string) {
 		Path:     "/",
 		Expires:  time.Now().UTC().Add(24 * time.Hour),
 		HttpOnly: true,
-		Secure:   true,
+		// In development environment, set Secure to false if not using HTTPS
+		Secure: false,
+		// Allow JavaScript access to the cookie in development
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, cookie)
+	log.Printf("Set session cookie: %s", sessionID)
 }
