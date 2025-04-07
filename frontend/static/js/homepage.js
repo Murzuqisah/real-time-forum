@@ -155,26 +155,35 @@ export const HomePage = () => {
 
     document.body.appendChild(postsContainer);
 
-
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
-    floating.style.display = 'none'
     let createPost = document.createElement('p')
     createPost.textContent = 'Create a Post'
     let floatingButton = document.createElement('button')
-    floatingButton.type = 'submit'
-    floatingButton.classList.add('floating-create-post-btn')
     floatingButton.id = 'floatingButton'
-    floatingButton.ariaLabel = 'Create a new post'
+    floatingButton.classList.add('floating-create-post-btn')
     let img = document.createElement('img')
     img.classList.add('web-icon')
     img.src = '/frontend/static/assets/plus-solid.svg'
     img.alt = 'create-post'
     floatingButton.appendChild(img)
-
     floating.appendChild(createPost)
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
+
+    // create post event listener
+    createPostTop.addEventListener('click', function () {
+        postForm.classList.remove('hidden');
+        overlay.classList.add('active');
+        overlay.style.display = 'block';
+    });
+
+    floatingButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        postForm.classList.remove('hidden');
+        overlay.classList.add('active');
+        overlay.style.display = 'block';
+    });
 
     document.body.appendChild(postsContainer);
     let profile = document.createElement('aside');
