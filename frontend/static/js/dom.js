@@ -1,320 +1,139 @@
 import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
 import { goBack } from './homepage.js';
+import { CONSTANTS, CHAT_HEADER_STYLES, applyStyles } from './constants.js';
+import { SessionManager } from './session-manager.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    let previousState = sessionStorage.getItem('pageState');
-    console.log(`previous state ${previousState}`)
-    if (previousState === 'home') {
-        sessionStorage.setItem('pageState', '')
-        let session = sessionStorage.getItem('session')
-        checksession(session)
-    } else {
-        SignInPage();
+// Page router
+const Router = {
+    routes: {
+        '/': () => SessionManager.isAuthenticated() ? HomePage() : SignInPage(),
+        '/sign-in': SignInPage,
+        '/sign-up': SignUpPage,
+    },
+    navigate: (path) => {
+        history.pushState(null, '', path);
+        Router.render();
+    },
+    render: () => {
+        const path = location.pathname;
+        const route = Router.routes[path] || Router.routes['/'];
+        route();
     }
+};
 
-    let signin = document.getElementById('sign-in-btn');
+// Improved session check
+async function checkSession() {
+    const { session } = SessionManager.get();
+    if (!session) return false;
 
-    if (signin) {
-        signin.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Signing in...');
-            let email = document.getElementById('email').value;
-            let password = document.getElementById('password').value;
-            login(email, password)
+    try {
+        const response = await fetch('/check', {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session })
         });
+        const data = await response.json();
+        return data.error === 'ok';
+    } catch (error) {
+        console.error('Session check failed:', error);
+        return false;
+    }
+}
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', async () => {
+    if (await checkSession()) {
+        Router.navigate('/');
+    } else {
+        SessionManager.clear();
+        Router.navigate('/sign-in');
     }
 });
 
-export function RealTime(User, session) {
-    HomePage();
-    let socket;
+function handleConversation(data, User, socket) {
+    if (!data.conversation.length) return;
+    
+    hideElement('chatListContainer');
+    showChatContainer();
+    clearChatBox();
+    
+    const chatbox = document.getElementById('chatBox');
+    const chatheader = createChatHeader(data.user.username);
+    
+    data.conversation.forEach(message => {
+        const messageElement = createMessageElement(message, User.id);
+        chatbox.appendChild(messageElement);
+    });
+    
+    setupSendMessageHandler(socket, data.user.username);
+}
 
-    let likebutton = document.querySelector('.like-button')
-    if (likebutton) {
-        likebutton.addEventListener('click', (e) => {
-            e.preventDefault()
-            socket.send(JSON.stringify({ type: 'reaction', postid: likebutton.id, userid: User.id, reaction: 'like' }))
-        })
-    }
+function createMessageElement(message, userId) {
+    const element = document.createElement('div');
+    element.classList.add('message', message.sender_id === userId ? 'sent' : 'received');
+    element.textContent = message.body;
+    return element;
+}
 
-    function connectWebSocket() {
-        socket = new WebSocket(`ws://${window.location.host}/ws`);
+function setupSendMessageHandler(socket, receiverUsername) {
+    const send = document.getElementById('send');
+    send.addEventListener('click', (e) => {
+        e.preventDefault();
+        const msg = document.getElementById('messageInput').value;
+        socket.send(JSON.stringify({ 
+            type: CONSTANTS.MESSAGE_TYPES.MESSAGING, 
+            sender: User.username, 
+            receiver: receiverUsername, 
+            message: msg 
+        }));
+    });
+}
 
+function connectWebSocket() {
+    try {
+        const socket = new WebSocket(CONSTANTS.WEBSOCKET_URL);
+        
         socket.addEventListener('open', () => {
-            console.log("WebSocket connected.");
-            socket.send(JSON.stringify({ type: 'getposts' }));
-            socket.send(JSON.stringify({ type: "chats", sender: User.id.toString() }))
+            console.log('WebSocket connected');
+            socket.send(JSON.stringify({ 
+                type: CONSTANTS.MESSAGE_TYPES.REGISTER, 
+                sender: User.id 
+            }));
         });
-
-        if (!User) {
-            waitForSocket(() => {
-                let session = sessionStorage.getItem('session');
-                socket.send(JSON.stringify({ type: 'getuser', session: session }));
-            })
-        }
-
-        socket.addEventListener('message', (event) => {
-            const data = JSON.parse(event.data);
-            console.log('Received message:', data);
-
-            switch (data.type) {
-                case "posts":
-                    let postContainer = document.querySelector('.posts');
-                    if (postContainer) {
-                        renderPosts(data, postContainer);
-                    } else {
-                        console.error("Post container not found.");
-                    }
-                    break;
-                case 'error':
-                    if (data.message === 'invalid session') {
-                        SignInPage();
-                        alert(data.message);
-                    } else {
-                        alert(data.message);
-                    }
-                    break;
-                case 'getuser':
-                    console.log('Got user data');
-                    User = data.user;
-                    console.log(data.user)
-                    socket.send(JSON.stringify({ type: 'getposts' }));
-                    break;
-                case 'reaction':
-                    console.log('adding reaction')
-                    let reaction = document.getElementById(data.id)
-                    if (data.reaction === 'like') {
-                        reaction.likecount.textContent = reaction.likecount + data.reaction
-                    }
-                    break;
-                case 'getusers':
-                    document.getElementById("chatListContainer").style.display = "none";
-                    let userlist = document.getElementById("userListContainer")
-                    userlist.innerHTML = ""
-                    data.users.forEach(elem => {
-                        if (elem.username !== User.username) {
-                            let item = document.createElement('div')
-                            item.classList.add('user-item')
-                            item.textContent = elem.username
-                            item.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                document.getElementById("userListContainer").style.display = 'none';
-                                let chatheader = document.getElementById(`chatHeader`)
-                                chatheader.innerHTML = ""
-                                let bcbutton = document.createElement('button')
-                                bcbutton.classList.add('back-button')
-                                bcbutton.textContent = 'Back'
-                                bcbutton.addEventListener('click', (e) => {
-                                    goBack()
-                                })
-                                let span = document.createElement('span')
-                                span.id = 'chatHeader'
-                                chatheader.appendChild(bcbutton)
-                                chatheader.appendChild(span)
-                                let name = document.createElement('div')
-                                name.textContent = elem.username
-                                name.style.color = 'white'
-                                name.style.display = 'flex'
-                                name.style.position = 'relative'
-                                name.style.alignItems = 'center'
-                                name.style.padding = '0 15px'
-                                name.style.marginRight = '150px'
-                                name.style.flexDirection = 'column'
-                                name.style.justifyContent = 'spacebetween'
-                                name.style.textAlign = 'center'
-                                name.style.whitespace = 'nowrap'
-                                chatheader.appendChild(name)
-                                let chatContainer = document.getElementById('chatContainer');
-                                chatContainer.style.display = 'flex';
-                            });
-                            let send = document.getElementById('send')
-                            send.addEventListener('click', (e) => {
-                                e.preventDefault()
-                                let msg = document.getElementById('messageInput').value
-                                console.log(User)
-                                socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: elem.username, message: msg }))
-                            })
-                            userlist.appendChild(item)
-                        }
-                    });
-                    userlist.style.display = 'flex'
-                    break
-                case 'messaging':
-                    if (data.status === "ok") {
-                        let messageElement = document.createElement("div");
-                        messageElement.classList.add("message", "sent");
-                        messageElement.innerText = data.message;
-                        document.getElementById("chatBox").appendChild(messageElement)
-                        let input = document.getElementById('messageInput')
-                        input.value = ""
-                        input.placeholder = 'Type a message...'
-                    }
-                    break
-                case "chats":
-                    if (data.users.length > 0) {
-                        console.log(data.users)
-                        let chatlist = document.getElementById('chatList')
-                        chatlist.innerHTML = ""
-                        data.users.forEach(elem => {
-                            let chat = document.createElement('div')
-                            chat.classList.add('chat')
-                            chat.textContent = elem.username
-                            chatlist.appendChild(chat)
-                            chat.addEventListener('click', (e) => {
-                                e.preventDefault()
-                                socket.send(JSON.stringify({ type: "conversation", sender: User.id.toString(), receiver: elem.id.toString() }))
-                            })
-                        })
-
-                    }
-                    break
-                case 'conversation':
-                    if (data.conversation.length > 0) {
-                        document.getElementById('chatListContainer').style.display = 'none'
-                        let chat = document.getElementById('chatContainer')
-                        chat.style.display = 'flex'
-
-                        let chatbox = document.getElementById('chatBox')
-                        chatbox.innerHTML = ""
-                        data.conversation.forEach(elem => {
-                            let chatheader = document.getElementById(`chatHeader`)
-                            chatheader.innerHTML = ""
-                            let bcbutton = document.createElement('button')
-                            bcbutton.classList.add('back-button')
-                            bcbutton.textContent = 'Back'
-                            bcbutton.addEventListener('click', (e) => {
-                                goBack()
-                            })
-                            let span = document.createElement('span')
-                            span.id = 'chatHeader'
-                            chatheader.appendChild(bcbutton)
-                            chatheader.appendChild(span)
-                            let name = document.createElement('div')
-                            name.textContent = data.user.username
-                            name.style.color = 'white'
-                            name.style.display = 'flex'
-                            name.style.position = 'relative'
-                            name.style.alignItems = 'center'
-                            name.style.padding = '0 15px'
-                            name.style.marginRight = '150px'
-                            name.style.flexDirection = 'column'
-                            name.style.justifyContent = 'spacebetween'
-                            name.style.textAlign = 'center'
-                            name.style.whitespace = 'nowrap'
-                            chatheader.appendChild(name)
-                            let chatContainer = document.getElementById('chatContainer');
-                            chatContainer.style.display = 'flex';
-                            if (elem.sender_id === User.id) {
-                                let sent = document.createElement('div')
-                                sent.classList.add("message", "sent");
-                                sent.textContent = elem.body
-                                chatbox.appendChild(sent)
-                            } else {
-                                let receive = document.createElement('div')
-                                receive.textContent = elem.body
-                                receive.classList.add('message', 'received')
-                                chatbox.appendChild(receive)
-                            }
-
-                        })
-                        let send = document.getElementById('send')
-                        send.addEventListener('click', (e) => {
-                            e.preventDefault()
-                            let msg = document.getElementById('messageInput').value
-                            socket.send(JSON.stringify({ type: 'messaging', sender: User.username, receiver: data.user.username, message: msg }))
-                        })
-                        break
-                    }
-                    break;
-                case 'onlineusers':
-                    document.getElementById("userListContainer").style.display = "none";
-                    let online = document.getElementById("onlineStatus")
-                    online.innerHTML = ''
-                    data.users.forEach(user => {
-                        let onlineUser = document.createElement('div')
-                        onlineUser.classList.add('user-item')
-
-                        let usernameSpan = document.createElement('span')
-                        usernameSpan.textContent = user.username
-                        let statusDot = document.createElement('span')
-                        statusDot.classList.add('status-dot')
-                        statusDot.style.backgroundColor = user.online ? 'green' : 'red'
-                        onlineUser.appendChild(usernameSpan)
-                        onlineUser.appendChild(statusDot)
-                        onlineUser.textContent = user.username
-                        online.appendChild(onlineUser)
-                    })
-                default:
-                    console.log("Unknown message type:", data.type);
-            }
+        
+        socket.addEventListener('error', (error) => {
+            console.error('WebSocket error:', error);
+            setTimeout(connectWebSocket, CONSTANTS.RECONNECT_DELAY);
         });
-
-        socket.addEventListener('close', () => {
-            console.log("WebSocket closed. Attempting to reconnect...");
-            setTimeout(connectWebSocket, 3000);
-        });
-
-        socket.addEventListener('error', (err) => {
-            console.error("WebSocket encountered an error:", err);
-            socket.close();
-        });
-
-        let newChat = document.getElementById('newChat')
-        if (newChat) {
-            newChat.addEventListener('click', (e) => {
-                e.preventDefault()
-                socket.send(JSON.stringify({ type: 'getusers' }))
-            })
-        }
-    }
-
-    connectWebSocket();
-
-    window.addEventListener('load', () => {
-        if (!socket || socket.readyState === WebSocket.CLOSED) {
-            connectWebSocket();
-        }
-    });
-
-    let state = sessionStorage.getItem('pageState');
-    console.log(`state is ${state}`);
-
-    window.addEventListener('beforeunload', () => {
-        let currentPage = "home";
-        sessionStorage.setItem('pageState', currentPage);
-        sessionStorage.setItem('session', session);
-    });
-
-    function waitForSocket(callback) {
-        if (socket.readyState === WebSocket.OPEN) {
-            callback();
-        } else {
-            console.log('Socket not ready, retrying...');
-            setTimeout(() => waitForSocket(callback), 50);
-        }
+        
+        return socket;
+    } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+        setTimeout(connectWebSocket, CONSTANTS.RECONNECT_DELAY);
     }
 }
 
+// Update the existing checksession function to use SessionManager
 async function checksession(session) {
-    await fetch('/check', {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session: session })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('unexpected error occured')
-            }
-            return response.json()
-        })
-        .then(data => {
-            console.log(data.error)
-            if (data.error === 'ok') {
-                RealTime("", session)
-            } else {
-                sessionStorage.setItem('pageState', '')
-                SignInPage()
-            }
-        })
+    const isValid = await SessionManager.validateSession(session);
+    if (isValid) {
+        RealTime("", session);
+    } else {
+        SessionManager.saveState('');
+        SignInPage();
+    }
 }
+
+// Update the existing event listener
+window.addEventListener('beforeunload', () => {
+    SessionManager.saveState('home');
+    sessionStorage.setItem('session', session);
+});
+
+// Export necessary functions
+export {
+    handleConversation,
+    connectWebSocket,
+    checksession
+};
