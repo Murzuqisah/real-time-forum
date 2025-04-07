@@ -80,6 +80,7 @@ export function RealTime(User, session) {
     };
 
     const handleSocketMessage = (data) => {
+        createPost();
         switch (data.type) {
             case "posts":
                 const postContainer = document.querySelector('.posts');
@@ -133,61 +134,6 @@ export function RealTime(User, session) {
                 break;
             default:
                 console.log("Unknown message type:", data.type);
-        }
-
-        const  form = document.getElementById('upload');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                let postTitle = document.getElementById('post-title').value;
-                let postBody = document.getElementById('post-content').value;
-                let postFile = document.getElementById('uploaded-file').files[0];
-                
-                if (!postTitle || !postBody) {
-                    alert('Please fill in all fields.');
-                    return;
-                }
-                
-                const createPostForm = document.querySelector('.create-post');
-                createPostForm.classList.add('hidden');
-                
-                if (postFile) {
-                    let filetype = postFile.type;
-                    let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                    if (!validTypes.includes(filetype)) {
-                        alert('Invalid file type. Please upload an image.');
-                        return;
-                    }
-                    if (postFile.size > 20 * 1024 * 1024) {
-                        alert('File size exceeds 20MB. Please upload a smaller image.');
-                        return;
-                    }
-                    
-                    let reader = new FileReader();
-                    
-                    reader.onloadend = function () {
-                        let base64data = reader.result.split(',')[1];
-                        socket.send(JSON.stringify({
-                            type: 'post',
-                            title: postTitle,
-                            body: postBody,
-                            file: base64data,
-                            sender: User.id.toString(),
-                        }));
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    socket.send(JSON.stringify({
-                        type: 'post',
-                        title: postTitle,
-                        body: postBody,
-                        file: null,
-                        sender: User.id.toString(),
-                    }));
-                }
-                console.log('event for posting called')
-            })
         }
     };
 
@@ -398,6 +344,63 @@ export function RealTime(User, session) {
             input.placeholder = 'Type a message...';
         }
     };
+
+    const createPost = () => {
+        const  form = document.getElementById('upload');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                let postTitle = document.getElementById('post-title').value;
+                let postBody = document.getElementById('post-content').value;
+                let postFile = document.getElementById('uploaded-file').files[0];
+                
+                if (!postTitle || !postBody) {
+                    alert('Please fill in all fields.');
+                    return;
+                }
+                
+                const createPostForm = document.querySelector('.create-post');
+                createPostForm.classList.add('hidden');
+                
+                if (postFile) {
+                    let filetype = postFile.type;
+                    let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!validTypes.includes(filetype)) {
+                        alert('Invalid file type. Please upload an image.');
+                        return;
+                    }
+                    if (postFile.size > 20 * 1024 * 1024) {
+                        alert('File size exceeds 20MB. Please upload a smaller image.');
+                        return;
+                    }
+                    
+                    let reader = new FileReader();
+                    
+                    reader.onloadend = function () {
+                        let base64data = reader.result.split(',')[1];
+                        socket.send(JSON.stringify({
+                            type: 'post',
+                            title: postTitle,
+                            body: postBody,
+                            file: base64data,
+                            sender: User.id.toString(),
+                        }));
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    socket.send(JSON.stringify({
+                        type: 'post',
+                        title: postTitle,
+                        body: postBody,
+                        file: null,
+                        sender: User.id.toString(),
+                    }));
+                }
+                console.log('event for posting called')
+            })
+        }
+    }
 
     const createBackButton = (onClick) => {
         const btn = document.createElement('button');
