@@ -10,9 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         SignInPage();
     }
-
-    // We're now handling the form submission in the SignInPage component
-    // No need to add event listener here as it could cause duplicate submissions
 });
 
 export function RealTime(User, session) {
@@ -154,24 +151,6 @@ export function RealTime(User, session) {
                     message: msg,
                     username: User.username
                 }));
-            });
-        }
-
-        const floatingButton = document.getElementById('floatingButton');
-        if (floatingButton) {
-            floatingButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                const createPostForm = document.querySelector('.create-post');
-                if (createPostForm.classList.contains('hidden')) {
-                    createPostForm.classList.remove('hidden');
-                    createPostForm.style.opacity = 1;
-                    createPostForm.style.visibility = 'visible';
-                } else {
-                    createPostForm.style.opacity = 0;
-                    createPostForm.style.visibility = 'hidden';
-                    setTimeout(() => createPostForm.classList.add('hidden'), 500); // Delay hiding with a timeout to allow opacity transition
-                }
-                console.log('clicked post add')
             });
         }
     };
