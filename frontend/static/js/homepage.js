@@ -413,6 +413,8 @@ function chat(profile) {
     input.type = 'text'
     input.id = 'messageInput'
     input.placeholder = 'Type a message...'
+    // Add a data attribute to help with event delegation
+    input.dataset.chatInput = 'true'
     let send = document.createElement('button')
     send.id = 'send'
     send.innerHTML = '<img src="/frontend/static/assets/paper-plane-regular.svg" alt="Send" style="height: 16px; filter: invert(100%)">';

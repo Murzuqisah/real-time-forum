@@ -1,5 +1,5 @@
 import { HomePage, renderPosts } from './homepage.js';
-import { SignInPage, login } from './sign-in.js';
+import { SignInPage } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const previousState = sessionStorage.getItem('pageState');
@@ -128,30 +128,103 @@ export function RealTime(User, session) {
     };
 
     const attachUIEventListeners = () => {
-        // New chat button event
-        const newChat = document.getElementById('newChat');
-        if (newChat) {
-            newChat.addEventListener('click', (e) => {
-                e.preventDefault();
-                socket.send(JSON.stringify({ type: 'getusers' }));
+        console.log('Attaching UI event listeners');
+
+        // Remove existing event listeners to prevent duplicates
+        document.body.removeEventListener('click', handleBodyClick);
+
+        // Add a single event listener using event delegation
+        document.body.addEventListener('click', handleBodyClick);
+
+        // Add input event listener for message input
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendMessage();
+                }
             });
         }
+    };
 
-        // Send message event
-        const sendBtn = document.getElementById('send');
-        if (sendBtn) {
-            sendBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const msg = document.getElementById('messageInput').value;
-                const receiverElem = document.getElementById('name');
+    // Event delegation handler for all button clicks
+    const handleBodyClick = (e) => {
+        // Handle new chat button
+        if (e.target.id === 'newChat' || e.target.closest('#newChat')) {
+            e.preventDefault();
+            console.log('New chat button clicked');
+            socket.send(JSON.stringify({ type: 'getusers' }));
+            return;
+        }
+
+        // Handle send message button
+        if (e.target.id === 'send' || e.target.closest('#send')) {
+            e.preventDefault();
+            console.log('Send button clicked');
+            sendMessage();
+            return;
+        }
+
+        // Handle back buttons
+        if (e.target.classList.contains('back-button') || e.target.closest('.back-button')) {
+            e.preventDefault();
+            const container = e.target.closest('.header');
+            if (container && container.id === 'chatHeader') {
+                console.log('Chat back button clicked');
+                // First hide the chat container and show the chat list
+                goBack();
+                // Then request updated chats
                 socket.send(JSON.stringify({
-                    type: 'messaging',
-                    sender: User.username,
-                    receiver: receiverElem?.textContent,
-                    message: msg,
+                    type: "chats",
+                    sender: User.id.toString(),
                     username: User.username
                 }));
-            });
+            } else {
+                console.log('User list back button clicked');
+                goBackToChats();
+            }
+            return;
+        }
+
+        // Handle chat item clicks
+        if (e.target.classList.contains('chat') || e.target.closest('.chat')) {
+            e.preventDefault();
+            const chatElement = e.target.classList.contains('chat') ? e.target : e.target.closest('.chat');
+            const username = chatElement.dataset.username;
+            const userId = chatElement.dataset.userId;
+            if (username && userId) {
+                console.log('Chat item clicked:', username);
+                socket.send(JSON.stringify({
+                    type: "conversation",
+                    sender: User.id.toString(),
+                    receiver: userId,
+                    username: User.username
+                }));
+            }
+            return;
+        }
+    };
+
+    // Helper function to send a message
+    const sendMessage = () => {
+        const messageInput = document.getElementById('messageInput');
+        const msg = messageInput.value;
+        if (!msg.trim()) return; // Don't send empty messages
+
+        const receiverElem = document.getElementById('chatHeader').querySelector('span');
+        if (receiverElem && receiverElem.textContent) {
+            socket.send(JSON.stringify({
+                type: 'messaging',
+                sender: User.username,
+                receiver: receiverElem.textContent,
+                message: msg,
+                username: User.username
+            }));
+
+            // Clear the input field after sending
+            messageInput.value = '';
+            messageInput.focus();
         }
     };
 
@@ -186,13 +259,11 @@ export function RealTime(User, session) {
         const header = document.createElement('div');
         header.classList.add('header');
         header.textContent = "Users";
-        const backBtn = createBackButton(() => {
-            socket.send(JSON.stringify({
-                type: "chats",
-                sender: User.id.toString(),
-                username: User.username
-            }));
-        });
+        // We'll use event delegation for the back button
+        const backBtn = document.createElement('button');
+        backBtn.classList.add('back-button');
+        backBtn.textContent = 'Back';
+        // The click handler is now in the handleBodyClick function
         header.appendChild(backBtn);
         userList.appendChild(header);
         const chatList = document.createElement('div');
@@ -203,19 +274,12 @@ export function RealTime(User, session) {
                 item.classList.add('chat');
                 item.textContent = elem.username;
                 item.dataset.username = elem.username;
+                item.dataset.userId = elem.id.toString();
                 const statusIndicator = document.createElement('p');
                 statusIndicator.classList.add('status');
                 statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
                 item.appendChild(statusIndicator);
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    socket.send(JSON.stringify({
-                        type: "conversation",
-                        sender: User.id.toString(),
-                        receiver: elem.id.toString(),
-                        username: User.username
-                    }));
-                });
+                // Event delegation is now used instead of individual event listeners
                 chatList.appendChild(item);
             }
         });
@@ -235,19 +299,12 @@ export function RealTime(User, session) {
                 chat.classList.add('chat');
                 chat.textContent = elem.username;
                 chat.dataset.username = elem.username;
+                chat.dataset.userId = elem.id.toString();
                 const statusIndicator = document.createElement('p');
                 statusIndicator.classList.add('status');
                 statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
                 chat.appendChild(statusIndicator);
-                chat.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    socket.send(JSON.stringify({
-                        type: "conversation",
-                        sender: User.id.toString(),
-                        receiver: elem.id.toString(),
-                        username: User.username
-                    }));
-                });
+                // Event delegation is now used instead of individual event listeners
                 chatList.appendChild(chat);
             });
         }
@@ -263,13 +320,11 @@ export function RealTime(User, session) {
         chatBox.innerHTML = "";
         const chatHeader = document.getElementById('chatHeader');
         chatHeader.innerHTML = "";
-        const backBtn = createBackButton(() => {
-            socket.send(JSON.stringify({
-                type: "chats",
-                sender: User.id.toString(),
-                username: User.username
-            }));
-        });
+        // We'll use event delegation for the back button
+        const backBtn = document.createElement('button');
+        backBtn.classList.add('back-button');
+        backBtn.textContent = 'Back';
+        // The click handler is now in the handleBodyClick function
         chatHeader.appendChild(backBtn);
         const headerSpan = document.createElement('span');
         headerSpan.id = 'chatHeader';
@@ -374,17 +429,19 @@ export function RealTime(User, session) {
         }
     }
 
-    const createBackButton = (onClick) => {
-        const btn = document.createElement('button');
-        btn.classList.add('back-button');
-        btn.textContent = 'Back';
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            onClick();
-        });
-        return btn;
+    // We're now using event delegation for back buttons
+    // This function is kept for reference but is no longer used
+
+    // Helper functions for navigation
+    const goBack = () => {
+        document.getElementById("chatContainer").style.display = "none";
+        document.getElementById("chatListContainer").style.display = "flex";
     };
 
+    const goBackToChats = () => {
+        document.getElementById("userListContainer").style.display = "none";
+        document.getElementById("chatListContainer").style.display = "flex";
+    };
 
     const status = (onlineUsersList, username) => {
         return onlineUsersList.includes(username);
