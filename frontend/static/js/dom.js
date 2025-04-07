@@ -339,23 +339,21 @@ export function RealTime(User, session) {
     };
 
     const createPost = () => {
-        const  form = document.getElementById('upload');
+        const form = document.getElementById('upload');
         if (form) {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-
                 let postTitle = document.getElementById('post-title').value;
                 let postBody = document.getElementById('post-content').value;
                 let postFile = document.getElementById('uploaded-file').files[0];
-
+    
                 if (!postTitle || !postBody) {
                     alert('Please fill in all fields.');
                     return;
                 }
-
-                const createPostForm = document.querySelector('.create-post');
-                createPostForm.classList.add('hidden');
-
+    
+                
+    
                 if (postFile) {
                     let filetype = postFile.type;
                     let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -367,33 +365,34 @@ export function RealTime(User, session) {
                         alert('File size exceeds 20MB. Please upload a smaller image.');
                         return;
                     }
-
-                    let reader = new FileReader();
-
-                    reader.onloadend = function () {
-                        let base64data = reader.result.split(',')[1];
-                        socket.send(JSON.stringify({
-                            type: 'post',
-                            title: postTitle,
-                            body: postBody,
-                            file: base64data,
-                            sender: User.id.toString(),
-                        }));
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    socket.send(JSON.stringify({
-                        type: 'post',
-                        title: postTitle,
-                        body: postBody,
-                        file: null,
-                        sender: User.id.toString(),
-                    }));
                 }
-                form.reset();
-            })
+
+                const createPostForm = document.querySelector('.create-post');
+                createPostForm.classList.add('hidden');
+
+                let form = document.getElementById("upload")
+
+                fetch('/post', {
+                    method: "POST",
+                    body: new FormData(form)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("unknown error occured");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error === 'ok') {
+                        RealTime(data.user, data.session)
+                    } else {
+                        alert(data.error)
+                    }
+                })
+    
+            });
         }
-    }
+    };
 
     const createBackButton = (onClick) => {
         const btn = document.createElement('button');
@@ -443,3 +442,11 @@ async function checksession(session) {
         SignInPage();
     }
 }
+
+function chunkString(str, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < str.length; i += chunkSize) {
+      chunks.push(str.slice(i, i + chunkSize));
+    }
+    return chunks;
+  }
