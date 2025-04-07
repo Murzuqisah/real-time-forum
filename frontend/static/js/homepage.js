@@ -86,6 +86,19 @@ export const HomePage = () => {
     createPostTop.appendChild(createText)
     postsContainer.appendChild(createPostTop)
 
+    // post form
+    let postForm = document.createElement('section');
+    postForm.classList.add('create-post', 'hidden');
+    let overlay = document.createElement('div')
+    overlay.classList.add('overlay')
+    document.body.appendChild(overlay)
+
+    let postdiv = document.createElement('div')
+    postdiv.classList.add('post-popup')
+
+    let closeButton = document.createElement('button');
+    closeButton.classList.add('close-modal');
+
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
     floating.style.display = 'none'
