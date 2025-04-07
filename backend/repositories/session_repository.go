@@ -24,10 +24,10 @@ func ValidateSession(sessionToken string) (string, error) {
 	query := "SELECT user_id, expires_at FROM tblSessions WHERE session_token = ?"
 	row := util.DB.QueryRow(query, sessionToken)
 
-	var sessionTOken string
+	var userID string
 	var expiresAt time.Time
 
-	err := row.Scan(&sessionToken, &expiresAt)
+	err := row.Scan(&userID, &expiresAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return "", fmt.Errorf("invalid or expired session token")
@@ -39,7 +39,7 @@ func ValidateSession(sessionToken string) (string, error) {
 		_, _ = util.DB.Exec("DELETE FROM tblSessions WHERE session_token = ?", sessionToken)
 		return "", fmt.Errorf("session expired")
 	}
-	return sessionTOken, nil
+	return userID, nil
 }
 
 // DeleteSession removes a session when a user logs out
