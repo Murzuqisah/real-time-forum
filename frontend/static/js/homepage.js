@@ -1,9 +1,12 @@
 export const HomePage = () => {
+    // Reset the document
     document.head.innerHTML = ""
     document.head.innerHTML = `
     <link rel="stylesheet" href="/frontend/static/css/style.css" />
     `
     document.body.innerHTML = ""
+
+    // Add scripts
     let scriptFiles = [
         "/frontend/static/js/script.js",
     ];
@@ -14,6 +17,11 @@ export const HomePage = () => {
         script.defer = true;
         document.head.appendChild(script);
     });
+
+    // Create overlay for modals - this should be added first to ensure it's available
+    let overlay = document.createElement('div')
+    overlay.classList.add('overlay')
+    document.body.appendChild(overlay)
 
     // Append the header
     let header = document.createElement('header');
@@ -72,7 +80,18 @@ export const HomePage = () => {
 
     let postsContainer = document.createElement('main');
     postsContainer.classList.add('posts');
-    postsContainer.appendChild(postingform());
+
+    // Create post form section
+    let postForm = document.createElement('section');
+    postForm.classList.add('create-post', 'hidden');
+    postForm.id = 'post-form';
+
+    // Get the post form content from the postingform function
+    let postFormContent = postingform();
+    postForm.appendChild(postFormContent);
+
+    // Add the post form to the document body (not inside postsContainer)
+    document.body.appendChild(postForm);
 
     // Create post button at the top of the page
     let createPostTop = document.createElement('main')
@@ -86,72 +105,8 @@ export const HomePage = () => {
     createPostTop.appendChild(createText)
     postsContainer.appendChild(createPostTop)
 
-    // post form
-    let postForm = document.createElement('section');
-    postForm.classList.add('create-post', 'hidden');
-    let overlay = document.createElement('div')
-    overlay.classList.add('overlay')
-    document.body.appendChild(overlay)
-
-    let postdiv = document.createElement('div')
-    postdiv.classList.add('post-popup')
-
-    let closeButton = document.createElement('button');
-    closeButton.classList.add('close-modal');
-    closeButton.innerHTML = '&times;';
-    closeButton.addEventListener('click', function () {
-        postForm.classList.add('hidden');
-        overlay.style.display = 'none'
-    });
-    postdiv.appendChild(closeButton);
-
-    let postTitle = document.createElement('h2')
-    postTitle.textContent = 'Create a Post';
-    postdiv.appendChild(postTitle)
-
-    let upload = document.createElement('form');
-    upload.name = "upload";
-    upload.id = "upload";
-    upload.enctype = "multipart/form-data";
-
-    let labelTitle = document.createElement('label');
-    labelTitle.htmlFor = "post-title";
-    labelTitle.textContent = "Title";
-    let inputTitle = document.createElement('input');
-    inputTitle.type = "text";
-    inputTitle.id = "post-title";
-    inputTitle.name = "post-title";
-    inputTitle.placeholder = "Enter your post title";
-    inputTitle.required = true;
-    let labelContent = document.createElement('label');
-    labelContent.htmlFor = "post-content";
-    labelContent.textContent = "Content";
-    let textarea = document.createElement('textarea');
-    textarea.id = "post-content";
-    textarea.name = "post-content";
-    textarea.placeholder = "Write your post here...";
-    textarea.required = true;
-    let postOperation = document.createElement('div');
-    postOperation.classList.add('post-operation');
-    let fileInput = document.createElement('input');
-    fileInput.type = "file";
-    fileInput.name = "uploaded-file";
-    fileInput.id = "uploaded-file";
-    postOperation.appendChild(fileInput);
-    let button = document.createElement('button');
-    button.type = "submit";
-    button.id = 'posting'
-    button.textContent = "Post";
-
-    upload.appendChild(labelTitle);
-    upload.appendChild(inputTitle);
-    upload.appendChild(labelContent);
-    upload.appendChild(textarea);
-    upload.appendChild(postOperation);
-    upload.appendChild(button);
-    postdiv.appendChild(upload)
-    postForm.appendChild(postdiv);
-    postsContainer.appendChild(postForm);
+    // We're using the postForm created earlier
+    // The form is already added to the document body
 
     document.body.appendChild(postsContainer);
 
@@ -184,6 +139,17 @@ export const HomePage = () => {
         overlay.classList.add('active');
         overlay.style.display = 'block';
     });
+
+    // Make sure the close button properly hides both the form and overlay
+    // Find the close button within the post form
+    const closeButton = postForm.querySelector('.close-modal');
+    if (closeButton) {
+        closeButton.addEventListener('click', function () {
+            postForm.classList.add('hidden');
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+        });
+    }
 
     document.body.appendChild(postsContainer);
 
@@ -372,7 +338,7 @@ export function renderPosts(data, postsContainer) {
 
         article.appendChild(commentsection)
         postsContainer.appendChild(article);
-    });  
+    });
 }
 
 function chat(profile) {
@@ -419,7 +385,7 @@ function chat(profile) {
    userlist.appendChild(list)
    profile.appendChild(userlist)
 
-  
+
     let chatcontainer = document.createElement('div')
     chatcontainer.classList.add('chat-container')
     chatcontainer.id = 'chatContainer'
@@ -431,7 +397,7 @@ function chat(profile) {
     let bcbutton = document.createElement('button')
     bcbutton.classList.add('back-button')
     bcbutton.textContent = 'Back'
-    bcbutton.addEventListener('click', (e) => {
+    bcbutton.addEventListener('click', () => {
         goBack()
     })
     let span = document.createElement('span')
@@ -462,12 +428,21 @@ function chat(profile) {
 }
 
 function postingform() {
-    let postForm = document.createElement('section');
-    postForm.classList.add('create-post', 'hidden');
-    postForm.id = 'post-form'
-
+    // This function now only creates the form structure
+    // The actual section element and event listeners are handled in the HomePage function
     let postdiv = document.createElement('div')
     postdiv.classList.add('post-popup')
+
+    // Add close button
+    let closeButton = document.createElement('button');
+    closeButton.classList.add('close-modal');
+    closeButton.innerHTML = '&times;';
+    postdiv.appendChild(closeButton);
+
+    // Add title
+    let postTitle = document.createElement('h2')
+    postTitle.textContent = 'Create a Post';
+    postdiv.appendChild(postTitle)
 
     let upload = document.createElement('form');
     upload.name = "upload";
@@ -510,8 +485,7 @@ function postingform() {
     upload.appendChild(postOperation);
     upload.appendChild(button);
     postdiv.appendChild(upload)
-    postForm.appendChild(postdiv);
-    return postForm
+    return postdiv
 }
 
 export function goBack() {
@@ -525,10 +499,10 @@ function goBackToChats() {
     document.getElementById("chatListContainer").style.display = "flex";
 }
 
-// Helper to format time
-function formatTime(timestamp) {
+// Helper to format time - exported for use in other modules
+export function formatTime(timestamp) {
     if (!timestamp) return 'Unknown';
-    
+
     try {
         const date = new Date(timestamp);
         return date.toLocaleString();
