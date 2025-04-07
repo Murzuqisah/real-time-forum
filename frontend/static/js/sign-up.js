@@ -206,12 +206,15 @@ async function signUp(username, email, password, confirmedPassword, e) {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      return response.json(); 
+      return response.json();
     })
     .then(data => {
       console.log(data);
       if (data.error === 'ok') {
-        navigate(e, '/sign-in');
+        // Always redirect to sign-in page after successful sign-up
+        // Pass a success parameter to show a message
+        navigate(e, '/sign-in?from=signup');
+        // No need for alert as we'll show a message on the sign-in page
       } else {
         alert(data.error);
       }
