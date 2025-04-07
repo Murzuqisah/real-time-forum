@@ -163,7 +163,7 @@ export const HomePage = () => {
     profileHeader.classList.add('profile-header')
 
     let profileImg = document.createElement('img')
-    profileImg.src = '/frontend/static/assets/profile.png'
+    // profileImg.src = '/frontend/static/img/profile-image.jpeg' <- to style tomorrow
     profileImg.alt = 'User Icon'
     profileHeader.appendChild(profileImg)
 
@@ -430,12 +430,9 @@ function chat(profile) {
 }
 
 function postingform() {
-    // This function now only creates the form structure
-    // The actual section element and event listeners are handled in the HomePage function
     let postdiv = document.createElement('div')
     postdiv.classList.add('post-popup')
 
-    // Add close button
     let closeButton = document.createElement('button');
     closeButton.classList.add('close-modal');
     closeButton.innerHTML = '&times;';
