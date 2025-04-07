@@ -74,8 +74,21 @@ export const HomePage = () => {
     postsContainer.classList.add('posts');
     postsContainer.appendChild(postingform());
 
+    // Create post button at the top of the page
+    let createPostTop = document.createElement('main')
+    createPostTop.classList.add('create-post-top');
+    let createIcon = document.createElement('img')
+    createIcon.src = '/frontend/static/assets/plus-solid.svg';
+    createIcon.alt = 'create post'
+    let createText = document.createElement('p')
+    createText.textContent = 'Create a Post'
+    createPostTop.appendChild(createIcon)
+    createPostTop.appendChild(createText)
+    postsContainer.appendChild(createPostTop)
+
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
+    floating.style.display = 'none'
     let createPost = document.createElement('p')
     createPost.textContent = 'Create a Post'
     let floatingButton = document.createElement('button')
