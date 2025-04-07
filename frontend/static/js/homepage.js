@@ -6,9 +6,6 @@ export const HomePage = () => {
     document.body.innerHTML = ""
     let scriptFiles = [
         "/frontend/static/js/script.js",
-        "/frontend/static/js/comments_toggler.js",
-        "/frontend/static/js/reactions.js",
-        "/frontend/static/js/format_time.js"
     ];
 
     scriptFiles.forEach(src => {
@@ -97,15 +94,6 @@ export const HomePage = () => {
     document.body.appendChild(floating)
 
     document.body.appendChild(postsContainer);
-
-    // online status indicator
-    let onlineStatus = document.createElement('div')
-    onlineStatus.classList.add('online-status')
-    let status = document.createElement('div')
-    status.textContent = 'Online Users'
-    status.classList.add('status')
-    onlineStatus.appendChild(status)
-
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile = chat(profile)
@@ -285,10 +273,6 @@ function chat(profile) {
     let button = document.createElement('button')
     button.classList.add('back-button')
     button.textContent = 'Back'
-    button.addEventListener('click', (e) => {
-        e.preventDefault()
-        goBackToChats()
-    })
     back.appendChild(button)
     back.textContent = 'Select User'
 
@@ -349,6 +333,7 @@ function postingform() {
 
     let upload = document.createElement('form');
     upload.name = "upload";
+    upload.id = "upload";
     upload.enctype = "multipart/form-data";
 
     let labelTitle = document.createElement('label');
@@ -376,6 +361,7 @@ function postingform() {
     fileInput.id = "uploaded-file";
     postOperation.appendChild(fileInput);
     let button = document.createElement('button');
+    button.type = "submit";
     button.id = 'posting'
     button.textContent = "Post";
 
