@@ -186,8 +186,36 @@ export const HomePage = () => {
     });
 
     document.body.appendChild(postsContainer);
+
     let profile = document.createElement('aside');
     profile.classList.add('profile');
+
+    let profileSection = document.createElement('div');
+    profileSection.classList.add('profile-section');
+
+    let profileHeader = document.createElement('div')
+    profileHeader.classList.add('profile-header')
+
+    let profileImg = document.createElement('img')
+    profileImg.src = '/frontend/static/assets/profile.png'
+    profileImg.alt = 'User Icon'
+    profileHeader.appendChild(profileImg)
+
+    let profileName = document.createElement('h3')
+    profileName.id = 'profileName'
+    profileName.textContent = 'Username'
+
+    let profileEmail = document.createElement('p')
+    profileEmail.id = 'profileEmail'
+    profileEmail.textContent = 'email'
+
+    profileSection.appendChild(profileHeader)
+    profileSection.appendChild(profileImg)
+    profileSection.appendChild(profileName)
+    profileSection.appendChild(profileEmail)
+
+    profile.appendChild(profileSection)
+
     profile = chat(profile)
     document.body.appendChild(profile);
 };
@@ -198,26 +226,34 @@ export function renderPosts(data, postsContainer) {
         return;
     }
 
-    postsContainer.innerHTML = "";
-    postsContainer.appendChild(postingform());
+    const createPostTop = document.querySelector('.create-post-top');
+    postsContainer.innerHTML = '';
+
+    if (createPostTop) {
+        postsContainer.appendChild(createPostTop);
+    }
 
     data.posts.forEach(item => {
         item = item || {};
 
         let article = document.createElement('article');
-        article.classList.add('post');
+        article.classList.add('post', 'animate-slide-in');
 
         let headerDiv = document.createElement('div');
+        headerDiv.classList.add('post-header');
         headerDiv.innerHTML = `
             <p class="post-author">@${item.username || "Unknown"}</p>
             <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
         `;
         article.appendChild(headerDiv);
 
-        article.innerHTML += `
-            <h3>${item.post_title || "Untitled"}</h3>
-            <p>${item.body || "No content"}</p>
-        `;
+        let title = document.createElement('h2')
+        title.textContent = item.post_title || "Untitled";
+        article.appendChild(title);
+
+        let content = document.createElement('p');
+        content.textContent = item.body || "No content";
+        article.appendChild(content);
 
         if (item.imageurl) {
             let img = document.createElement('img');
@@ -245,7 +281,7 @@ export function renderPosts(data, postsContainer) {
 
         let likebutton = document.createElement('button')
         likebutton.classList.add('like-button')
-        likebutton.id = item.id
+        likebutton.id = `like-${item.id}`;
         likebutton.ariaLabel = 'like this post'
         let likeimg = document.createElement('img')
         likeimg.classList.add('icon')
@@ -253,17 +289,18 @@ export function renderPosts(data, postsContainer) {
         likeimg.alt = 'thumbs-up-regular'
         likeimg.style.height = '25px'
         likeimg.style.width = '1.2rem'
-        likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        likeimg.style.marginRight = '5px'
+        // likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        // likeimg.style.marginRight = '5px'
         likebutton.appendChild(likeimg)
         let likecount = document.createElement('span')
         likecount.classList.add('like-count')
-        likecount.textContent = item.likes
+        likecount.textContent = item.likes || 0;
         likebutton.appendChild(likecount)
         article.appendChild(likebutton)
 
         let dislikebutton = document.createElement('button')
-        dislikebutton.id = item.id
+        dislikebutton.classList.add('dislike-button')
+        dislikebutton.id = `like-${item.id}`
         dislikebutton.ariaLabel = 'Dislike this post'
         let dislikeimg = document.createElement('img')
         dislikeimg.classList.add('icon')
@@ -276,7 +313,7 @@ export function renderPosts(data, postsContainer) {
         dislikebutton.appendChild(dislikeimg)
         let dislikecount = document.createElement('span')
         dislikecount.classList.add('dislike-count')
-        dislikecount.textContent = item.dislikes
+        dislikecount.textContent = item.dislikes || 0;
         dislikebutton.appendChild(dislikecount)
         article.appendChild(dislikebutton)
 
@@ -287,26 +324,28 @@ export function renderPosts(data, postsContainer) {
         commentimg.classList.add('icon')
         commentimg.style.height = '25px'
         commentimg.style.width = '1.2rem'
-        commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        commentimg.style.marginRight = '5px'
+        // commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+        // commentimg.style.marginRight = '5px'
         commentimg.src = '/frontend/static/assets/comment-regular.svg'
         commentimg.alt = 'comment-regular'
         let commentcount = document.createElement('span')
         commentcount.classList.add('comment-count')
-        commentcount.textContent = item.comment_count
+        commentcount.textContent = item.comment_count || 0;
         commentbutton.appendChild(commentimg)
         commentbutton.append(commentcount)
         article.appendChild(commentbutton)
 
-        let commentsection = document.createElement('div')
-        commentsection.classList.add('comments-section')
-        let h4 = document.createElement('h4')
-        h4.textContent = 'Comments'
-        commentsection.appendChild(h4)
+        article.appendChild(postactions);
+
+        let commentList = document.createElement('div');
+        commentList.classList.add('comment-list');
+        commentList.id = `comment-list-${item.id}`;
+        commentsection.appendChild(commentList);
 
         let commentinput = document.createElement('comment-input')
         commentinput.classList.add('comment-input')
         let addcomment = document.createElement('form')
+        addcomment.id = `comment-form-${item.id}`;
         let input = document.createElement('input')
         input.type = 'hidden'
         input.name = 'id'
@@ -316,22 +355,22 @@ export function renderPosts(data, postsContainer) {
         comment.type = 'text'
         comment.name = 'comment'
         comment.classList.add('comment-box')
-        comment.placeholder = 'Write a comment...'
-        addcomment.appendChild(comment)
+        comment.placeholder = 'Write a comment...';
+        addcomment.appendChild(comment);
         let addbutton = document.createElement('button')
-        addbutton.classList.add('submit-comment')
+        addbutton.classList.add('submit-comment');
+        addbutton.type = 'submit';
         let addimg = document.createElement('img')
-        addimg.style.height = '20px'
-        addimg.style.margin = '0'
         addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
         addimg.alt = 'paper-plane-regular'
+        // addimg.style.height = '20px'
+        // addimg.style.margin = '0'
         addbutton.appendChild(addimg)
         addcomment.appendChild(addbutton)
         commentsection.appendChild(addcomment)
+        commentsection.appendChild(commentinput)
 
         article.appendChild(commentsection)
-
-
         postsContainer.appendChild(article);
     });  
 }
@@ -339,8 +378,8 @@ export function renderPosts(data, postsContainer) {
 function chat(profile) {
     let chatListContainer = document.createElement('div')
     chatListContainer.classList.add('chat-list-container')
-    chatListContainer.id = 'chatListContainer'
-    let header = document.createElement('div')
+    chatListContainer.id = 'chatListContainer';
+    let header = document.createElement('div');
     header.classList.add('header')
     header.textContent = "Chats"
     let chatlist = document.createElement('div')
@@ -365,18 +404,22 @@ function chat(profile) {
     let button = document.createElement('button')
     button.classList.add('back-button')
     button.textContent = 'Back'
+    button.addEventListener('click', (e) => {
+        e.preventDefault()
+        goBackToChats()
+    })
     back.appendChild(button)
     back.textContent = 'Select User'
 
-    let list = document.createElement('div')
-    list.classList.add('user-list')
-    list.id = 'userList'
+   let list = document.createElement('div')
+   list.classList.add('user-list')
+   list.id = 'userList'
 
-    userlist.appendChild(back)
-    userlist.appendChild(list)
-    profile.appendChild(userlist)
+   userlist.appendChild(back)
+   userlist.appendChild(list)
+   profile.appendChild(userlist)
 
-
+  
     let chatcontainer = document.createElement('div')
     chatcontainer.classList.add('chat-container')
     chatcontainer.id = 'chatContainer'
@@ -388,7 +431,9 @@ function chat(profile) {
     let bcbutton = document.createElement('button')
     bcbutton.classList.add('back-button')
     bcbutton.textContent = 'Back'
-
+    bcbutton.addEventListener('click', (e) => {
+        goBack()
+    })
     let span = document.createElement('span')
     span.id = 'chatHeader'
     backbutton.appendChild(bcbutton)
@@ -404,6 +449,7 @@ function chat(profile) {
     input.placeholder = 'Type a message...'
     let send = document.createElement('button')
     send.id = 'send'
+    send.innerHTML = '<img src="/frontend/static/assets/paper-plane-regular.svg" alt="Send" style="height: 16px; filter: invert(100%)">';
     chatinput.appendChild(input)
     chatinput.appendChild(send)
 
@@ -466,4 +512,28 @@ function postingform() {
     postdiv.appendChild(upload)
     postForm.appendChild(postdiv);
     return postForm
+}
+
+export function goBack() {
+    document.getElementById("chatContainer").style.display = "none";
+    document.getElementById("chatListContainer").style.display = "flex";
+}
+
+
+function goBackToChats() {
+    document.getElementById("userListContainer").style.display = "none";
+    document.getElementById("chatListContainer").style.display = "flex";
+}
+
+// Helper to format time
+function formatTime(timestamp) {
+    if (!timestamp) return 'Unknown';
+    
+    try {
+        const date = new Date(timestamp);
+        return date.toLocaleString();
+    } catch (e) {
+        console.error('Error formatting time:', e);
+        return timestamp;
+    }
 }
