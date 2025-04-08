@@ -74,7 +74,7 @@ export function RealTime(User, session) {
 
     const handleSocketMessage = (data) => {
         createPost();
-       
+
         switch (data.type) {
             case "posts":
                 const postContainer = document.querySelector('.posts');
@@ -278,7 +278,20 @@ export function RealTime(User, session) {
         }
     };
 
-    const showConversation = (data) => {
+    function throttle(func, limit) {
+        let inThrottle;
+        return function (...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
+    const MESSAGES_PER_PAGE = 20;
+
+    const showConversation = throttle((data) => {
         document.getElementById('chatListContainer').style.display = 'none';
         document.getElementById('userListContainer').style.display = 'none';
         const chat = document.getElementById('chatContainer');
@@ -288,6 +301,7 @@ export function RealTime(User, session) {
         chatBox.innerHTML = "";
         const chatHeader = document.getElementById('chatHeader');
         chatHeader.innerHTML = "";
+
         const backBtn = createBackButton(() => {
             socket.send(JSON.stringify({
                 type: "chats",
@@ -296,9 +310,11 @@ export function RealTime(User, session) {
             }));
         });
         chatHeader.appendChild(backBtn);
+
         const headerSpan = document.createElement('span');
         headerSpan.id = 'chatHeader';
         chatHeader.appendChild(headerSpan);
+
         const nameDiv = document.createElement('div');
         nameDiv.id = "name";
         nameDiv.textContent = data.user.username;
@@ -315,26 +331,30 @@ export function RealTime(User, session) {
             whitespace: 'nowrap'
         });
         chatHeader.appendChild(nameDiv);
-        data.conversation.forEach(elem => {
-            if (elem.sender_id === User.id) {
-                const sent = document.createElement('div');
-                sent.classList.add("message", "sent");
-                sent.textContent = elem.body;
-                chatBox.appendChild(sent);
-            } else {
-                const received = document.createElement('div');
-                received.classList.add("message", "received");
-                received.textContent = elem.body;
-                chatBox.appendChild(received);
-            }
+
+        // Show only the last 20 messages
+        const messagesToShow = data.conversation.slice(-MESSAGES_PER_PAGE);
+
+        messagesToShow.forEach(elem => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add("message", elem.sender_id === User.id ? "sent" : "received");
+            messageDiv.textContent = elem.body;
+            chatBox.appendChild(messageDiv);
         });
-    };
+
+        // Optional: Scroll to bottom
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }, 1000);
+
+
 
     const displayMessage = (data) => {
         const messageElement = document.createElement("div");
         messageElement.classList.add("message", data.sender.username === User.username ? "sent" : "received");
         messageElement.innerText = data.message;
-        document.getElementById("chatBox").appendChild(messageElement);
+        let chatBox = document.getElementById("chatBox")
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
         const input = document.getElementById('messageInput');
         if (input) {
             input.value = "";
@@ -415,13 +435,13 @@ export function RealTime(User, session) {
             button.removeEventListener('click', handleLike); // Prevent duplicate listeners
             button.addEventListener('click', handleLike);
         });
-    
+
         const dislikeButtons = document.querySelectorAll(".dislike-button");
         dislikeButtons.forEach((button) => {
             button.removeEventListener('click', handleDislike);
             button.addEventListener('click', handleDislike);
         });
-    
+
         function handleLike(e) {
             e.preventDefault();
             const button = e.currentTarget;
@@ -432,7 +452,7 @@ export function RealTime(User, session) {
                 reactionType: "like"
             }));
         }
-    
+
         function handleDislike(e) {
             e.preventDefault();
             const button = e.currentTarget;
@@ -444,7 +464,7 @@ export function RealTime(User, session) {
             }));
         }
     };
-    
+
 
 
     const status = (onlineUsersList, username) => {
