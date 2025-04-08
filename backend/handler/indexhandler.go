@@ -105,19 +105,13 @@ func HandleConnection(client *Client) {
 		case "getposts":
 			getposts(client)
 		case "reaction":
-			action, err := ReactionHandler(msg["userid"], msg["postid"], msg["reaction"])
+			err := ReactionHandler(msg["userid"], msg["postid"], msg["reactionType"])
 			if err != nil {
 				log.Println("Error adding reaction:", err)
 				sendError(client, err.Error())
 				continue
 			}
-			log.Println("Reaction added")
-			sendJSON(client, map[string]any{
-				"type":     "reaction",
-				"id":       msg["postid"],
-				"action":   action,
-				"reaction": msg["reaction"],
-			})
+			getposts(client)
 		case "getuser":
 			if _, ok := SessionStore[msg["session"]]; !ok {
 				log.Println("Invalid session:", msg["session"])
