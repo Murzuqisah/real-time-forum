@@ -74,10 +74,13 @@ export function RealTime(User, session) {
 
     const handleSocketMessage = (data) => {
         createPost();
+       
         switch (data.type) {
             case "posts":
                 const postContainer = document.querySelector('.posts');
+                console.log(data)
                 if (postContainer) renderPosts(data, postContainer);
+                attachPostReactionListeners(socket, User);
                 break;
             case 'error':
                 if (data.message === 'invalid session') {
@@ -128,6 +131,7 @@ export function RealTime(User, session) {
             default:
                 console.log("Unknown message type:", data.type);
         }
+
     };
 
     const attachUIEventListeners = () => {
@@ -346,14 +350,14 @@ export function RealTime(User, session) {
                 let postTitle = document.getElementById('post-title').value;
                 let postBody = document.getElementById('post-content').value;
                 let postFile = document.getElementById('uploaded-file').files[0];
-    
+
                 if (!postTitle || !postBody) {
                     alert('Please fill in all fields.');
                     return;
                 }
-    
-                
-    
+
+
+
                 if (postFile) {
                     let filetype = postFile.type;
                     let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -376,20 +380,20 @@ export function RealTime(User, session) {
                     method: "POST",
                     body: new FormData(form)
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("unknown error occured");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error === 'ok') {
-                        RealTime(data.user, data.session)
-                    } else {
-                        alert(data.error)
-                    }
-                })
-    
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("unknown error occured");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error === 'ok') {
+                            RealTime(data.user, data.session)
+                        } else {
+                            alert(data.error)
+                        }
+                    })
+
             });
         }
     };
@@ -404,6 +408,43 @@ export function RealTime(User, session) {
         });
         return btn;
     };
+
+    const attachPostReactionListeners = (socket, User) => {
+        const likeButtons = document.querySelectorAll(".like-button");
+        likeButtons.forEach((button) => {
+            button.removeEventListener('click', handleLike); // Prevent duplicate listeners
+            button.addEventListener('click', handleLike);
+        });
+    
+        const dislikeButtons = document.querySelectorAll(".dislike-button");
+        dislikeButtons.forEach((button) => {
+            button.removeEventListener('click', handleDislike);
+            button.addEventListener('click', handleDislike);
+        });
+    
+        function handleLike(e) {
+            e.preventDefault();
+            const button = e.currentTarget;
+            socket.send(JSON.stringify({
+                type: "reaction",
+                userid: User.id.toString(),
+                postid: button.id,
+                reactionType: "like"
+            }));
+        }
+    
+        function handleDislike(e) {
+            e.preventDefault();
+            const button = e.currentTarget;
+            socket.send(JSON.stringify({
+                type: "reaction",
+                userid: User.id.toString(),
+                postid: button.id,
+                reactionType: "Dislike"
+            }));
+        }
+    };
+    
 
 
     const status = (onlineUsersList, username) => {
@@ -442,11 +483,3 @@ async function checksession(session) {
         SignInPage();
     }
 }
-
-function chunkString(str, chunkSize) {
-    const chunks = [];
-    for (let i = 0; i < str.length; i += chunkSize) {
-      chunks.push(str.slice(i, i + chunkSize));
-    }
-    return chunks;
-  }
