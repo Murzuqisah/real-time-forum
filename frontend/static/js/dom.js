@@ -278,6 +278,10 @@ export function RealTime(User, session) {
         }
     };
 
+    const MESSAGES_PER_PAGE = 20;
+    let currentPage = 1;
+    let conversationData = [];
+    
     function throttle(func, limit) {
         let inThrottle;
         return function (...args) {
@@ -288,20 +292,28 @@ export function RealTime(User, session) {
             }
         };
     }
-
-    const MESSAGES_PER_PAGE = 20;
-
+    
+    function decodeHTML(html) {
+        const txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+    
     const showConversation = throttle((data) => {
+        // Store the full conversation data for paging
+        conversationData = data.conversation;
+        currentPage = 1;
+    
         document.getElementById('chatListContainer').style.display = 'none';
         document.getElementById('userListContainer').style.display = 'none';
         const chat = document.getElementById('chatContainer');
         chat.style.display = 'flex';
-
+    
         const chatBox = document.getElementById('chatBox');
         chatBox.innerHTML = "";
         const chatHeader = document.getElementById('chatHeader');
         chatHeader.innerHTML = "";
-
+    
         const backBtn = createBackButton(() => {
             socket.send(JSON.stringify({
                 type: "chats",
@@ -310,11 +322,11 @@ export function RealTime(User, session) {
             }));
         });
         chatHeader.appendChild(backBtn);
-
+    
         const headerSpan = document.createElement('span');
         headerSpan.id = 'chatHeader';
         chatHeader.appendChild(headerSpan);
-
+    
         const nameDiv = document.createElement('div');
         nameDiv.id = "name";
         nameDiv.textContent = data.user.username;
@@ -331,27 +343,58 @@ export function RealTime(User, session) {
             whitespace: 'nowrap'
         });
         chatHeader.appendChild(nameDiv);
-
-        // Show only the last 20 messages
-        const messagesToShow = data.conversation.slice(-MESSAGES_PER_PAGE);
-
+    
+        loadMessages(currentPage);
+    
+        // Add scroll listener
+        chatBox.addEventListener('scroll', () => {
+            if (chatBox.scrollTop === 0) { // User scrolled to the top
+                currentPage++;
+                loadMessages(currentPage, true);
+            }
+        });
+    }, 100);
+    
+    // 👇 Load messages for a specific page
+    function loadMessages(page, prepend = false) {
+        const chatBox = document.getElementById('chatBox');
+        const totalMessages = conversationData.length;
+        const start = Math.max(totalMessages - (page * MESSAGES_PER_PAGE), 0);
+        const end = totalMessages - ((page - 1) * MESSAGES_PER_PAGE);
+        const messagesToShow = conversationData.slice(start, end);
+    
+        // Save the old scroll position to maintain it after loading messages
+        const oldScrollHeight = chatBox.scrollHeight;
+    
         messagesToShow.forEach(elem => {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add("message", elem.sender_id === User.id ? "sent" : "received");
-            messageDiv.textContent = elem.body;
-            chatBox.appendChild(messageDiv);
+            messageDiv.textContent = decodeHTML(elem.body);
+    
+            if (prepend) {
+                chatBox.insertBefore(messageDiv, chatBox.firstChild);
+            } else {
+                chatBox.appendChild(messageDiv);
+            }
         });
+    
+        // After prepending new messages, scroll to the bottom
+        if (prepend) {
+            chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight;
+        } else {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+    
 
-        // Optional: Scroll to bottom
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }, 1000);
 
 
 
     const displayMessage = (data) => {
         const messageElement = document.createElement("div");
         messageElement.classList.add("message", data.sender.username === User.username ? "sent" : "received");
-        messageElement.innerText = data.message;
+        let text = decodeHTML(data.message)
+        messageElement.innerText = text;
         let chatBox = document.getElementById("chatBox")
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
