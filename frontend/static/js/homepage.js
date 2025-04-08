@@ -149,11 +149,11 @@ export function renderPosts(data, postsContainer) {
 
         let postactions = document.createElement('div')
         postactions.classList.add('post-actions')
-        postactions.id = item.id
+        postactions.id = item.id.toString()
 
         let likebutton = document.createElement('button')
         likebutton.classList.add('like-button')
-        likebutton.id = item.id
+        likebutton.id = item.id.toString()
         likebutton.ariaLabel = 'like this post'
         let likeimg = document.createElement('img')
         likeimg.classList.add('icon')
@@ -171,7 +171,8 @@ export function renderPosts(data, postsContainer) {
         article.appendChild(likebutton)
 
         let dislikebutton = document.createElement('button')
-        dislikebutton.id = item.id
+        dislikebutton.classList.add('dislike-button')
+        dislikebutton.id = item.id.toString()
         dislikebutton.ariaLabel = 'Dislike this post'
         let dislikeimg = document.createElement('img')
         dislikeimg.classList.add('icon')
