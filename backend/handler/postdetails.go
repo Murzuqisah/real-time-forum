@@ -40,7 +40,7 @@ func PostDetails(posts []models.Post) ([]models.Post, error) {
 			log.Println("Failed to get categories", err3)
 			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 		}
-		likes, err4 := repositories.GetReactions(util.DB, post.ID, "Like")
+		likes, err4 := repositories.GetReactions(util.DB, post.ID, "like")
 		if err4 != nil {
 			log.Println("Failed to get likes", err4)
 			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
