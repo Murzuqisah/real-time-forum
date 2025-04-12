@@ -376,3 +376,4 @@ function postingform() {
     postForm.appendChild(postdiv);
     return postForm
 }
+    
