@@ -128,6 +128,14 @@ export function RealTime(User, session) {
             case 'onlineusers':
                 updateChatStatuses(data);
                 break;
+            case "comment":
+                let comments = document.getElementById('comments-section')
+                let comment = document.createElement('div')
+                comment.classList.add('comment')
+                let p = document.createElement('p')
+                p.innerHTML = `<strong>${User.username}</strong> ${data.comment}`
+                comment.appendChild(p)
+                comments.appendChild(comment)
             default:
                 console.log("Unknown message type:", data.type);
         }
@@ -485,6 +493,12 @@ export function RealTime(User, session) {
             button.addEventListener('click', handleDislike);
         });
 
+        const addbutton = document.querySelectorAll('.submit-comment');
+        addbutton.forEach(button => {
+            button.removeEventListener('click', handlecomment);
+            button.addEventListener('click', handlecomment)
+        })
+
         function handleLike(e) {
             e.preventDefault();
             const button = e.currentTarget;
@@ -505,6 +519,22 @@ export function RealTime(User, session) {
                 postid: button.id,
                 reactionType: "Dislike"
             }));
+        }
+
+        
+        function handlecomment(e) {
+            e.preventDefault()
+            let comment = document.getElementById("commentit");
+            let id = document.getElementById("commentid").value;
+            socket.send(JSON.stringify({
+                type: "comment",
+                commentid: id.toString(),
+                comment: comment.value,
+                userid: User.id.toString(),
+            }))
+
+            comment.textContent = ""
+            comment.placeholder = 'Write a comment...'
         }
     };
 
