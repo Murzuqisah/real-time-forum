@@ -29,16 +29,6 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err != nil {
-		log.Println("failed to change post id to int", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": "unknown error occured. Try again later",
-		})
-		return
-	}
-
 	cookie, err := getSessionID(r)
 	if err != nil {
 		log.Println("failed to get cookie", err)
@@ -75,7 +65,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		SendOK(w,msg)
+		SendOK(w, msg)
 		return
 	}
 
@@ -90,7 +80,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		SendOK(w,msg)
+		SendOK(w, msg)
 		return
 	} else {
 		err := repositories.UpdateReaction(util.DB, msg.ReactionType, user.ID, msg.PostId)
@@ -104,7 +94,7 @@ func ReactionHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	SendOK(w,msg)
+	SendOK(w, msg)
 }
 
 func SendOK(w http.ResponseWriter, msg Reaction) {
