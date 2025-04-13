@@ -1,5 +1,6 @@
 import { SignUpPage } from "./sign-up.js"
 import { RealTime } from "./dom.js"
+import { HomePage } from "./homepage.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -211,7 +212,7 @@ export async function login(email, password) {
       // Store session in sessionStorage
       sessionStorage.setItem('session', data.session);
       sessionStorage.setItem('pageState', 'home');
-      // Call RealTime to render the homepage
+      HomePage(data);
       RealTime(data.user, data.session);
       // Update URL without exposing credentials
       history.pushState({}, '', '/');
