@@ -205,7 +205,8 @@ export async function login(email, password) {
     });
 
     if (!response.ok) {
-      throw new Error('unexpected error occured');
+      let data = await response.json()
+      throw new Error(data.error);
     }
 
     const data = await response.json();
