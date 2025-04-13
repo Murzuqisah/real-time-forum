@@ -221,6 +221,7 @@ export function renderPosts(data, postsContainer) {
         // Create the comment section (initially hidden)
         let commentsection = document.createElement('div')
         commentsection.classList.add('comments-section')
+        commentsection.id = 'comments-section'
         commentsection.style.display = 'none'  // HIDE by default
 
         let h4 = document.createElement('h4')
@@ -233,12 +234,14 @@ export function renderPosts(data, postsContainer) {
         let addcomment = document.createElement('form')
         let input = document.createElement('input')
         input.name = 'id'
+        input.id = "commentid"
         input.type = 'hidden'
         input.value = item.id
         addcomment.appendChild(input)
 
         let comment = document.createElement('input')
         comment.type = 'text'
+        comment.id = "commentit"
         comment.name = 'comment'
         comment.classList.add('comment-box')
         comment.placeholder = 'Write a comment...'
@@ -246,6 +249,7 @@ export function renderPosts(data, postsContainer) {
 
         let addbutton = document.createElement('button')
         addbutton.classList.add('submit-comment')
+        addbutton.id = 'submit-comment'
         let addimg = document.createElement('img')
         addimg.style.height = '20px'
         addimg.style.margin = '0'
@@ -266,6 +270,45 @@ export function renderPosts(data, postsContainer) {
                 p.innerHTML = `<strong>${comment.username}</strong> ${comment.body}`
                 comment_item.appendChild(p)
 
+
+                let likebutton = document.createElement('button')
+                likebutton.classList.add('like-button')
+                likebutton.id = comment.id.toString()
+                likebutton.ariaLabel = 'like this post'
+                let likeimg = document.createElement('img')
+                likeimg.classList.add('icon')
+                likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
+                likeimg.alt = 'thumbs-up-regular'
+                likeimg.style.height = '25px'
+                likeimg.style.width = '1.2rem'
+                likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+                likeimg.style.marginRight = '5px'
+                likebutton.appendChild(likeimg)
+                let likecount = document.createElement('span')
+                likecount.classList.add('like-count')
+                likecount.textContent = comment.likes
+                likebutton.appendChild(likecount)
+                comment_item.appendChild(likebutton)
+
+                let dislikebutton = document.createElement('button')
+                dislikebutton.classList.add('dislike-button')
+                dislikebutton.id = comment.id.toString()
+                dislikebutton.ariaLabel = 'Dislike this post'
+                let dislikeimg = document.createElement('img')
+                dislikeimg.classList.add('icon')
+                dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
+                dislikeimg.style.height = '25px'
+                dislikeimg.style.width = '1.2rem'
+                dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+                dislikeimg.style.marginRight = '5px'
+                dislikeimg.alt = 'thumbs-down-regular'
+                dislikebutton.appendChild(dislikeimg)
+                let dislikecount = document.createElement('span')
+                dislikecount.classList.add('dislike-count')
+                dislikecount.textContent = comment.dislikes
+                dislikebutton.appendChild(dislikecount)
+                comment_item.appendChild(dislikebutton)
+
                 commentsection.appendChild(comment_item)
             })
         }
@@ -281,29 +324,6 @@ export function renderPosts(data, postsContainer) {
                 commentsection.style.display = 'none'
             }
         })
-
-        addbutton.addEventListener('click', (e) => {
-            e.preventDefault()
-            fetch('/comments', {
-                method: "POST",
-                body: new FormData(addcomment)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("unknown error occured");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.error === 'ok') {
-                        RealTime(data.user, data.session)
-                    } else {
-                        alert(data.error)
-                    }
-                })
-        })
-
-
 
         postsContainer.appendChild(article);
     });
