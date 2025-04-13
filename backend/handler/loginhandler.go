@@ -10,6 +10,7 @@ import (
 
 	"github.com/jesee-kuya/forum/backend/models"
 	"github.com/jesee-kuya/forum/backend/repositories"
+	"github.com/jesee-kuya/forum/backend/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -50,12 +51,39 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(SessionStore)
 
+	posts, err := repositories.GetPosts(util.DB)
+	if err != nil {
+		log.Println("Error fetching posts:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	posts, err = PostDetails(posts)
+	if err != nil {
+		log.Println("Error processing posts:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	for i := range posts {
+		posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"error":   "ok",
 		"user":    user,
 		"session": session,
+		"posts": posts,
 	})
 }
 
