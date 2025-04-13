@@ -22,6 +22,7 @@ func InitRoutes() *http.ServeMux {
 	r.HandleFunc("/sign-in", handler.LoginHandler)
 	r.HandleFunc("/check", handler.CheckSession)
 	r.HandleFunc("/post", handler.CreatePost)
+	r.HandleFunc("/comments", handler.CommentHandler)
 
 	r.Handle("/ws", websocket.Handler(handler.HandleWebsocket))
 	return r
