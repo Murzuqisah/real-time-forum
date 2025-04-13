@@ -6,9 +6,29 @@ import (
 	"strings"
 
 	"github.com/jesee-kuya/forum/backend/models"
+	"github.com/jesee-kuya/forum/backend/util"
 )
 
 var PostQuery string
+
+func GetPost(id int) (models.Post, error) {
+	var comment models.Post
+	query := `
+		SELECT p.id, p.user_id, u.username, p.body, p.created_on
+		FROM tblPosts p
+		JOIN tblUsers u ON p.user_id = u.id
+		WHERE p.id = ?
+	`
+	err := util.DB.QueryRow(query, id).Scan(
+		&comment.ID,
+		&comment.UserID,
+		&comment.UserName,
+		&comment.Body,
+		&comment.CreatedOn,
+	)
+
+	return comment, err
+}
 
 func GetPosts(db *sql.DB) ([]models.Post, error) {
 	query := `
