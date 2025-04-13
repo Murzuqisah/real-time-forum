@@ -1,6 +1,5 @@
 import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
-let messages = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const previousState = sessionStorage.getItem('pageState');
@@ -11,17 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         SignInPage();
     }
-
-    // We're now handling the form submission in the SignInPage component
-    // No need to add event listener here as it could cause duplicate submissions
 });
 
 export function RealTime(User, session) {
     let socket;
 
+
     const connectWebSocket = () => {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
-
+        attachUIEventListeners();
+        attachPostReactionListeners(socket, User);
+        
         if (!User) {
             waitForSocket(() => {
                 const session = sessionStorage.getItem('session');
@@ -53,8 +52,7 @@ export function RealTime(User, session) {
                 }));
             })
 
-            attachUIEventListeners();
-            attachPostReactionListeners(socket, User);
+
         });
 
 
@@ -74,7 +72,7 @@ export function RealTime(User, session) {
             socket.close();
         });
 
-       
+
     };
 
     const handleSocketMessage = (data) => {
@@ -85,7 +83,7 @@ export function RealTime(User, session) {
             //     const postContainer = document.querySelector('.posts');
             //     console.log(data)
             //     if (postContainer) renderPosts(data, postContainer);
-               
+
             //     break;
             case 'error':
                 if (data.message === 'invalid session') {
@@ -593,13 +591,6 @@ export function RealTime(User, session) {
         sessionStorage.setItem('pageState', "home");
         sessionStorage.setItem('session', session);
     });
-
-
-    function safeSend(payload) {
-        waitForSocket(() => {
-            socket.send(JSON.stringify(payload));
-        });
-    }
 }
 
 async function checksession(session) {
