@@ -73,7 +73,7 @@ export const HomePage = (data) => {
     let postsContainer = document.createElement('main');
     postsContainer = renderPosts(data, postsContainer)
     postsContainer.classList.add('posts');
-    // postsContainer.appendChild(postingform());
+    postsContainer.id = 'postcontainer'
 
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
@@ -117,197 +117,11 @@ export function renderPosts(data, postsContainer) {
 
         let article = document.createElement('article');
         article.classList.add('post');
-
-        let headerDiv = document.createElement('div');
-
-        const rawTimestamp = item.created_on
-        const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'))
-        item.created_on = formatTimestamp(parsedTimestamp)
-        headerDiv.innerHTML = `
-            <p class="post-author">@${item.username || "Unknown"}</p>
-            <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
-        `;
-        article.appendChild(headerDiv);
-
-        article.innerHTML += `
-            <h3>${item.post_title || "Untitled"}</h3>
-            <p>${item.body || "No content"}</p>
-        `;
-
-        if (item.imageurl) {
-            let img = document.createElement('img');
-            img.classList.add('uploaded-file');
-            img.src = item.imageurl;
-            img.alt = item.post_title || "Image";
-            article.appendChild(img);
-        }
-
-        if (Array.isArray(item.categories)) {
-            let categoryDiv = document.createElement('div');
-            categoryDiv.classList.add('category-div');
-            item.categories.forEach(cat => {
-                let page = document.createElement('p');
-                page.classList.add('post-category');
-                page.textContent = cat;
-                categoryDiv.appendChild(page);
-            });
-            article.appendChild(categoryDiv);
-        }
-
-        let postactions = document.createElement('div')
-        postactions.classList.add('post-actions')
-        postactions.id = item.id.toString()
-
-        let likebutton = document.createElement('button')
-        likebutton.classList.add('like-button')
-        likebutton.id = item.id.toString()
-        likebutton.ariaLabel = 'like this post'
-        let likeimg = document.createElement('img')
-        likeimg.classList.add('icon')
-        likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
-        likeimg.alt = 'thumbs-up-regular'
-        likeimg.style.height = '25px'
-        likeimg.style.width = '1.2rem'
-        likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        likeimg.style.marginRight = '5px'
-        likebutton.appendChild(likeimg)
-        let likecount = document.createElement('span')
-        likecount.classList.add('like-count')
-        likecount.textContent = item.likes
-        likebutton.appendChild(likecount)
-        article.appendChild(likebutton)
-
-        let dislikebutton = document.createElement('button')
-        dislikebutton.classList.add('dislike-button')
-        dislikebutton.id = item.id.toString()
-        dislikebutton.ariaLabel = 'Dislike this post'
-        let dislikeimg = document.createElement('img')
-        dislikeimg.classList.add('icon')
-        dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
-        dislikeimg.style.height = '25px'
-        dislikeimg.style.width = '1.2rem'
-        dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        dislikeimg.style.marginRight = '5px'
-        dislikeimg.alt = 'thumbs-down-regular'
-        dislikebutton.appendChild(dislikeimg)
-        let dislikecount = document.createElement('span')
-        dislikecount.classList.add('dislike-count')
-        dislikecount.textContent = item.dislikes
-        dislikebutton.appendChild(dislikecount)
-        article.appendChild(dislikebutton)
-
-        // Create the comment button
-        let commentbutton = document.createElement('button')
-        commentbutton.classList.add('comment-button')
-        commentbutton.ariaLabel = 'View or add comments'
-
-        // Icon for the comment button
-        let commentimg = document.createElement('img')
-        commentimg.classList.add('icon')
-        commentimg.style.height = '25px'
-        commentimg.style.width = '1.2rem'
-        commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-        commentimg.style.marginRight = '5px'
-        commentimg.src = '/frontend/static/assets/comment-regular.svg'
-        commentimg.alt = 'comment-regular'
-
-        // Comment count
-        let commentcount = document.createElement('span')
-        commentcount.classList.add('comment-count')
-        commentcount.textContent = item.comment_count
-
-        // Append icon and count to the button
-        commentbutton.appendChild(commentimg)
-        commentbutton.append(commentcount)
-
-        // Append the button to the article
-        article.appendChild(commentbutton)
-
-        // Create the comment section (initially hidden)
-        let commentsection = document.createElement('div')
-        commentsection.classList.add('comments-section')
-        commentsection.id = 'comments-section'
-        commentsection.style.display = 'none'  // HIDE by default
-
-        let h4 = document.createElement('h4')
-        h4.textContent = 'Comments'
-        commentsection.appendChild(h4)
-
-        // Add comment input area
-        let commentinput = document.createElement('div')
-        commentinput.classList.add('comment-input')
-        let addcomment = document.createElement('form')
-        let input = document.createElement('input')
-        input.classList.add("commentid")
-        input.name = 'id'
-        input.type = 'hidden'
-        input.value = item.id
-        addcomment.appendChild(input)
-
-        let comment = document.createElement('input')
-        comment.type = 'text'
-        comment.name = 'comment'
-        comment.classList.add('comment-box')
-        comment.placeholder = 'Write a comment...'
-        addcomment.appendChild(comment)
-
-        let addbutton = document.createElement('button')
-        addbutton.classList.add('submit-comment')
-        addbutton.id = 'submit-comment'
-        let addimg = document.createElement('img')
-        addimg.style.height = '20px'
-        addimg.style.margin = '0'
-        addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
-        addimg.alt = 'paper-plane-regular'
-        addbutton.appendChild(addimg)
-
-        addcomment.appendChild(addbutton)
-        commentsection.appendChild(addcomment)
-
-        let comments = document.createElement('div')
-        comments.classList.add('comment-in')
-        // Display existing comments
-        if (item.comments) {
-            item.comments.forEach(comment => {
-                let comment_item = commentItem(comment)
-                comments.appendChild(comment_item)
-            })
-        }
-
-        commentsection.appendChild(comments)
-
-        // Append the comment section to the article
-        article.appendChild(commentsection)
-
-        // 👉 Toggle the visibility on button click
-        commentbutton.addEventListener('click', () => {
-            if (commentsection.style.display === 'none') {
-                commentsection.style.display = 'block'
-            } else {
-                commentsection.style.display = 'none'
-            }
-        })
-
-        addbutton.addEventListener('click', (e) => {
-            e.preventDefault()
-            submitcomment(addcomment, comments, commentcount, item)
-            addcomment.reset()
-        })
-
-        dislikebutton.addEventListener('click', (e) => {
-            e.preventDefault()
-            reactionHandler(dislikecount, likecount, item, 'Dislike')
-        })
-    
-        likebutton.addEventListener('click', (e) => {
-            e.preventDefault()
-            reactionHandler(dislikecount, likecount, item, 'like')
-        })
-
+        article = postItem(article, item)
         postsContainer.appendChild(article);
-
-
     });
+
+
     return postsContainer
 }
 
@@ -440,6 +254,36 @@ function postingform() {
     upload.appendChild(button);
     postdiv.appendChild(upload)
     postForm.appendChild(postdiv);
+
+    upload.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let postTitle = inputTitle.value;
+        let postBody = textarea.value;
+        let postFile = fileInput.files[0];
+
+        if (!postTitle || !postBody) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        if (postFile) {
+            let filetype = postFile.type;
+            let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!validTypes.includes(filetype)) {
+                alert('Invalid file type. Please upload an image.');
+                return;
+            }
+            if (postFile.size > 20 * 1024 * 1024) {
+                alert('File size exceeds 20MB. Please upload a smaller image.');
+                return;
+            }
+        }
+
+        createPost(upload)
+        const createPostForm = document.querySelector('.create-post');
+        createPostForm.classList.add('hidden');
+        upload.reset()
+    });
     return postForm
 }
 
@@ -567,7 +411,7 @@ function commentItem(comment) {
     return comment_item
 }
 
-function reactionHandler(dislikecount, likecount,item, type) {
+function reactionHandler(dislikecount, likecount, item, type) {
     fetch('/reaction', {
         method: "POST",
         body: JSON.stringify({ reaction: type, postid: item.id })
@@ -587,4 +431,219 @@ function reactionHandler(dislikecount, likecount,item, type) {
                 alert(data.error)
             }
         })
+}
+
+
+const createPost = (form) => {
+    fetch('/post', {
+        method: "POST",
+        body: new FormData(form)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("unknown error occured");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error === 'ok') {
+                let postsContainer = document.getElementById('postcontainer')
+                let article = document.createElement('article');
+                article.classList.add('post');
+                article = postItem(article, data.item)
+                postsContainer.prepend(article)
+            } else {
+                alert(data.error)
+            }
+        })
+};
+
+function postItem(article, item) {
+    let headerDiv = document.createElement('div');
+
+    const rawTimestamp = item.created_on
+    const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'))
+    item.created_on = formatTimestamp(parsedTimestamp)
+    headerDiv.innerHTML = `
+        <p class="post-author">@${item.username || "Unknown"}</p>
+        <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
+    `;
+    article.appendChild(headerDiv);
+
+    article.innerHTML += `
+        <h3>${item.post_title || "Untitled"}</h3>
+        <p>${item.body || "No content"}</p>
+    `;
+
+    if (item.imageurl) {
+        let img = document.createElement('img');
+        img.classList.add('uploaded-file');
+        img.src = item.imageurl;
+        img.alt = item.post_title || "Image";
+        article.appendChild(img);
+    }
+
+    if (Array.isArray(item.categories)) {
+        let categoryDiv = document.createElement('div');
+        categoryDiv.classList.add('category-div');
+        item.categories.forEach(cat => {
+            let page = document.createElement('p');
+            page.classList.add('post-category');
+            page.textContent = cat;
+            categoryDiv.appendChild(page);
+        });
+        article.appendChild(categoryDiv);
+    }
+
+    let postactions = document.createElement('div')
+    postactions.classList.add('post-actions')
+    postactions.id = item.id.toString()
+
+    let likebutton = document.createElement('button')
+    likebutton.classList.add('like-button')
+    likebutton.id = item.id.toString()
+    likebutton.ariaLabel = 'like this post'
+    let likeimg = document.createElement('img')
+    likeimg.classList.add('icon')
+    likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
+    likeimg.alt = 'thumbs-up-regular'
+    likeimg.style.height = '25px'
+    likeimg.style.width = '1.2rem'
+    likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+    likeimg.style.marginRight = '5px'
+    likebutton.appendChild(likeimg)
+    let likecount = document.createElement('span')
+    likecount.classList.add('like-count')
+    likecount.textContent = item.likes
+    likebutton.appendChild(likecount)
+    article.appendChild(likebutton)
+
+    let dislikebutton = document.createElement('button')
+    dislikebutton.classList.add('dislike-button')
+    dislikebutton.id = item.id.toString()
+    dislikebutton.ariaLabel = 'Dislike this post'
+    let dislikeimg = document.createElement('img')
+    dislikeimg.classList.add('icon')
+    dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
+    dislikeimg.style.height = '25px'
+    dislikeimg.style.width = '1.2rem'
+    dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+    dislikeimg.style.marginRight = '5px'
+    dislikeimg.alt = 'thumbs-down-regular'
+    dislikebutton.appendChild(dislikeimg)
+    let dislikecount = document.createElement('span')
+    dislikecount.classList.add('dislike-count')
+    dislikecount.textContent = item.dislikes
+    dislikebutton.appendChild(dislikecount)
+    article.appendChild(dislikebutton)
+
+    // Create the comment button
+    let commentbutton = document.createElement('button')
+    commentbutton.classList.add('comment-button')
+    commentbutton.ariaLabel = 'View or add comments'
+
+    // Icon for the comment button
+    let commentimg = document.createElement('img')
+    commentimg.classList.add('icon')
+    commentimg.style.height = '25px'
+    commentimg.style.width = '1.2rem'
+    commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+    commentimg.style.marginRight = '5px'
+    commentimg.src = '/frontend/static/assets/comment-regular.svg'
+    commentimg.alt = 'comment-regular'
+
+    // Comment count
+    let commentcount = document.createElement('span')
+    commentcount.classList.add('comment-count')
+    commentcount.textContent = item.comment_count
+
+    // Append icon and count to the button
+    commentbutton.appendChild(commentimg)
+    commentbutton.append(commentcount)
+
+    // Append the button to the article
+    article.appendChild(commentbutton)
+
+    // Create the comment section (initially hidden)
+    let commentsection = document.createElement('div')
+    commentsection.classList.add('comments-section')
+    commentsection.id = 'comments-section'
+    commentsection.style.display = 'none'  // HIDE by default
+
+    let h4 = document.createElement('h4')
+    h4.textContent = 'Comments'
+    commentsection.appendChild(h4)
+
+    // Add comment input area
+    let commentinput = document.createElement('div')
+    commentinput.classList.add('comment-input')
+    let addcomment = document.createElement('form')
+    let input = document.createElement('input')
+    input.classList.add("commentid")
+    input.name = 'id'
+    input.type = 'hidden'
+    input.value = item.id
+    addcomment.appendChild(input)
+
+    let comment = document.createElement('input')
+    comment.type = 'text'
+    comment.name = 'comment'
+    comment.classList.add('comment-box')
+    comment.placeholder = 'Write a comment...'
+    addcomment.appendChild(comment)
+
+    let addbutton = document.createElement('button')
+    addbutton.classList.add('submit-comment')
+    addbutton.id = 'submit-comment'
+    let addimg = document.createElement('img')
+    addimg.style.height = '20px'
+    addimg.style.margin = '0'
+    addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
+    addimg.alt = 'paper-plane-regular'
+    addbutton.appendChild(addimg)
+
+    addcomment.appendChild(addbutton)
+    commentsection.appendChild(addcomment)
+
+    let comments = document.createElement('div')
+    comments.classList.add('comment-in')
+    // Display existing comments
+    if (item.comments) {
+        item.comments.forEach(comment => {
+            let comment_item = commentItem(comment)
+            comments.appendChild(comment_item)
+        })
+    }
+
+    commentsection.appendChild(comments)
+
+    // Append the comment section to the article
+    article.appendChild(commentsection)
+
+    // 👉 Toggle the visibility on button click
+    commentbutton.addEventListener('click', () => {
+        if (commentsection.style.display === 'none') {
+            commentsection.style.display = 'block'
+        } else {
+            commentsection.style.display = 'none'
+        }
+    })
+
+    addbutton.addEventListener('click', (e) => {
+        e.preventDefault()
+        submitcomment(addcomment, comments, commentcount, item)
+        addcomment.reset()
+    })
+
+    dislikebutton.addEventListener('click', (e) => {
+        e.preventDefault()
+        reactionHandler(dislikecount, likecount, item, 'Dislike')
+    })
+
+    likebutton.addEventListener('click', (e) => {
+        e.preventDefault()
+        reactionHandler(dislikecount, likecount, item, 'like')
+    })
+
+    return article
 }
