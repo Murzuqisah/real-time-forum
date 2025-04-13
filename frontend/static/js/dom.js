@@ -612,6 +612,7 @@ async function checksession(session) {
         if (!response.ok) throw new Error('Unexpected error occurred');
         const data = await response.json();
         if (data.error === 'ok') {
+            HomePage(data)
             RealTime("", session);
         } else {
             sessionStorage.setItem('pageState', '');
