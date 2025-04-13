@@ -51,6 +51,10 @@ func PostDetails(posts []models.Post) ([]models.Post, error) {
 			return nil, errors.New("an Unexpected Error Occurred. Try Again Later")
 		}
 
+		for i := range comments {
+			comments[i].CreatedOn = comments[i].CreatedOn.UTC()
+		}
+
 		posts[i].Comments = comments
 		posts[i].CommentCount = len(comments)
 		posts[i].Categories = categories
