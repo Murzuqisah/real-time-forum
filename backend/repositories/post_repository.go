@@ -14,7 +14,7 @@ var PostQuery string
 func GetPost(id int) (models.Post, error) {
 	var comment models.Post
 	query := `
-		SELECT p.id, p.user_id, u.username, p.body, p.created_on
+		SELECT p.id, p.user_id, u.username, p.body, p.created_on, p.post_title, p.media_url
 		FROM tblPosts p
 		JOIN tblUsers u ON p.user_id = u.id
 		WHERE p.id = ?
@@ -25,6 +25,8 @@ func GetPost(id int) (models.Post, error) {
 		&comment.UserName,
 		&comment.Body,
 		&comment.CreatedOn,
+		&comment.PostTitle,
+		&comment.MediaURL,
 	)
 
 	return comment, err
