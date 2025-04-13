@@ -1089,3 +1089,21 @@ body.dark-theme .comment-box {
   border-radius: 5px;
   cursor: pointer;
 }
+
+#custom-alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  max-width: 300px;
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#custom-alert.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  color: var(--tertiary-color);
+}
