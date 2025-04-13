@@ -45,7 +45,7 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 	comment := r.FormValue("comment")
 	if len(comment) == 0 {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{
 			"error": "enter a comment",
 		})
