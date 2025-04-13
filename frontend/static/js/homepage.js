@@ -1,5 +1,3 @@
-import { RealTime } from "./dom.js";
-
 export const HomePage = (data) => {
     document.head.innerHTML = ""
     document.head.innerHTML = `
