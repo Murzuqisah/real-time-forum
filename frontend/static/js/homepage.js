@@ -356,11 +356,6 @@ export function renderPosts(data, postsContainer) {
             item.comments.forEach(comment => {
                 let comment_item = commentItem(comment)
                 commentsection.appendChild(comment_item)
-                
-                addbutton.addEventListener('click', (e) => {
-                    e.preventDefault()
-                    submitcomment(addcomment, commentsection)
-                })
             })
         }
 
@@ -374,6 +369,11 @@ export function renderPosts(data, postsContainer) {
             } else {
                 commentsection.style.display = 'none'
             }
+        })
+
+        addbutton.addEventListener('click', (e) => {
+            e.preventDefault()
+            submitcomment(addcomment, commentsection)
         })
 
         postsContainer.appendChild(article);
@@ -565,7 +565,7 @@ function submitcomment(addcomment, commentsection) {
         .then(data => {
             if (data.error === 'ok') {
                 let comment_item = commentItem(data.comment)
-                commentsection.appendChild(comment_item)
+                commentsection.prepend(comment_item)
             } else {
                 alert(data.error)
             }
