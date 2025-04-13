@@ -1,6 +1,6 @@
 import { RealTime } from "./dom.js";
 
-export const HomePage = () => {
+export const HomePage = (data) => {
     document.head.innerHTML = ""
     document.head.innerHTML = `
     <link rel="stylesheet" href="/frontend/static/css/style.css" />
@@ -73,8 +73,9 @@ export const HomePage = () => {
 
 
     let postsContainer = document.createElement('main');
+    postsContainer = renderPosts(data, postsContainer)
     postsContainer.classList.add('posts');
-    postsContainer.appendChild(postingform());
+    // postsContainer.appendChild(postingform());
 
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
@@ -95,6 +96,7 @@ export const HomePage = () => {
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
 
+    
     document.body.appendChild(postsContainer);
     let profile = document.createElement('aside');
     profile.classList.add('profile');
@@ -105,7 +107,9 @@ export const HomePage = () => {
 
 export function renderPosts(data, postsContainer) {
     if (!data || !Array.isArray(data.posts)) {
-        return;
+        console.log("error in the data posts")
+        console.log(data)
+        return postsContainer;
     }
 
     postsContainer.innerHTML = "";
@@ -330,6 +334,7 @@ export function renderPosts(data, postsContainer) {
 
         postsContainer.appendChild(article);
     });
+    return postsContainer
 }
 
 function chat(profile) {
