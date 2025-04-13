@@ -584,7 +584,13 @@ function commentItem(comment) {
     comment_item.classList.add('comment')
 
     let p = document.createElement('p')
-    p.innerHTML = `<strong>${comment.username}</strong> ${comment.body}`
+    const rawTimestamp = comment.created_on
+    const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'))
+    comment.created_on = formatTimestamp(parsedTimestamp)
+    p.innerHTML = `
+    <p class="post-time"><time datetime="${comment.created_on || ''}">${comment.created_on || 'Unknown'}</time></p>
+    <strong>${comment.username}</strong> ${comment.body}
+    `
     comment_item.appendChild(p)
 
 
