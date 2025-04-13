@@ -1,3 +1,5 @@
+import { RealTime } from "./dom.js";
+
 export const HomePage = () => {
     document.head.innerHTML = ""
     document.head.innerHTML = `
@@ -189,9 +191,12 @@ export function renderPosts(data, postsContainer) {
         dislikebutton.appendChild(dislikecount)
         article.appendChild(dislikebutton)
 
+        // Create the comment button
         let commentbutton = document.createElement('button')
         commentbutton.classList.add('comment-button')
         commentbutton.ariaLabel = 'View or add comments'
+
+        // Icon for the comment button
         let commentimg = document.createElement('img')
         commentimg.classList.add('icon')
         commentimg.style.height = '25px'
@@ -200,33 +205,45 @@ export function renderPosts(data, postsContainer) {
         commentimg.style.marginRight = '5px'
         commentimg.src = '/frontend/static/assets/comment-regular.svg'
         commentimg.alt = 'comment-regular'
+
+        // Comment count
         let commentcount = document.createElement('span')
         commentcount.classList.add('comment-count')
         commentcount.textContent = item.comment_count
+
+        // Append icon and count to the button
         commentbutton.appendChild(commentimg)
         commentbutton.append(commentcount)
+
+        // Append the button to the article
         article.appendChild(commentbutton)
 
+        // Create the comment section (initially hidden)
         let commentsection = document.createElement('div')
         commentsection.classList.add('comments-section')
+        commentsection.style.display = 'none'  // HIDE by default
+
         let h4 = document.createElement('h4')
         h4.textContent = 'Comments'
         commentsection.appendChild(h4)
 
-        let commentinput = document.createElement('comment-input')
+        // Add comment input area
+        let commentinput = document.createElement('div')
         commentinput.classList.add('comment-input')
         let addcomment = document.createElement('form')
         let input = document.createElement('input')
-        input.type = 'hidden'
         input.name = 'id'
+        input.type = 'hidden'
         input.value = item.id
         addcomment.appendChild(input)
+
         let comment = document.createElement('input')
         comment.type = 'text'
         comment.name = 'comment'
         comment.classList.add('comment-box')
         comment.placeholder = 'Write a comment...'
         addcomment.appendChild(comment)
+
         let addbutton = document.createElement('button')
         addbutton.classList.add('submit-comment')
         let addimg = document.createElement('img')
@@ -235,14 +252,61 @@ export function renderPosts(data, postsContainer) {
         addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
         addimg.alt = 'paper-plane-regular'
         addbutton.appendChild(addimg)
+
         addcomment.appendChild(addbutton)
         commentsection.appendChild(addcomment)
 
+        // Display existing comments
+        if (item.comments) {
+            item.comments.forEach(comment => {
+                let comment_item = document.createElement('div')
+                comment_item.classList.add('comment')
+
+                let p = document.createElement('p')
+                p.innerHTML = `<strong>${comment.username}</strong> ${comment.body}`
+                comment_item.appendChild(p)
+
+                commentsection.appendChild(comment_item)
+            })
+        }
+
+        // Append the comment section to the article
         article.appendChild(commentsection)
+
+        // 👉 Toggle the visibility on button click
+        commentbutton.addEventListener('click', () => {
+            if (commentsection.style.display === 'none') {
+                commentsection.style.display = 'block'
+            } else {
+                commentsection.style.display = 'none'
+            }
+        })
+
+        addbutton.addEventListener('click', (e) => {
+            e.preventDefault()
+            fetch('/comments', {
+                method: "POST",
+                body: new FormData(addcomment)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("unknown error occured");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error === 'ok') {
+                        RealTime(data.user, data.session)
+                    } else {
+                        alert(data.error)
+                    }
+                })
+        })
+
 
 
         postsContainer.appendChild(article);
-    });  
+    });
 }
 
 function chat(profile) {
@@ -376,4 +440,3 @@ function postingform() {
     postForm.appendChild(postdiv);
     return postForm
 }
-    
