@@ -136,6 +136,7 @@ export function RealTime(User, session) {
                 p.innerHTML = `<strong>${User.username}</strong> ${data.comment}`
                 comment.appendChild(p)
                 comments.appendChild(comment)
+                break
             default:
                 console.log("Unknown message type:", data.type);
         }
@@ -289,7 +290,7 @@ export function RealTime(User, session) {
     const MESSAGES_PER_PAGE = 20;
     let currentPage = 1;
     let conversationData = [];
-    
+
     function throttle(func, limit) {
         let inThrottle;
         return function (...args) {
@@ -300,28 +301,28 @@ export function RealTime(User, session) {
             }
         };
     }
-    
+
     function decodeHTML(html) {
         const txt = document.createElement("textarea");
         txt.innerHTML = html;
         return txt.value;
     }
-    
+
     const showConversation = throttle((data) => {
         // Store the full conversation data for paging
         conversationData = data.conversation;
         currentPage = 1;
-    
+
         document.getElementById('chatListContainer').style.display = 'none';
         document.getElementById('userListContainer').style.display = 'none';
         const chat = document.getElementById('chatContainer');
         chat.style.display = 'flex';
-    
+
         const chatBox = document.getElementById('chatBox');
         chatBox.innerHTML = "";
         const chatHeader = document.getElementById('chatHeader');
         chatHeader.innerHTML = "";
-    
+
         const backBtn = createBackButton(() => {
             socket.send(JSON.stringify({
                 type: "chats",
@@ -330,11 +331,11 @@ export function RealTime(User, session) {
             }));
         });
         chatHeader.appendChild(backBtn);
-    
+
         const headerSpan = document.createElement('span');
         headerSpan.id = 'chatHeader';
         chatHeader.appendChild(headerSpan);
-    
+
         const nameDiv = document.createElement('div');
         nameDiv.id = "name";
         nameDiv.textContent = data.user.username;
@@ -351,9 +352,9 @@ export function RealTime(User, session) {
             whitespace: 'nowrap'
         });
         chatHeader.appendChild(nameDiv);
-    
+
         loadMessages(currentPage);
-    
+
         // Add scroll listener
         chatBox.addEventListener('scroll', () => {
             if (chatBox.scrollTop === 0) { // User scrolled to the top
@@ -362,7 +363,7 @@ export function RealTime(User, session) {
             }
         });
     }, 100);
-    
+
     // 👇 Load messages for a specific page
     function loadMessages(page, prepend = false) {
         const chatBox = document.getElementById('chatBox');
@@ -370,22 +371,22 @@ export function RealTime(User, session) {
         const start = Math.max(totalMessages - (page * MESSAGES_PER_PAGE), 0);
         const end = totalMessages - ((page - 1) * MESSAGES_PER_PAGE);
         const messagesToShow = conversationData.slice(start, end);
-    
+
         // Save the old scroll position to maintain it after loading messages
         const oldScrollHeight = chatBox.scrollHeight;
-    
+
         messagesToShow.forEach(elem => {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add("message", elem.sender_id === User.id ? "sent" : "received");
             messageDiv.textContent = decodeHTML(elem.body);
-    
+
             if (prepend) {
                 chatBox.insertBefore(messageDiv, chatBox.firstChild);
             } else {
                 chatBox.appendChild(messageDiv);
             }
         });
-    
+
         // After prepending new messages, scroll to the bottom
         if (prepend) {
             chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight;
@@ -393,7 +394,7 @@ export function RealTime(User, session) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     }
-    
+
 
 
 
@@ -493,11 +494,10 @@ export function RealTime(User, session) {
             button.addEventListener('click', handleDislike);
         });
 
-        const addbutton = document.querySelectorAll('.submit-comment');
-        addbutton.forEach(button => {
+        document.querySelectorAll('.submit-comment').forEach(button => {
             button.removeEventListener('click', handlecomment);
-            button.addEventListener('click', handlecomment)
-        })
+            button.addEventListener('click', handlecomment);
+        });
 
         function handleLike(e) {
             e.preventDefault();
@@ -521,21 +521,47 @@ export function RealTime(User, session) {
             }));
         }
 
-        
-        function handlecomment(e) {
-            e.preventDefault()
-            let comment = document.getElementById("commentit");
-            let id = document.getElementById("commentid").value;
-            socket.send(JSON.stringify({
-                type: "comment",
-                commentid: id.toString(),
-                comment: comment.value,
-                userid: User.id.toString(),
-            }))
 
-            comment.textContent = ""
-            comment.placeholder = 'Write a comment...'
+        function handlecomment(e) {
+            e.preventDefault();
+
+            // In case image inside button was clicked
+            const button = e.target.closest('.submit-comment');
+            if (!button) return;
+
+            const form = button.closest('form');
+            const commentInput = form.querySelector('.comment-box');
+            const commentIdInput = form.querySelector('.commentid');
+
+            if (!commentInput || !commentIdInput) {
+                console.error('Missing input or comment ID');
+                return;
+            }
+
+            const commentText = commentInput.value.trim();
+            const commentId = commentIdInput.value;
+
+            if (!commentText) {
+                console.warn("Comment is empty.");
+                return;
+            }
+            console.log(commentText)
+
+            waitForSocket(() => {
+                console.log('sending')
+                socket.send(JSON.stringify({
+                    type: "comment",
+                    commentid: commentId,
+                    comment: commentText,
+                    userid: User.id.toString(),
+                }));
+            });
+
+            commentInput.value = "";
+            commentInput.placeholder = 'Write a comment...';
         }
+
+
     };
 
 
