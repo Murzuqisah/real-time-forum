@@ -233,15 +233,14 @@ export function renderPosts(data, postsContainer) {
         commentinput.classList.add('comment-input')
         let addcomment = document.createElement('form')
         let input = document.createElement('input')
+        input.classList.add("commentid")
         input.name = 'id'
-        input.id = "commentid"
         input.type = 'hidden'
         input.value = item.id
         addcomment.appendChild(input)
 
         let comment = document.createElement('input')
         comment.type = 'text'
-        comment.id = "commentit"
         comment.name = 'comment'
         comment.classList.add('comment-box')
         comment.placeholder = 'Write a comment...'
