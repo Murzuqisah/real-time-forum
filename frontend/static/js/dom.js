@@ -103,13 +103,6 @@ export function RealTime(User, session) {
                     }));
                 })
                 break;
-            case 'reaction':
-                console.log('adding reaction');
-                const reaction = document.getElementById(data.id);
-                if (data.reaction === 'like' && reaction?.likecount) {
-                    reaction.likecount.textContent = reaction.likecount + data.reaction;
-                }
-                break;
             case 'getusers':
                 showUsersList(data);
                 break;
