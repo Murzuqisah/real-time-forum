@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export function RealTime(User, session) {
-    HomePage();
     let socket;
 
     const connectWebSocket = () => {
@@ -55,6 +54,7 @@ export function RealTime(User, session) {
             })
 
             attachUIEventListeners();
+            attachPostReactionListeners(socket, User);
         });
 
 
@@ -81,12 +81,12 @@ export function RealTime(User, session) {
         createPost();
 
         switch (data.type) {
-            case "posts":
-                const postContainer = document.querySelector('.posts');
-                console.log(data)
-                if (postContainer) renderPosts(data, postContainer);
-                attachPostReactionListeners(socket, User);
-                break;
+            // case "posts":
+            //     const postContainer = document.querySelector('.posts');
+            //     console.log(data)
+            //     if (postContainer) renderPosts(data, postContainer);
+               
+            //     break;
             case 'error':
                 if (data.message === 'invalid session') {
                     sessionStorage.setItem('pageState', '');
