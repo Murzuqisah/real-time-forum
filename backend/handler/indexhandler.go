@@ -220,27 +220,6 @@ func HandleConnection(client *Client) {
 			})
 		case "register":
 			register(msg["sender"], client)
-		case "comment":
-			userid, err := strconv.Atoi(msg["userid"])
-			if err != nil {
-				sendError(client, "unexpected error occured")
-				continue
-			}
-			id, err := strconv.Atoi(msg["commentid"])
-			if err != nil {
-				sendError(client, "unexpected error occured")
-				continue
-			}
-			err = Comment(userid, id, msg["comment"])
-			if err != nil {
-				sendError(client, "unexpected error occured")
-				continue
-			}
-
-			sendJSON(client, map[string]any{
-				"type":    "comment",
-				"comment": msg["comment"],
-			})
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendError(client, "Invalid message type")
