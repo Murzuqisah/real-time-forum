@@ -18,8 +18,6 @@ export function RealTime(User, session) {
 
     const connectWebSocket = () => {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
-        attachUIEventListeners();
-        attachPostReactionListeners(socket, User);
         
         if (!User) {
             waitForSocket(() => {
@@ -72,7 +70,7 @@ export function RealTime(User, session) {
             socket.close();
         });
 
-
+        attachUIEventListeners();
     };
 
     const handleSocketMessage = (data) => {
@@ -133,15 +131,6 @@ export function RealTime(User, session) {
             case 'onlineusers':
                 updateChatStatuses(data);
                 break;
-            case "comment":
-                let comments = document.getElementById('comments-section')
-                let comment = document.createElement('div')
-                comment.classList.add('comment')
-                let p = document.createElement('p')
-                p.innerHTML = `<strong>${User.username}</strong> ${data.comment}`
-                comment.appendChild(p)
-                comments.appendChild(comment)
-                break
             default:
                 console.log("Unknown message type:", data.type);
         }
@@ -486,93 +475,6 @@ export function RealTime(User, session) {
             onClick();
         });
         return btn;
-    };
-
-    const attachPostReactionListeners = (socket, User) => {
-        const likeButtons = document.querySelectorAll(".like-button");
-        likeButtons.forEach((button) => {
-            button.removeEventListener('click', handleLike); // Prevent duplicate listeners
-            button.addEventListener('click', handleLike);
-        });
-
-        const dislikeButtons = document.querySelectorAll(".dislike-button");
-        dislikeButtons.forEach((button) => {
-            button.removeEventListener('click', handleDislike);
-            button.addEventListener('click', handleDislike);
-        });
-
-        document.querySelectorAll('.submit-comment').forEach(button => {
-            button.removeEventListener('click', handlecomment);
-            button.addEventListener('click', handlecomment);
-        });
-
-        function handleLike(e) {
-            e.preventDefault();
-            const button = e.currentTarget;
-            waitForSocket(() => {
-                socket.send(JSON.stringify({
-                    type: "reaction",
-                    userid: User.id.toString(),
-                    postid: button.id,
-                    reactionType: "like"
-                }));
-            })
-        }
-
-        function handleDislike(e) {
-            e.preventDefault();
-            const button = e.currentTarget;
-            waitForSocket(() => {
-                socket.send(JSON.stringify({
-                    type: "reaction",
-                    userid: User.id.toString(),
-                    postid: button.id,
-                    reactionType: "Dislike"
-                }));
-            })
-        }
-
-
-        function handlecomment(e) {
-            e.preventDefault();
-
-            // In case image inside button was clicked
-            const button = e.target.closest('.submit-comment');
-            if (!button) return;
-
-            const form = button.closest('form');
-            const commentInput = form.querySelector('.comment-box');
-            const commentIdInput = form.querySelector('.commentid');
-
-            if (!commentInput || !commentIdInput) {
-                console.error('Missing input or comment ID');
-                return;
-            }
-
-            const commentText = commentInput.value.trim();
-            const commentId = commentIdInput.value;
-
-            if (!commentText) {
-                console.warn("Comment is empty.");
-                return;
-            }
-            console.log(commentText)
-
-            waitForSocket(() => {
-                console.log('sending')
-                socket.send(JSON.stringify({
-                    type: "comment",
-                    commentid: commentId,
-                    comment: commentText,
-                    userid: User.id.toString(),
-                }));
-            });
-
-            commentInput.value = "";
-            commentInput.placeholder = 'Write a comment...';
-        }
-
-
     };
 
 
