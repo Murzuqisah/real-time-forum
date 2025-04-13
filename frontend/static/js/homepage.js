@@ -351,13 +351,17 @@ export function renderPosts(data, postsContainer) {
         addcomment.appendChild(addbutton)
         commentsection.appendChild(addcomment)
 
+        let comments = document.createElement('div')
+        comments.classList.add('comment-in')
         // Display existing comments
         if (item.comments) {
             item.comments.forEach(comment => {
                 let comment_item = commentItem(comment)
-                commentsection.appendChild(comment_item)
+                comments.appendChild(comment_item)
             })
         }
+
+        commentsection.appendChild(comments)
 
         // Append the comment section to the article
         article.appendChild(commentsection)
@@ -373,7 +377,8 @@ export function renderPosts(data, postsContainer) {
 
         addbutton.addEventListener('click', (e) => {
             e.preventDefault()
-            submitcomment(addcomment, commentsection)
+            submitcomment(addcomment, comments)
+            addcomment.reset()
         })
 
         postsContainer.appendChild(article);
