@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jesee-kuya/forum/backend/models"
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
 )
@@ -152,7 +153,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("post-title")), html.EscapeString(r.FormValue("post-content")), url, SessionStore[cookie])
+	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("post-title")), html.EscapeString(r.FormValue("post-content")), url, SessionStore[cookie])
 	if err != nil {
 		log.Println("failed to add post", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -189,12 +190,36 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	post, err := repositories.GetPost(int(id))
+	if err != nil {
+		log.Println("Failed to get post:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+	details, err := PostDetails([]models.Post{post})
+	if err != nil {
+		log.Println("Failed to get post details:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+	post = details[0]
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"error":   "ok",
 		"user":    user,
 		"session": cookie,
+		"item":    post,
 	})
 }
 
