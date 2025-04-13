@@ -886,6 +886,13 @@ body.dark-theme .comment p {
   margin-bottom: 1rem;
 }
 
+.comment-in {
+  display: block;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
 .comment-input form {
   width: 100%;
   display: flex;
