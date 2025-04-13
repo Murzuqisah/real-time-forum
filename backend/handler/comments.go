@@ -83,6 +83,8 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cmt.CreatedOn = cmt.CreatedOn.UTC()
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
