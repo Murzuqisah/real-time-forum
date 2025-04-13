@@ -104,14 +104,6 @@ func HandleConnection(client *Client) {
 		switch msg["type"] {
 		case "getposts":
 			getposts(client)
-		case "reaction":
-			err := ReactionHandler(msg["userid"], msg["postid"], msg["reactionType"])
-			if err != nil {
-				log.Println("Error adding reaction:", err)
-				sendError(client, err.Error())
-				continue
-			}
-			getposts(client)
 		case "getuser":
 			if _, ok := SessionStore[msg["session"]]; !ok {
 				log.Println("Invalid session:", msg["session"])
