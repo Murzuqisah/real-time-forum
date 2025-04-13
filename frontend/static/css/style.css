@@ -475,6 +475,23 @@ body.dark-theme .post-header {
   transition: var(--transition);
 }
 
+.comment-container {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  margin: 20px auto;
+  overflow: hidden;
+}
+
+.comment-item {
+  padding: 0 16px 4px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word; 
+}
+
 body.dark-theme .post {
   background-color: var(--dark-neutral-color);
 }
