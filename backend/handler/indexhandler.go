@@ -324,6 +324,10 @@ func getposts(client *Client) {
 		return
 	}
 
+	for i := range posts {
+		posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+	}
+
 	sendJSON(client, map[string]any{
 		"type":  "posts",
 		"posts": posts,
