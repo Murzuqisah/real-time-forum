@@ -18,7 +18,7 @@ export function RealTime(User, session) {
 
     const connectWebSocket = () => {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
-        
+
         if (!User) {
             waitForSocket(() => {
                 const session = sessionStorage.getItem('session');
@@ -40,15 +40,17 @@ export function RealTime(User, session) {
                         username: User.username
                     }));
                 });
+            } else {
+                waitForSocket(() => {
+                    socket.send(JSON.stringify({
+                        type: "register",
+                        username: User.username,
+                        sender: User.id.toString(),
+                    }));
+                })
+
             }
 
-            waitForSocket(() => {
-                socket.send(JSON.stringify({
-                    type: "register",
-                    username: User.username,
-                    sender: User.id.toString(),
-                }));
-            })
 
 
         });
@@ -74,15 +76,7 @@ export function RealTime(User, session) {
     };
 
     const handleSocketMessage = (data) => {
-        createPost();
-
         switch (data.type) {
-            // case "posts":
-            //     const postContainer = document.querySelector('.posts');
-            //     console.log(data)
-            //     if (postContainer) renderPosts(data, postContainer);
-
-            //     break;
             case 'error':
                 if (data.message === 'invalid session') {
                     sessionStorage.setItem('pageState', '');
@@ -400,62 +394,6 @@ export function RealTime(User, session) {
         if (input) {
             input.value = "";
             input.placeholder = 'Type a message...';
-        }
-    };
-
-    const createPost = () => {
-        const form = document.getElementById('upload');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                let postTitle = document.getElementById('post-title').value;
-                let postBody = document.getElementById('post-content').value;
-                let postFile = document.getElementById('uploaded-file').files[0];
-
-                if (!postTitle || !postBody) {
-                    alert('Please fill in all fields.');
-                    return;
-                }
-
-
-
-                if (postFile) {
-                    let filetype = postFile.type;
-                    let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                    if (!validTypes.includes(filetype)) {
-                        alert('Invalid file type. Please upload an image.');
-                        return;
-                    }
-                    if (postFile.size > 20 * 1024 * 1024) {
-                        alert('File size exceeds 20MB. Please upload a smaller image.');
-                        return;
-                    }
-                }
-
-                const createPostForm = document.querySelector('.create-post');
-                createPostForm.classList.add('hidden');
-
-                let form = document.getElementById("upload")
-
-                fetch('/post', {
-                    method: "POST",
-                    body: new FormData(form)
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("unknown error occured");
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.error === 'ok') {
-                            RealTime(data.user, data.session)
-                        } else {
-                            alert(data.error)
-                        }
-                    })
-
-            });
         }
     };
 
