@@ -118,6 +118,10 @@ export function renderPosts(data, postsContainer) {
         article.classList.add('post');
 
         let headerDiv = document.createElement('div');
+
+        const rawTimestamp = item.created_on
+        const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'))
+        item.created_on = formatTimestamp(parsedTimestamp)
         headerDiv.innerHTML = `
             <p class="post-author">@${item.username || "Unknown"}</p>
             <p class="post-time">Posted: <time datetime="${item.created_on || ''}">${item.created_on || 'Unknown'}</time></p>
@@ -459,3 +463,39 @@ function postingform() {
     postForm.appendChild(postdiv);
     return postForm
 }
+
+function formatTimestamp(timestamp) {
+    const now = new Date();
+    const pastTime = new Date(timestamp);
+    const timeDifference = Math.floor((now - pastTime) / 1000);
+  
+    if (timeDifference < 60) {
+      return timeDifference === 1
+        ? '1 second ago'
+        : `${timeDifference} seconds ago`;
+    } else if (timeDifference < 3600) {
+      return Math.floor(timeDifference / 60) === 1
+        ? '1 minute ago'
+        : `${Math.floor(timeDifference / 60)} minutes ago`;
+    } else if (timeDifference < 86400) {
+      return Math.floor(timeDifference / 3600) === 1
+        ? '1 hour ago'
+        : `${Math.floor(timeDifference / 3600)} hours ago`;
+    } else if (timeDifference < 604800) {
+      return Math.floor(timeDifference / 86400) === 1
+        ? '1 day ago'
+        : `${Math.floor(timeDifference / 86400)} days ago`;
+    } else if (timeDifference < 2592000) {
+      return Math.floor(timeDifference / 604800) === 1
+        ? '1 week ago'
+        : `${Math.floor(timeDifference / 604800)} weeks ago`;
+    } else if (timeDifference < 31536000) {
+      return Math.floor(timeDifference / 2592000) === 1
+        ? '1 month ago'
+        : `${Math.floor(timeDifference / 2592000)} months ago`;
+    } else {
+      return Math.floor(timeDifference / 31536000) === 1
+        ? '1 year ago'
+        : `${Math.floor(timeDifference / 31536000)} years ago`;
+    }
+  }
