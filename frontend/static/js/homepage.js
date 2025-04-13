@@ -4,6 +4,9 @@ export const HomePage = (data) => {
     <link rel="stylesheet" href="/frontend/static/css/style.css" />
     `
     document.body.innerHTML = ""
+    document.body.innerHTML = `
+    <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
+    `
     let scriptFiles = [
         "/frontend/static/js/script.js",
     ];
@@ -262,7 +265,7 @@ function postingform() {
         let postFile = fileInput.files[0];
 
         if (!postTitle || !postBody) {
-            alert('Please fill in all fields.');
+            showAlert('Please fill in all fields.');
             return;
         }
 
@@ -270,11 +273,11 @@ function postingform() {
             let filetype = postFile.type;
             let validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!validTypes.includes(filetype)) {
-                alert('Invalid file type. Please upload an image.');
+                showAlert('Invalid file type. Please upload an image.');
                 return;
             }
             if (postFile.size > 20 * 1024 * 1024) {
-                alert('File size exceeds 20MB. Please upload a smaller image.');
+                showAlert('File size exceeds 20MB. Please upload a smaller image.');
                 return;
             }
         }
@@ -341,7 +344,7 @@ function submitcomment(addcomment, commentsection, commentcount, item) {
                 item.comment_count += 1
                 commentcount.textContent = item.comment_count
             } else {
-                alert(data.error)
+                showAlert(data.error)
             }
         })
 }
@@ -428,7 +431,7 @@ function reactionHandler(dislikecount, likecount, item, type) {
                 dislikecount.textContent = data.item.dislikes
                 likecount.textContent = data.item.likes
             } else {
-                alert(data.error)
+                showAlert(data.error)
             }
         })
 }
@@ -453,7 +456,7 @@ const createPost = (form) => {
                 article = postItem(article, data.item)
                 postsContainer.prepend(article)
             } else {
-                alert(data.error)
+                showAlert(data.error)
             }
         })
 };
@@ -647,3 +650,17 @@ function postItem(article, item) {
 
     return article
 }
+
+
+export function showAlert(message, type = "error") {
+    const alertBox = document.getElementById("custom-alert");
+    alertBox.className = `alert alert-${type} show`;
+    alertBox.textContent = message;
+  
+    setTimeout(() => {
+      alertBox.classList.remove("show");
+      alertBox.style.display = "none";
+    }, 4000);
+  
+    alertBox.style.display = "block";
+  }

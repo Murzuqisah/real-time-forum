@@ -1,6 +1,7 @@
 import { SignUpPage } from "./sign-up.js"
 import { RealTime } from "./dom.js"
 import { HomePage } from "./homepage.js"
+import { showAlert } from "./homepage.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -28,7 +29,9 @@ export const SignInPage = () => {
     max-width: 400px;
   }
   </style>
+  <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
   `
+
   let scriptFiles = [
     "/frontend/static/js/script.js",
     "/frontend/static/js/signin_validation.js",
@@ -217,10 +220,10 @@ export async function login(email, password) {
       // Update URL without exposing credentials
       history.pushState({}, '', '/');
     } else {
-      alert(data.error);
+      showAlert(data.error);
     }
   } catch (error) {
     console.error('Login error:', error);
-    alert(`Error: ${error.message}`);
+    showAlert(`Error: ${error.message}`);
   }
 }

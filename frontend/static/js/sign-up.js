@@ -1,3 +1,4 @@
+import { showAlert } from "./homepage.js"
 import { navigate } from "./sign-in.js"
 export const SignUpPage = () => {
   document.head.innerHTML = ""
@@ -15,7 +16,9 @@ export const SignUpPage = () => {
   justify-content: center;
 }
   </style>
+  <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
   `
+
   let scriptFiles = [
     "/frontend/static/js/signup_validation.js",
     "/frontend/static/css/sign-up.css",
@@ -162,11 +165,11 @@ export const SignUpPage = () => {
     let confirmedPassword = document.getElementById('confirmed-password').value;
 
     if (password !== confirmedPassword) {
-      alert('Passwords do not match');
+      showAlert('Passwords do not match');
       return;
     }
     if (!username || !email || !password || !confirmedPassword) {
-      alert('Username, email, and password are required for sign up');
+      showAlert('Username, email, and password are required for sign up');
       return;
     }
     signUp(username, email, password, confirmedPassword, e)
@@ -216,10 +219,10 @@ async function signUp(username, email, password, confirmedPassword, e) {
         navigate(e, '/sign-in?from=signup');
         // No need for alert as we'll show a message on the sign-in page
       } else {
-        alert(data.error);
+        showAlert(data.error);
       }
     })
     .catch(error => {
-      alert(`Error: ${error.message}`);
+      showAlert(`Error: ${error.message}`);
     });
 }
