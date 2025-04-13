@@ -377,7 +377,7 @@ export function renderPosts(data, postsContainer) {
 
         addbutton.addEventListener('click', (e) => {
             e.preventDefault()
-            submitcomment(addcomment, comments)
+            submitcomment(addcomment, comments, commentcount, item)
             addcomment.reset()
         })
 
@@ -556,7 +556,7 @@ function formatTimestamp(timestamp) {
     }
 }
 
-function submitcomment(addcomment, commentsection) {
+function submitcomment(addcomment, commentsection, commentcount, item) {
     fetch('/comment', {
         method: "POST",
         body: new FormData(addcomment),
@@ -571,6 +571,8 @@ function submitcomment(addcomment, commentsection) {
             if (data.error === 'ok') {
                 let comment_item = commentItem(data.comment)
                 commentsection.prepend(comment_item)
+                item.comment_count += 1
+                commentcount.textContent = item.comment_count
             } else {
                 alert(data.error)
             }
