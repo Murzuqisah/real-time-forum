@@ -94,7 +94,7 @@ export const HomePage = (data) => {
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
 
-    
+
     document.body.appendChild(postsContainer);
     let profile = document.createElement('aside');
     profile.classList.add('profile');
@@ -102,6 +102,92 @@ export const HomePage = (data) => {
     document.body.appendChild(profile);
 };
 
+const attachPostReactionListeners = () => {
+    const likeButtons = document.querySelectorAll(".like-button");
+    likeButtons.forEach((button) => {
+        button.removeEventListener('click', handleLike); // Prevent duplicate listeners
+        button.addEventListener('click', handleLike);
+    });
+
+    const dislikeButtons = document.querySelectorAll(".dislike-button");
+    dislikeButtons.forEach((button) => {
+        button.removeEventListener('click', handleDislike);
+        button.addEventListener('click', handleDislike);
+    });
+
+    document.querySelectorAll('.submit-comment').forEach(button => {
+        button.removeEventListener('click', handlecomment);
+        button.addEventListener('click', handlecomment);
+    });
+
+    function handleLike(e) {
+        e.preventDefault();
+        const button = e.currentTarget;
+        waitForSocket(() => {
+            socket.send(JSON.stringify({
+                type: "reaction",
+                userid: User.id.toString(),
+                postid: button.id,
+                reactionType: "like"
+            }));
+        })
+    }
+
+    function handleDislike(e) {
+        e.preventDefault();
+        const button = e.currentTarget;
+        waitForSocket(() => {
+            socket.send(JSON.stringify({
+                type: "reaction",
+                userid: User.id.toString(),
+                postid: button.id,
+                reactionType: "Dislike"
+            }));
+        })
+    }
+
+
+    function handlecomment(e) {
+        e.preventDefault();
+
+        // In case image inside button was clicked
+        const button = e.target.closest('.submit-comment');
+        if (!button) return;
+
+        const form = button.closest('form');
+        const commentInput = form.querySelector('.comment-box');
+        const commentIdInput = form.querySelector('.commentid');
+
+        if (!commentInput || !commentIdInput) {
+            console.error('Missing input or comment ID');
+            return;
+        }
+
+        const commentText = commentInput.value.trim();
+        const commentId = commentIdInput.value;
+
+        if (!commentText) {
+            console.warn("Comment is empty.");
+            return;
+        }
+        console.log(commentText)
+
+        waitForSocket(() => {
+            console.log('sending')
+            socket.send(JSON.stringify({
+                type: "comment",
+                commentid: commentId,
+                comment: commentText,
+                userid: User.id.toString(),
+            }));
+        });
+
+        commentInput.value = "";
+        commentInput.placeholder = 'Write a comment...';
+    }
+
+
+};
 
 export function renderPosts(data, postsContainer) {
     if (!data || !Array.isArray(data.posts)) {
@@ -268,53 +354,13 @@ export function renderPosts(data, postsContainer) {
         // Display existing comments
         if (item.comments) {
             item.comments.forEach(comment => {
-                let comment_item = document.createElement('div')
-                comment_item.classList.add('comment')
-
-                let p = document.createElement('p')
-                p.innerHTML = `<strong>${comment.username}</strong> ${comment.body}`
-                comment_item.appendChild(p)
-
-
-                let likebutton = document.createElement('button')
-                likebutton.classList.add('like-button')
-                likebutton.id = comment.id.toString()
-                likebutton.ariaLabel = 'like this post'
-                let likeimg = document.createElement('img')
-                likeimg.classList.add('icon')
-                likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
-                likeimg.alt = 'thumbs-up-regular'
-                likeimg.style.height = '25px'
-                likeimg.style.width = '1.2rem'
-                likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-                likeimg.style.marginRight = '5px'
-                likebutton.appendChild(likeimg)
-                let likecount = document.createElement('span')
-                likecount.classList.add('like-count')
-                likecount.textContent = comment.likes
-                likebutton.appendChild(likecount)
-                comment_item.appendChild(likebutton)
-
-                let dislikebutton = document.createElement('button')
-                dislikebutton.classList.add('dislike-button')
-                dislikebutton.id = comment.id.toString()
-                dislikebutton.ariaLabel = 'Dislike this post'
-                let dislikeimg = document.createElement('img')
-                dislikeimg.classList.add('icon')
-                dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
-                dislikeimg.style.height = '25px'
-                dislikeimg.style.width = '1.2rem'
-                dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-                dislikeimg.style.marginRight = '5px'
-                dislikeimg.alt = 'thumbs-down-regular'
-                dislikebutton.appendChild(dislikeimg)
-                let dislikecount = document.createElement('span')
-                dislikecount.classList.add('dislike-count')
-                dislikecount.textContent = comment.dislikes
-                dislikebutton.appendChild(dislikecount)
-                comment_item.appendChild(dislikebutton)
-
+                let comment_item = commentItem(comment)
                 commentsection.appendChild(comment_item)
+                
+                addbutton.addEventListener('click', (e) => {
+                    e.preventDefault()
+                    submitcomment(addcomment, commentsection)
+                })
             })
         }
 
@@ -331,6 +377,8 @@ export function renderPosts(data, postsContainer) {
         })
 
         postsContainer.appendChild(article);
+
+
     });
     return postsContainer
 }
@@ -471,34 +519,104 @@ function formatTimestamp(timestamp) {
     const now = new Date();
     const pastTime = new Date(timestamp);
     const timeDifference = Math.floor((now - pastTime) / 1000);
-  
+
     if (timeDifference < 60) {
-      return timeDifference === 1
-        ? '1 second ago'
-        : `${timeDifference} seconds ago`;
+        return timeDifference === 1
+            ? '1 second ago'
+            : `${timeDifference} seconds ago`;
     } else if (timeDifference < 3600) {
-      return Math.floor(timeDifference / 60) === 1
-        ? '1 minute ago'
-        : `${Math.floor(timeDifference / 60)} minutes ago`;
+        return Math.floor(timeDifference / 60) === 1
+            ? '1 minute ago'
+            : `${Math.floor(timeDifference / 60)} minutes ago`;
     } else if (timeDifference < 86400) {
-      return Math.floor(timeDifference / 3600) === 1
-        ? '1 hour ago'
-        : `${Math.floor(timeDifference / 3600)} hours ago`;
+        return Math.floor(timeDifference / 3600) === 1
+            ? '1 hour ago'
+            : `${Math.floor(timeDifference / 3600)} hours ago`;
     } else if (timeDifference < 604800) {
-      return Math.floor(timeDifference / 86400) === 1
-        ? '1 day ago'
-        : `${Math.floor(timeDifference / 86400)} days ago`;
+        return Math.floor(timeDifference / 86400) === 1
+            ? '1 day ago'
+            : `${Math.floor(timeDifference / 86400)} days ago`;
     } else if (timeDifference < 2592000) {
-      return Math.floor(timeDifference / 604800) === 1
-        ? '1 week ago'
-        : `${Math.floor(timeDifference / 604800)} weeks ago`;
+        return Math.floor(timeDifference / 604800) === 1
+            ? '1 week ago'
+            : `${Math.floor(timeDifference / 604800)} weeks ago`;
     } else if (timeDifference < 31536000) {
-      return Math.floor(timeDifference / 2592000) === 1
-        ? '1 month ago'
-        : `${Math.floor(timeDifference / 2592000)} months ago`;
+        return Math.floor(timeDifference / 2592000) === 1
+            ? '1 month ago'
+            : `${Math.floor(timeDifference / 2592000)} months ago`;
     } else {
-      return Math.floor(timeDifference / 31536000) === 1
-        ? '1 year ago'
-        : `${Math.floor(timeDifference / 31536000)} years ago`;
+        return Math.floor(timeDifference / 31536000) === 1
+            ? '1 year ago'
+            : `${Math.floor(timeDifference / 31536000)} years ago`;
     }
-  }
+}
+
+function submitcomment(addcomment, commentsection) {
+    fetch('/comment', {
+        method: "POST",
+        body: new FormData(addcomment),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("unknown error occured");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error === 'ok') {
+                let comment_item = commentItem(data.comment)
+                commentsection.appendChild(comment_item)
+            } else {
+                alert(data.error)
+            }
+        })
+}
+
+function commentItem(comment) {
+    let comment_item = document.createElement('div')
+    comment_item.classList.add('comment')
+
+    let p = document.createElement('p')
+    p.innerHTML = `<strong>${comment.username}</strong> ${comment.body}`
+    comment_item.appendChild(p)
+
+
+    let likebutton = document.createElement('button')
+    likebutton.classList.add('like-button')
+    likebutton.id = comment.id.toString()
+    likebutton.ariaLabel = 'like this post'
+    let likeimg = document.createElement('img')
+    likeimg.classList.add('icon')
+    likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
+    likeimg.alt = 'thumbs-up-regular'
+    likeimg.style.height = '25px'
+    likeimg.style.width = '1.2rem'
+    likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+    likeimg.style.marginRight = '5px'
+    likebutton.appendChild(likeimg)
+    let likecount = document.createElement('span')
+    likecount.classList.add('like-count')
+    likecount.textContent = comment.likes
+    likebutton.appendChild(likecount)
+    comment_item.appendChild(likebutton)
+
+    let dislikebutton = document.createElement('button')
+    dislikebutton.classList.add('dislike-button')
+    dislikebutton.id = comment.id.toString()
+    dislikebutton.ariaLabel = 'Dislike this post'
+    let dislikeimg = document.createElement('img')
+    dislikeimg.classList.add('icon')
+    dislikeimg.src = '/frontend/static/assets/thumbs-down-regular.svg'
+    dislikeimg.style.height = '25px'
+    dislikeimg.style.width = '1.2rem'
+    dislikeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+    dislikeimg.style.marginRight = '5px'
+    dislikeimg.alt = 'thumbs-down-regular'
+    dislikebutton.appendChild(dislikeimg)
+    let dislikecount = document.createElement('span')
+    dislikecount.classList.add('dislike-count')
+    dislikecount.textContent = comment.dislikes
+    dislikebutton.appendChild(dislikecount)
+    comment_item.appendChild(dislikebutton)
+    return comment_item
+}
