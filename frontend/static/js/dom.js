@@ -1,5 +1,6 @@
 import { HomePage, renderPosts } from './homepage.js';
 import { SignInPage, login } from './sign-in.js';
+let messages = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const previousState = sessionStorage.getItem('pageState');
@@ -45,11 +46,15 @@ export function RealTime(User, session) {
                 });
             }
 
-            socket.send(JSON.stringify({
-                type: "register",
-                username: User.username,
-                sender: User.id.toString(),
-            }));
+            waitForSocket(() => {
+                socket.send(JSON.stringify({
+                    type: "register",
+                    username: User.username,
+                    sender: User.id.toString(),
+                }));
+            })
+
+            attachUIEventListeners();
         });
 
 
@@ -69,7 +74,7 @@ export function RealTime(User, session) {
             socket.close();
         });
 
-        attachUIEventListeners();
+       
     };
 
     const handleSocketMessage = (data) => {
@@ -94,11 +99,13 @@ export function RealTime(User, session) {
                 break;
             case 'getuser':
                 User = data.user;
-                socket.send(JSON.stringify({
-                    type: "register",
-                    username: User.username,
-                    sender: User.id.toString(),
-                }));
+                waitForSocket(() => {
+                    socket.send(JSON.stringify({
+                        type: "register",
+                        username: User.username,
+                        sender: User.id.toString(),
+                    }));
+                })
                 break;
             case 'reaction':
                 console.log('adding reaction');
@@ -221,11 +228,13 @@ export function RealTime(User, session) {
         header.classList.add('header');
         header.textContent = "Users";
         const backBtn = createBackButton(() => {
-            socket.send(JSON.stringify({
-                type: "chats",
-                sender: User.id.toString(),
-                username: User.username
-            }));
+            waitForSocket(() => {
+                socket.send(JSON.stringify({
+                    type: "chats",
+                    sender: User.id.toString(),
+                    username: User.username
+                }));
+            })
         });
         header.appendChild(backBtn);
         userList.appendChild(header);
@@ -243,12 +252,14 @@ export function RealTime(User, session) {
                 item.appendChild(statusIndicator);
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
-                    socket.send(JSON.stringify({
-                        type: "conversation",
-                        sender: User.id.toString(),
-                        receiver: elem.id.toString(),
-                        username: User.username
-                    }));
+                    waitForSocket(() => {
+                        socket.send(JSON.stringify({
+                            type: "conversation",
+                            sender: User.id.toString(),
+                            receiver: elem.id.toString(),
+                            username: User.username
+                        }));
+                    })
                 });
                 chatList.appendChild(item);
             }
@@ -275,12 +286,14 @@ export function RealTime(User, session) {
                 chat.appendChild(statusIndicator);
                 chat.addEventListener('click', (e) => {
                     e.preventDefault();
-                    socket.send(JSON.stringify({
-                        type: "conversation",
-                        sender: User.id.toString(),
-                        receiver: elem.id.toString(),
-                        username: User.username
-                    }));
+                    waitForSocket(() => {
+                        socket.send(JSON.stringify({
+                            type: "conversation",
+                            sender: User.id.toString(),
+                            receiver: elem.id.toString(),
+                            username: User.username
+                        }));
+                    })
                 });
                 chatList.appendChild(chat);
             });
@@ -395,10 +408,6 @@ export function RealTime(User, session) {
         }
     }
 
-
-
-
-
     const displayMessage = (data) => {
         const messageElement = document.createElement("div");
         messageElement.classList.add("message", data.sender.username === User.username ? "sent" : "received");
@@ -502,23 +511,27 @@ export function RealTime(User, session) {
         function handleLike(e) {
             e.preventDefault();
             const button = e.currentTarget;
-            socket.send(JSON.stringify({
-                type: "reaction",
-                userid: User.id.toString(),
-                postid: button.id,
-                reactionType: "like"
-            }));
+            waitForSocket(() => {
+                socket.send(JSON.stringify({
+                    type: "reaction",
+                    userid: User.id.toString(),
+                    postid: button.id,
+                    reactionType: "like"
+                }));
+            })
         }
 
         function handleDislike(e) {
             e.preventDefault();
             const button = e.currentTarget;
-            socket.send(JSON.stringify({
-                type: "reaction",
-                userid: User.id.toString(),
-                postid: button.id,
-                reactionType: "Dislike"
-            }));
+            waitForSocket(() => {
+                socket.send(JSON.stringify({
+                    type: "reaction",
+                    userid: User.id.toString(),
+                    postid: button.id,
+                    reactionType: "Dislike"
+                }));
+            })
         }
 
 
@@ -580,6 +593,13 @@ export function RealTime(User, session) {
         sessionStorage.setItem('pageState', "home");
         sessionStorage.setItem('session', session);
     });
+
+
+    function safeSend(payload) {
+        waitForSocket(() => {
+            socket.send(JSON.stringify(payload));
+        });
+    }
 }
 
 async function checksession(session) {
