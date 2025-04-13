@@ -102,93 +102,6 @@ export const HomePage = (data) => {
     document.body.appendChild(profile);
 };
 
-const attachPostReactionListeners = () => {
-    const likeButtons = document.querySelectorAll(".like-button");
-    likeButtons.forEach((button) => {
-        button.removeEventListener('click', handleLike); // Prevent duplicate listeners
-        button.addEventListener('click', handleLike);
-    });
-
-    const dislikeButtons = document.querySelectorAll(".dislike-button");
-    dislikeButtons.forEach((button) => {
-        button.removeEventListener('click', handleDislike);
-        button.addEventListener('click', handleDislike);
-    });
-
-    document.querySelectorAll('.submit-comment').forEach(button => {
-        button.removeEventListener('click', handlecomment);
-        button.addEventListener('click', handlecomment);
-    });
-
-    function handleLike(e) {
-        e.preventDefault();
-        const button = e.currentTarget;
-        waitForSocket(() => {
-            socket.send(JSON.stringify({
-                type: "reaction",
-                userid: User.id.toString(),
-                postid: button.id,
-                reactionType: "like"
-            }));
-        })
-    }
-
-    function handleDislike(e) {
-        e.preventDefault();
-        const button = e.currentTarget;
-        waitForSocket(() => {
-            socket.send(JSON.stringify({
-                type: "reaction",
-                userid: User.id.toString(),
-                postid: button.id,
-                reactionType: "Dislike"
-            }));
-        })
-    }
-
-
-    function handlecomment(e) {
-        e.preventDefault();
-
-        // In case image inside button was clicked
-        const button = e.target.closest('.submit-comment');
-        if (!button) return;
-
-        const form = button.closest('form');
-        const commentInput = form.querySelector('.comment-box');
-        const commentIdInput = form.querySelector('.commentid');
-
-        if (!commentInput || !commentIdInput) {
-            console.error('Missing input or comment ID');
-            return;
-        }
-
-        const commentText = commentInput.value.trim();
-        const commentId = commentIdInput.value;
-
-        if (!commentText) {
-            console.warn("Comment is empty.");
-            return;
-        }
-        console.log(commentText)
-
-        waitForSocket(() => {
-            console.log('sending')
-            socket.send(JSON.stringify({
-                type: "comment",
-                commentid: commentId,
-                comment: commentText,
-                userid: User.id.toString(),
-            }));
-        });
-
-        commentInput.value = "";
-        commentInput.placeholder = 'Write a comment...';
-    }
-
-
-};
-
 export function renderPosts(data, postsContainer) {
     if (!data || !Array.isArray(data.posts)) {
         console.log("error in the data posts")
@@ -379,6 +292,16 @@ export function renderPosts(data, postsContainer) {
             e.preventDefault()
             submitcomment(addcomment, comments, commentcount, item)
             addcomment.reset()
+        })
+
+        dislikebutton.addEventListener('click', (e) => {
+            e.preventDefault()
+            reactionHandler(dislikecount, likecount, item, 'Dislike')
+        })
+    
+        likebutton.addEventListener('click', (e) => {
+            e.preventDefault()
+            reactionHandler(dislikecount, likecount, item, 'like')
         })
 
         postsContainer.appendChild(article);
@@ -631,5 +554,37 @@ function commentItem(comment) {
     dislikecount.textContent = comment.dislikes
     dislikebutton.appendChild(dislikecount)
     comment_item.appendChild(dislikebutton)
+
+    dislikebutton.addEventListener('click', (e) => {
+        e.preventDefault()
+        reactionHandler(dislikecount, likecount, comment, 'Dislike')
+    })
+
+    likebutton.addEventListener('click', (e) => {
+        e.preventDefault()
+        reactionHandler(dislikecount, likecount, comment, 'like')
+    })
     return comment_item
+}
+
+function reactionHandler(dislikecount, likecount,item, type) {
+    fetch('/reaction', {
+        method: "POST",
+        body: JSON.stringify({ reaction: type, postid: item.id })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("unknown error occured");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error === 'ok') {
+                console.log(data)
+                dislikecount.textContent = data.item.dislikes
+                likecount.textContent = data.item.likes
+            } else {
+                alert(data.error)
+            }
+        })
 }
