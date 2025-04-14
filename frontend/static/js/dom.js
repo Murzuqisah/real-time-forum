@@ -337,6 +337,15 @@ export async function RealTime() {
 
     const handleSocketMessage = (data) => {
         switch (data.type) {
+            case 'error':
+                if (data.message === 'invalid session') {
+                    sessionStorage.clear();
+                    SignInPage();
+                    showAlert(data.message);
+                } else {
+                    showAlert(data.message);
+                }
+                break;
             case 'getusers':
                 showUsersList(data);
                 break;
@@ -358,6 +367,8 @@ export async function RealTime() {
             case 'onlineusers':
                 updateChatStatuses(data);
                 break;
+            default:
+                showAlert('unexpected error occured. Try again later')
         }
     }
 
