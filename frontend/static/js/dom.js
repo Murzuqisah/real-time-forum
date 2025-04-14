@@ -323,6 +323,18 @@ export async function RealTime() {
         }
     };
 
+    const updateChatStatuses = (data) => {
+        const chats = document.querySelectorAll('.chat');
+        chats.forEach(chat => {
+            const username = chat.dataset.username;
+            chat.innerHTML = username;
+            const statusIndicator = document.createElement('p');
+            statusIndicator.classList.add('status');
+            statusIndicator.textContent = status(data.online, username) ? "Online" : "Offline";
+            chat.appendChild(statusIndicator);
+        });
+    };
+
     const handleSocketMessage = (data) => {
         switch (data.type) {
             case 'getusers':
@@ -342,6 +354,9 @@ export async function RealTime() {
                 } else {
                     showConversation({ ...data, conversation: [] });
                 }
+                break;
+            case 'onlineusers':
+                updateChatStatuses(data);
                 break;
         }
     }
