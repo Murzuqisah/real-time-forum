@@ -784,12 +784,14 @@ body.dark-theme .profile p {
 
 
 .message {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 10px;
-  max-width: 70%;
-  word-wrap: break-word;
+  padding: 8px 12px;
+  line-height: 1.4;
+  margin: 4px 0;
+  border-radius: 15px;
+  max-width: 80%;
+  /* word-wrap: break-word; */
   display: inline-block;
+  position: relative; 
 }
 
 .message.received {
@@ -797,6 +799,8 @@ body.dark-theme .profile p {
   align-self: flex-start;
   text-align: left;
   border-top-left-radius: 0;
+  margin-left: 8px;
+  margin-top: 18px;
 }
 
 .message.sent {
@@ -807,13 +811,47 @@ body.dark-theme .profile p {
   border-top-right-radius: 0;
 }
 
-.message-time {
+.message-time,
+.message-author {
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin: 2px;
   font-weight: 100;
   font-size: xx-small;
   font-style: italic;
   color: #121212;
-  bottom: 0;
+  position: absolute; 
 }
+
+.message.received .message-author {
+  position: absolute;
+  top: -14px;
+  left: 0;
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.message.received .message-time {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.message.sent .message-author {
+  left: 2px;
+  top: 2px;
+}
+
+.message.sent .message-time {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
 
 .session-status {
   font-size: 1rem;
