@@ -442,19 +442,20 @@ function arrangemessage(messageDiv, elem) {
     elem.sent_on = parsedTimestamp.toLocaleString('en-US', options)
         .replace(/,/, ', ')
         .replace(/(\d{1,2}:\d{2})\s/, '$1 ');
-
-    messageDiv.textContent = decodeHTML(elem.body);
-
     let puser = document.createElement('span')
     puser.classList.add('message-author')
+    let content = document.createElement('p')
+    content.classList.add("message-content")
+    content.textContent = decodeHTML(elem.body)
     puser.textContent = elem.username
-    messageDiv.appendChild(puser)
-
+    
     let p = document.createElement('p');
     p.classList.add('message-time')
     p.innerHTML = `
-        <time datetime="${elem.sent_on || ''}">${elem.sent_on || 'Unknown'}</time>
+    <time datetime="${elem.sent_on || ''}">${elem.sent_on || 'Unknown'}</time>
     `
+    messageDiv.appendChild(puser)
+    messageDiv.appendChild(content)
     messageDiv.appendChild(p)
     return messageDiv
 }
