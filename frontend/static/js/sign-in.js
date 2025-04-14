@@ -219,7 +219,7 @@ export async function login(email, password) {
       sessionStorage.setItem("username", data.user.username)
       sessionStorage.setItem("userId", data.user.id.toString())
       HomePage(data);
-      RealTime();
+      await RealTime();
       // Update URL without exposing credentials
       history.pushState({}, '', '/');
     } else {
