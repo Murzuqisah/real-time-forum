@@ -30,7 +30,7 @@ var (
 func HandleWebsocket(ws *websocket.Conn) {
 	client := &Client{
 		conn: ws,
-		send: make(chan string, 256), // Buffered channel.
+		send: make(chan string, 2048),
 	}
 	go client.writePump()
 	defer ws.Close()
