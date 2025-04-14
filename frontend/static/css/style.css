@@ -812,6 +812,7 @@ body.dark-theme .profile p {
   font-size: xx-small;
   font-style: italic;
   color: #121212;
+  bottom: 0;
 }
 
 .session-status {
