@@ -198,7 +198,7 @@ func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 	var messages []models.Message
 
 	query := `
-		SELECT receiver_id , sender_id, body, sent_on 
+		SELECT receiver_id , sender_id, body, sent_on, username 
 		FROM tblMessages 
 		WHERE (receiver_id  = ? AND sender_id = ?) 
 		   OR (receiver_id  = ? AND sender_id = ?)
@@ -213,7 +213,7 @@ func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 
 	for rows.Next() {
 		var message models.Message
-		if err := rows.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn); err != nil {
+		if err := rows.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn, &message.Username); err != nil {
 			log.Println("Row Scan Error:", err)
 			return nil, errors.New("unexpected error occured")
 		}
