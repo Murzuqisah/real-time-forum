@@ -130,6 +130,7 @@ func (client *Client) processMessages() {
 			}
 
 			message, err := repositories.Getmessage(int(id))
+			message.SentOn = message.SentOn.UTC()
 			if err != nil {
 				sendError(client, "unexpected error occured")
 				continue
