@@ -142,9 +142,15 @@ func HandleConnection(client *Client) {
 				sendError(client, "unexpected error occured")
 				continue
 			}
-			_, err = repositories.InsertRecord(util.DB, " tblMessages",
+			id, err := repositories.InsertRecord(util.DB, " tblMessages",
 				[]string{"receiver_id", "sender_id", "body", "username"},
 				receiver.ID, sender.ID, html.EscapeString(msg["message"]), sender.Username)
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
+
+			message, err := repositories.Getmessage(int(id))
 			if err != nil {
 				sendError(client, "unexpected error occured")
 				continue
@@ -152,7 +158,7 @@ func HandleConnection(client *Client) {
 			sendJSON(client, map[string]any{
 				"type":     "messaging",
 				"status":   "ok",
-				"message":  html.EscapeString(msg["message"]),
+				"message":  message,
 				"sender":   sender,
 				"receiver": receiver,
 			})
