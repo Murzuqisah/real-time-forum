@@ -74,9 +74,10 @@ export const HomePage = (data) => {
 
 
     let postsContainer = document.createElement('main');
-    postsContainer = renderPosts(data, postsContainer)
     postsContainer.classList.add('posts');
     postsContainer.id = 'postcontainer'
+    postsContainer = renderPosts(data, postsContainer)
+    postsContainer.appendChild(postingform());
 
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
@@ -113,7 +114,6 @@ export function renderPosts(data, postsContainer) {
     }
 
     postsContainer.innerHTML = "";
-    postsContainer.appendChild(postingform());
 
     data.posts.forEach(item => {
         item = item || {};
