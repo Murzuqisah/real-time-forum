@@ -467,6 +467,8 @@ body.dark-theme .post-header {
   font-weight: 300;
 }
 
+
+
 .post {
   background-color: #f9f9f9;
   padding: 1rem;
@@ -803,6 +805,13 @@ body.dark-theme .profile p {
   align-self: flex-end;
   text-align: right;
   border-top-right-radius: 0;
+}
+
+.message-time {
+  font-weight: 100;
+  font-size: xx-small;
+  font-style: italic;
+  color: #121212;
 }
 
 .session-status {
