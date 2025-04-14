@@ -656,11 +656,11 @@ export function showAlert(message, type = "error") {
     const alertBox = document.getElementById("custom-alert");
     alertBox.className = `alert alert-${type} show`;
     alertBox.textContent = message;
-  
+
     setTimeout(() => {
-      alertBox.classList.remove("show");
-      alertBox.style.display = "none";
+        alertBox.classList.remove("show");
+        alertBox.style.display = "none";
     }, 4000);
-  
+
     alertBox.style.display = "block";
-  }
+}
