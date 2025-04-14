@@ -13,31 +13,64 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-// Client wraps the websocket connection with its own send channel.
+// Client wraps the websocket connection with channels for sending and processing messages.
 type Client struct {
-	username string
-	conn     *websocket.Conn
-	send     chan string
+	username    string
+	conn        *websocket.Conn
+	send        chan string
+	processChan chan map[string]string
+	mu          sync.Mutex
 }
 
-// Global map of online users now holds *Client instead of *websocket.Conn.
 var (
 	onlineUsers = make(map[string]*Client)
-	mu          sync.RWMutex // Use RWMutex for concurrent reads.
+	mu          sync.RWMutex
 )
 
-// HandleWebsocket creates a new Client for the connection and starts its writePump.
+// HandleWebsocket initializes client and starts processing goroutines.
 func HandleWebsocket(ws *websocket.Conn) {
 	client := &Client{
-		conn: ws,
-		send: make(chan string, 2048),
+		conn:        ws,
+		send:        make(chan string, 2048),
+		processChan: make(chan map[string]string, 100),
 	}
 	go client.writePump()
+	go client.processMessages()
 	defer ws.Close()
-	HandleConnection(client)
+
+	// Main loop to read messages and send to processChan
+	for {
+		var rawMessage string
+		err := websocket.Message.Receive(client.conn, &rawMessage)
+		if err != nil {
+			log.Println("WebSocket read error:", err)
+			break
+		}
+
+		var msg map[string]string
+		if err := json.Unmarshal([]byte(rawMessage), &msg); err != nil {
+			sendError(client, "Invalid JSON format")
+			continue
+		}
+
+		client.processChan <- msg
+	}
+
+	// Cleanup on connection close
+	close(client.processChan)
+	client.mu.Lock()
+	username := client.username
+	client.mu.Unlock()
+
+	mu.Lock()
+	if username != "" {
+		delete(onlineUsers, username)
+	}
+	mu.Unlock()
+	broadcastOnlineUsers()
 }
 
-// writePump continuously sends messages from the client's send channel over the WebSocket.
+// writePump sends messages from the send channel to the WebSocket.
 func (c *Client) writePump() {
 	for msg := range c.send {
 		if err := websocket.Message.Send(c.conn, msg); err != nil {
@@ -47,82 +80,28 @@ func (c *Client) writePump() {
 	}
 }
 
-// sendJSON marshals the data into JSON and sends it via the client's send channel.
-func sendJSON(c *Client, data any) {
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		log.Println("Error encoding JSON:", err)
-		return
-	}
-	select {
-	case c.send <- string(jsonData):
-	case <-time.After(1 * time.Second):
-		log.Println("Warning: message send timed out")
-	}
-}
+// processMessages handles messages from processChan in order.
+func (client *Client) processMessages() {
+	for msg := range client.processChan {
+		log.Printf("Processing message: %v", msg)
 
-// sendError is a helper function for sending error messages.
-func sendError(c *Client, errMsg string) {
-	sendJSON(c, map[string]any{
-		"type":    "error",
-		"message": errMsg,
-	})
-}
-
-// HandleConnection reads messages from the client and processes them.
-func HandleConnection(client *Client) {
-	for {
-		var rawMessage string
-		err := websocket.Message.Receive(client.conn, &rawMessage)
-		if err != nil {
-			if err.Error() == "EOF" {
-				continue
-			}
-			log.Println("WebSocket closed: ", err)
-			break
-		}
-
-		var msg map[string]string
-		if err := json.Unmarshal([]byte(rawMessage), &msg); err != nil {
-			log.Println("Error decoding message:", err)
-			sendError(client, "Invalid JSON format")
-			continue
-		}
-
-		log.Printf("Received Message: %v", msg)
-
-		// If a username is provided, add the client to the online users list.
 		if username, ok := msg["username"]; ok {
-			client.username = username
-			mu.Lock()
-			onlineUsers[username] = client
-			mu.Unlock()
-			go broadcastOnlineUsers()
-			go monitorConnection(username, client)
+			client.mu.Lock()
+			if client.username == "" {
+				client.username = username
+				mu.Lock()
+				onlineUsers[username] = client
+				mu.Unlock()
+				go broadcastOnlineUsers()
+			}
+			client.mu.Unlock()
 		}
 
 		switch msg["type"] {
-		case "getposts":
-			getposts(client)
-		case "getuser":
-			if _, ok := SessionStore[msg["session"]]; !ok {
-				log.Println("Invalid session:", msg["session"])
-				sendError(client, "invalid session")
-				continue
-			}
-			user, err := repositories.GetUserBySession(msg["session"])
-			if err != nil {
-				sendError(client, "invalid session")
-				continue
-			}
-			sendJSON(client, map[string]any{
-				"type": "getuser",
-				"user": user,
-			})
 		case "getusers":
 			users, err := repositories.GetUsers()
 			if err != nil {
-				sendError(client, "unexpected error occured")
+				sendError(client, "unexpected error occurred")
 				continue
 			}
 			sendJSON(client, map[string]any{
@@ -230,7 +209,28 @@ func HandleConnection(client *Client) {
 	}
 }
 
-// broadcastOnlineUsers sends the updated online users list to every client.
+// sendJSON marshals the data into JSON and sends it via the client's send channel.
+func sendJSON(c *Client, data any) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		log.Println("Error encoding JSON:", err)
+		return
+	}
+	select {
+	case c.send <- string(jsonData):
+	case <-time.After(1 * time.Second):
+		log.Println("Warning: message send timed out")
+	}
+}
+
+// sendError is a helper function for sending error messages.
+func sendError(c *Client, errMsg string) {
+	sendJSON(c, map[string]any{
+		"type":    "error",
+		"message": errMsg,
+	})
+}
+
 func broadcastOnlineUsers() {
 	mu.RLock()
 	onlineList := online()
@@ -246,20 +246,6 @@ func broadcastOnlineUsers() {
 			"online": onlineList,
 		})
 	}
-}
-
-// monitorConnection watches for connection closure and removes the client.
-func monitorConnection(username string, client *Client) {
-	buf := make([]byte, 1)
-	for {
-		if _, err := client.conn.Read(buf); err != nil {
-			break
-		}
-	}
-	mu.Lock()
-	delete(onlineUsers, username)
-	mu.Unlock()
-	broadcastOnlineUsers()
 }
 
 // online returns a list of usernames currently online.
@@ -287,30 +273,5 @@ func register(sender string, client *Client) {
 		"type":   "chats",
 		"users":  users,
 		"online": online(),
-	})
-}
-
-func getposts(client *Client) {
-	posts, err := repositories.GetPosts(util.DB)
-	if err != nil {
-		log.Println("Error fetching posts:", err)
-		sendError(client, "An unexpected error occurred. Try again later.")
-		return
-	}
-
-	posts, err = PostDetails(posts)
-	if err != nil {
-		log.Println("Error processing posts:", err)
-		sendError(client, err.Error())
-		return
-	}
-
-	for i := range posts {
-		posts[i].CreatedOn = posts[i].CreatedOn.UTC()
-	}
-
-	sendJSON(client, map[string]any{
-		"type":  "posts",
-		"posts": posts,
 	})
 }
