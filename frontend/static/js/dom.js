@@ -1,5 +1,5 @@
-import { HomePage, renderPosts } from './homepage.js';
-import { SignInPage, login } from './sign-in.js';
+import { HomePage } from './homepage.js';
+import { SignInPage } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const previousState = sessionStorage.getItem('pageState');
@@ -14,21 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 export function RealTime(User, session) {
     let socket;
-
-
     const connectWebSocket = () => {
         socket = new WebSocket(`ws://${window.location.host}/ws`);
-
-        if (!User) {
-            waitForSocket(() => {
-                const session = sessionStorage.getItem('session');
-                socket.send(JSON.stringify({
-                    type: 'getuser',
-                    session,
-                    username: User.username
-                }));
-            });
-        }
 
         socket.addEventListener('open', () => {
             if (!User) {
@@ -50,9 +37,7 @@ export function RealTime(User, session) {
                 })
 
             }
-
-
-
+            attachUIEventListeners();
         });
 
 
@@ -71,8 +56,6 @@ export function RealTime(User, session) {
             console.error("WebSocket error:", err);
             socket.close();
         });
-
-        attachUIEventListeners();
     };
 
     const handleSocketMessage = (data) => {
@@ -274,7 +257,7 @@ export function RealTime(User, session) {
         }
     };
 
-    const MESSAGES_PER_PAGE = 20;
+    const MESSAGES_PER_PAGE = 10;
     let currentPage = 1;
     let conversationData = [];
 
@@ -364,8 +347,28 @@ export function RealTime(User, session) {
 
         messagesToShow.forEach(elem => {
             const messageDiv = document.createElement('div');
+            const rawTimestamp = elem.sent_on;
+            const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'));
+            
+            const options = {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            };
+            elem.sent_on = parsedTimestamp.toLocaleString('en-US', options)
+              .replace(/,/, ', ') // Adds space after the first comma for "Mar 28, 2025, ..."
+              .replace(/(\d{1,2}:\d{2})\s/, '$1 '); // Ensures narrow space between time and AM/PM
             messageDiv.classList.add("message", elem.sender_id === User.id ? "sent" : "received");
             messageDiv.textContent = decodeHTML(elem.body);
+            let p = document.createElement('p');
+            p.classList.add('message-time')
+            p.innerHTML = `
+                <time datetime="${elem.sent_on || ''}">${elem.sent_on || 'Unknown'}</time>
+            `
+            messageDiv.appendChild(p)
 
             if (prepend) {
                 chatBox.insertBefore(messageDiv, chatBox.firstChild);
