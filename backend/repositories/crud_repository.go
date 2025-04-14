@@ -194,6 +194,20 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 	return users, nil
 }
 
+func Getmessage(id int) (models.Message, error) {
+	var message models.Message
+
+	query := `
+	SELECT receiver_id , sender_id, body, sent_on, username
+	FROM tblMessages 
+	WHERE id = ?
+	`
+
+	row := util.DB.QueryRow(query, id)
+	err := row.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn, &message.Username)
+	return message, err
+}
+
 func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 	var messages []models.Message
 
