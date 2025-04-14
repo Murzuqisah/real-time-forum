@@ -1,4 +1,4 @@
-import { HomePage } from './homepage.js';
+import { HomePage, showAlert } from './homepage.js';
 import { SignInPage } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,6 +12,211 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+export function RealTime() {
+    let socket;
+    const Username = sessionStorage.getItem("username");
+    const UserId = sessionStorage.getItem("userId")
+    const MESSAGES_PER_PAGE = 10;
+    let currentPage = 1;
+    let conversationData = [];
+
+    const connectWebSocket = () => {
+        socket = new WebSocket(`ws://${window.location.host}/ws`);
+
+        if (!Username || !UserId || Username.length == 0 || UserId.length == 0) {
+            showAlert("Invalid session")
+            sessionStorage.clear()
+            SignInPage()
+            return
+        }
+
+        socket.addEventListener('open', () => {
+            socket.send(JSON.stringify({
+                type: 'register',
+                username: Username,
+                sender: UserId,
+            }))
+        })
+
+        socket.addEventListener('message', (e) => {
+            const data = JSON.parse(e.data)
+            console.log('Received message:', data)
+            handleSocketMessage(data)
+        })
+    }
+
+    const showChatList = (data) => {
+        document.getElementById('userListContainer').style.display = 'none';
+        document.getElementById("chatContainer").style.display = "none";
+        document.getElementById("chatListContainer").style.display = "flex";
+        if (data.users.length > 0) {
+            const chatList = document.getElementById('chatList');
+            chatList.innerHTML = "";
+            data.users.forEach(elem => {
+                const chat = document.createElement('div');
+                chat.classList.add('chat');
+                chat.textContent = elem.username;
+                chat.dataset.username = elem.username;
+                const statusIndicator = document.createElement('p');
+                statusIndicator.classList.add('status');
+                statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                chat.appendChild(statusIndicator);
+                const handler = createHandler(elem)
+                chat.removeEventListener('click', handler)
+                chat.addEventListener('click', handler);
+                chatList.appendChild(chat);
+            });
+        }
+    };
+
+    const createHandler = (elem) => {
+        return function handleChatClick(e) {
+            e.preventDefault();
+            sendConversation(elem);
+        };
+    }
+
+    const sendConversation = (elem) => {
+        socket.send(JSON.stringify({
+            type: "conversation",
+            sender: UserId,
+            receiver: elem.id.toString(),
+            username: Username,
+        }));
+    }
+
+    const throttle = (func, limit) => {
+        let inThrottle;
+        return function (...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
+    const createBackButton = (onClick) => {
+        const btn = document.createElement('button');
+        btn.classList.add('back-button');
+        btn.textContent = 'Back';
+
+        const handler = createBackHandler(onClick);
+        btn.removeEventListener('click', handler);
+        btn.addEventListener('click', handler);
+        return btn;
+    };
+
+    const createBackHandler = (onClick) => {
+        return function handleback(e) {
+            e.preventDefault();
+            onClick()
+        }
+    }
+
+    const loadMessages = (page, prepend = false) => {
+        const chatBox = document.getElementById('chatBox');
+        const totalMessages = conversationData.length;
+        const start = Math.max(totalMessages - (page * MESSAGES_PER_PAGE), 0);
+        const end = totalMessages - ((page - 1) * MESSAGES_PER_PAGE);
+        const messagesToShow = conversationData.slice(start, end);
+        const oldScrollHeight = chatBox.scrollHeight;
+
+        messagesToShow.forEach(elem => {
+            console.log(elem)
+            let messageDiv = document.createElement('div');
+            messageDiv.classList.add("message", elem.sender_id.toString() === UserId ? "sent" : "received");
+            messageDiv = arrangemessage(messageDiv, elem)
+
+            if (prepend) {
+                chatBox.insertBefore(messageDiv, chatBox.firstChild);
+            } else {
+                chatBox.appendChild(messageDiv);
+            }
+        });
+
+        if (prepend) {
+            chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight;
+        } else {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    const showConversation = throttle((data) => {
+        conversationData = data.conversation;
+        currentPage = 1;
+
+        document.getElementById('chatListContainer').style.display = 'none';
+        document.getElementById('userListContainer').style.display = 'none';
+        const chat = document.getElementById('chatContainer');
+        chat.style.display = 'flex';
+
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = "";
+        const chatHeader = document.getElementById('chatHeader');
+        chatHeader.innerHTML = "";
+
+        const backBtn = createBackButton(() => {
+            socket.send(JSON.stringify({
+                type: "chats",
+                sender: UserId,
+                username: Username,
+            }));
+        });
+
+        chatHeader.appendChild(backBtn);
+
+        const headerSpan = document.createElement('span');
+        headerSpan.id = 'chatHeader';
+        chatHeader.appendChild(headerSpan);
+
+        const nameDiv = document.createElement('div');
+        nameDiv.id = "name";
+        nameDiv.textContent = data.user.username;
+        Object.assign(nameDiv.style, {
+            color: 'white',
+            display: 'flex',
+            position: 'relative',
+            alignItems: 'center',
+            padding: '0 15px',
+            marginRight: '150px',
+            flexDirection: 'column',
+            justifyContent: 'spacebetween',
+            textAlign: 'center',
+            whitespace: 'nowrap'
+        });
+        chatHeader.appendChild(nameDiv);
+
+        loadMessages(currentPage);
+
+        chatBox.addEventListener('scroll', () => {
+            if (chatBox.scrollTop === 0) {
+                currentPage++;
+                loadMessages(currentPage, true);
+            }
+        });
+    }, 100);
+
+    const handleSocketMessage = (data) => {
+        switch (data.type) {
+            case "chats":
+                showChatList(data);
+                break;
+            case 'conversation':
+                if (data.conversation) {
+                    showConversation(data);
+                } else {
+                    showConversation({ ...data, conversation: [] });
+                }
+                break;
+        }
+    }
+
+    connectWebSocket()
+}
+
+
+
 async function checksession(session) {
     try {
         const response = await fetch('/check', {
@@ -23,18 +228,18 @@ async function checksession(session) {
         const data = await response.json();
         if (data.error === 'ok') {
             HomePage(data)
-            RealTime("", session);
+            RealTime();
         } else {
-            sessionStorage.setItem('pageState', '');
+            sessionStorage.clear();
             SignInPage();
         }
     } catch (error) {
-        console.error(error);
+        showAlert(error);
         SignInPage();
     }
 }
 
-function arrangemessage(messageDiv, elem) {
+const arrangemessage = (messageDiv, elem) => {
     const rawTimestamp = elem.sent_on;
     const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'));
 
@@ -56,7 +261,7 @@ function arrangemessage(messageDiv, elem) {
     content.classList.add("message-content")
     content.textContent = decodeHTML(elem.body)
     puser.textContent = elem.username
-    
+
     let p = document.createElement('p');
     p.classList.add('message-time')
     p.innerHTML = `
@@ -68,8 +273,15 @@ function arrangemessage(messageDiv, elem) {
     return messageDiv
 }
 
-function decodeHTML(html) {
+const decodeHTML = (html) => {
     const txt = document.createElement("textarea");
     txt.innerHTML = html;
     return txt.value;
 }
+
+const status = (onlineUsersList, username) => {
+    if (!onlineUsersList) {
+        return false
+    }
+    return onlineUsersList.includes(username);
+};
