@@ -149,7 +149,7 @@ func (client *Client) processMessages() {
 				sendJSON(receiverClient, map[string]any{
 					"type":     "messaging",
 					"status":   "ok",
-					"message":  html.EscapeString(msg["message"]),
+					"message":  message,
 					"sender":   sender,
 					"receiver": receiver,
 				})
