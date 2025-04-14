@@ -196,6 +196,15 @@ function chat(profile) {
     input.placeholder = 'Type a message...'
     let send = document.createElement('button')
     send.id = 'send'
+    let sendimg = document.createElement('img')
+    sendimg.classList.add('icon')
+    sendimg.src = 'frontend/static/assets/paper-plane-regular.svg'
+    sendimg.alt = 'thumbs-up-regular'
+    sendimg.style.height = '25px'
+    sendimg.style.width = '1.2rem'
+    sendimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
+    sendimg.style.marginRight = '5px'
+    send.appendChild(sendimg)
     chatinput.appendChild(input)
     chatinput.appendChild(send)
 
