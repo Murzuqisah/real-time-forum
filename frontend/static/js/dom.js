@@ -49,7 +49,53 @@ export async function RealTime() {
                 const data = JSON.parse(e.data);
                 handleSocketMessage(data);
             });
+
+            attachUIEventListeners()
         });
+    };
+
+    const attachUIEventListeners = () => {
+        const newChat = document.getElementById('newChat');
+        if (newChat) {
+            newChat.addEventListener('click', (e) => {
+                e.preventDefault();
+                socket.send(JSON.stringify({ type: 'getusers' }));
+            });
+        }
+
+        const sendBtn = document.getElementById('send');
+        if (sendBtn) {
+            sendBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const msg = document.getElementById('messageInput').value;
+                const receiverElem = document.getElementById('name');
+                socket.send(JSON.stringify({
+                    type: 'messaging',
+                    sender: Username,
+                    receiver: receiverElem?.textContent,
+                    message: msg,
+                    username: Username,
+                }));
+            });
+        }
+
+        const floatingButton = document.getElementById('floatingButton');
+        if (floatingButton) {
+            floatingButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                const createPostForm = document.querySelector('.create-post');
+                if (createPostForm.classList.contains('hidden')) {
+                    createPostForm.classList.remove('hidden');
+                    createPostForm.style.opacity = 1;
+                    createPostForm.style.visibility = 'visible';
+                } else {
+                    createPostForm.style.opacity = 0;
+                    createPostForm.style.visibility = 'hidden';
+                    setTimeout(() => createPostForm.classList.add('hidden'), 500);
+                }
+                console.log('clicked post add')
+            });
+        }
     };
 
     const showChatList = (data) => {
@@ -103,7 +149,6 @@ export async function RealTime() {
         }));
         console.log('conversation sent')
     };
-
 
     const throttle = (func, limit) => {
         let inThrottle;
@@ -218,8 +263,76 @@ export async function RealTime() {
         });
     }, 100);
 
+    const showUsersList = (data) => {
+        document.getElementById("chatListContainer").style.display = "none";
+        const userList = document.getElementById("userListContainer");
+        userList.innerHTML = "";
+        const header = document.createElement('div');
+        header.classList.add('header');
+        header.textContent = "Users";
+        const backBtn = createBackButton(() => {
+            socket.send(JSON.stringify({
+                type: "chats",
+                sender: UserId,
+                username: Username,
+            }));
+
+        });
+        header.appendChild(backBtn);
+        userList.appendChild(header);
+        const chatList = document.createElement('div');
+        chatList.classList.add('chat-list');
+        data.users.sort((a, b) => a.username.localeCompare(b.username))
+        data.users.forEach(elem => {
+            if (elem.username !== Username) {
+                const item = document.createElement('div');
+                item.classList.add('chat');
+                item.textContent = elem.username;
+                item.dataset.username = elem.username;
+                const statusIndicator = document.createElement('p');
+                statusIndicator.classList.add('status');
+                statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                item.appendChild(statusIndicator);
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    socket.send(JSON.stringify({
+                        type: "conversation",
+                        sender: UserId,
+                        receiver: elem.id.toString(),
+                        username: Username,
+                    }));
+                });
+                chatList.appendChild(item);
+            }
+        });
+        userList.appendChild(chatList);
+        userList.style.display = 'flex';
+    };
+
+    const displayMessage = (data) => {
+        let messageElement = document.createElement("div");
+        messageElement.classList.add("message", data.sender.username === Username ? "sent" : "received");
+        messageElement = arrangemessage(messageElement, data.message)
+        let chatBox = document.getElementById("chatBox")
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        const input = document.getElementById('messageInput');
+        if (input) {
+            input.value = "";
+            input.placeholder = 'Type a message...';
+        }
+    };
+
     const handleSocketMessage = (data) => {
         switch (data.type) {
+            case 'getusers':
+                showUsersList(data);
+                break;
+            case 'messaging':
+                if (data.status === "ok") {
+                    displayMessage(data);
+                }
+                break;
             case "chats":
                 showChatList(data);
                 break;
