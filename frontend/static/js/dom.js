@@ -12,38 +12,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-export function RealTime() {
+export async function RealTime() {
     let socket;
     const Username = sessionStorage.getItem("username");
-    const UserId = sessionStorage.getItem("userId")
+    const UserId = sessionStorage.getItem("userId");
     const MESSAGES_PER_PAGE = 10;
     let currentPage = 1;
     let conversationData = [];
 
     const connectWebSocket = () => {
-        socket = new WebSocket(`ws://${window.location.host}/ws`);
+        return new Promise((resolve, reject) => {
+            socket = new WebSocket(`ws://${window.location.host}/ws`);
 
-        if (!Username || !UserId || Username.length == 0 || UserId.length == 0) {
-            showAlert("Invalid session")
-            sessionStorage.clear()
-            SignInPage()
-            return
-        }
+            if (!Username || !UserId || Username.length === 0 || UserId.length === 0) {
+                showAlert("Invalid session");
+                sessionStorage.clear();
+                SignInPage();
+                reject(new Error("Invalid session"));
+                return;
+            }
 
-        socket.addEventListener('open', () => {
-            socket.send(JSON.stringify({
-                type: 'register',
-                username: Username,
-                sender: UserId,
-            }))
-        })
+            socket.addEventListener('open', () => {
+                socket.send(JSON.stringify({
+                    type: 'register',
+                    username: Username,
+                    sender: UserId,
+                }));
+                resolve();
+            });
 
-        socket.addEventListener('message', (e) => {
-            const data = JSON.parse(e.data)
-            console.log('Received message:', data)
-            handleSocketMessage(data)
-        })
-    }
+            socket.addEventListener('error', (error) => {
+                reject(error);
+            });
+
+            socket.addEventListener('message', (e) => {
+                const data = JSON.parse(e.data);
+                handleSocketMessage(data);
+            });
+        });
+    };
 
     const showChatList = (data) => {
         document.getElementById('userListContainer').style.display = 'none';
@@ -52,6 +59,11 @@ export function RealTime() {
         if (data.users.length > 0) {
             const chatList = document.getElementById('chatList');
             chatList.innerHTML = "";
+
+            const loading = document.createElement('div');
+            loading.textContent = "Loading chats...";
+            chatList.appendChild(loading);
+            chatList.innerHTML = ""
             data.users.forEach(elem => {
                 const chat = document.createElement('div');
                 chat.classList.add('chat');
@@ -61,29 +73,37 @@ export function RealTime() {
                 statusIndicator.classList.add('status');
                 statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
                 chat.appendChild(statusIndicator);
-                const handler = createHandler(elem)
-                chat.removeEventListener('click', handler)
+                const handler = createHandler(elem, socket);
                 chat.addEventListener('click', handler);
                 chatList.appendChild(chat);
             });
         }
     };
 
-    const createHandler = (elem) => {
+    const createHandler = (elem, socket) => {
         return function handleChatClick(e) {
             e.preventDefault();
-            sendConversation(elem);
+            console.log('conversation clicked')
+            if (socket.readyState === WebSocket.OPEN) {
+                console.log('conversation sending')
+                sendConversation(elem);
+            } else {
+                showAlert("Connection not ready. Please try again.");
+            }
         };
-    }
+    };
 
     const sendConversation = (elem) => {
+        console.log('entered the sending feature')
         socket.send(JSON.stringify({
             type: "conversation",
             sender: UserId,
             receiver: elem.id.toString(),
             username: Username,
         }));
-    }
+        console.log('conversation sent')
+    };
+
 
     const throttle = (func, limit) => {
         let inThrottle;
@@ -110,6 +130,7 @@ export function RealTime() {
     const createBackHandler = (onClick) => {
         return function handleback(e) {
             e.preventDefault();
+            console.log('clicked back')
             onClick()
         }
     }
@@ -212,7 +233,13 @@ export function RealTime() {
         }
     }
 
-    connectWebSocket()
+    try {
+        await connectWebSocket();
+    } catch (error) {
+        showAlert("Connection failed. Please refresh.");
+        SignInPage();
+        return;
+    }
 }
 
 
@@ -228,7 +255,7 @@ async function checksession(session) {
         const data = await response.json();
         if (data.error === 'ok') {
             HomePage(data)
-            RealTime();
+            await RealTime();
         } else {
             sessionStorage.clear();
             SignInPage();
