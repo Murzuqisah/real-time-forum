@@ -50,6 +50,10 @@ export async function RealTime() {
                 handleSocketMessage(data);
             });
 
+            socket.addEventListener('close', () => {
+                setTimeout(connectWebSocket, 3000);
+            })
+
             attachUIEventListeners()
         });
     };
@@ -379,6 +383,15 @@ export async function RealTime() {
         SignInPage();
         return;
     }
+
+    window.addEventListener('load', () => {
+        if (!socket || socket.readyState === WebSocket.CLOSED) connectWebSocket();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        sessionStorage.setItem('pageState', "home");
+        sessionStorage.setItem('session', session);
+    });
 }
 
 
