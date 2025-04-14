@@ -205,6 +205,11 @@ func HandleConnection(client *Client) {
 				sendError(client, "unexpected error occured")
 				continue
 			}
+
+			for i := range messages {
+				messages[i].SentOn = messages[i].SentOn.UTC()
+			}
+			
 			sendJSON(client, map[string]any{
 				"type":         "conversation",
 				"conversation": messages,
