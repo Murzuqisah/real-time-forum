@@ -797,7 +797,8 @@ body.dark-theme .profile p {
   background: #f0f0f0;
   align-self: flex-start;
   margin-left: 8px;
-  margin-top: 18px; /* Space for author */
+  margin-top: 18px;
+  border-top-left-radius: 0;
 }
 
 .message.received .message-author {
@@ -810,9 +811,9 @@ body.dark-theme .profile p {
 }
 
 .message.received .message-time {
-  display: inline-block;
   margin-left: 8px;
   font-size: 0.7rem;
+  opacity: 0.8;
   color: #666;
 }
 
@@ -823,13 +824,14 @@ body.dark-theme .profile p {
   align-self: flex-end;
   margin-right: 8px;
   margin-top: 18px;
+  border-top-right-radius: 0;
 }
 
 .message.sent .message-time {
-  display: inline-block;
   margin-left: 8px;
   font-size: 0.7rem;
   opacity: 0.8;
+  color: #666;
 }
 
 /* Hide author for sent messages */
