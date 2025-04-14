@@ -216,8 +216,10 @@ export async function login(email, password) {
       // Store session in sessionStorage
       sessionStorage.setItem('session', data.session);
       sessionStorage.setItem('pageState', 'home');
+      sessionStorage.setItem("username", data.user.username)
+      sessionStorage.setItem("userId", data.user.id.toString())
       HomePage(data);
-      RealTime(data.user, data.session);
+      RealTime();
       // Update URL without exposing credentials
       history.pushState({}, '', '/');
     } else {
