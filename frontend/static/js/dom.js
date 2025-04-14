@@ -197,7 +197,7 @@ export function RealTime(User, session) {
         userList.appendChild(header);
         const chatList = document.createElement('div');
         chatList.classList.add('chat-list');
-        data.users.sort((a ,b) => a.username.localeCompare(b.username))
+        data.users.sort((a, b) => a.username.localeCompare(b.username))
         data.users.forEach(elem => {
             if (elem.username !== User.username) {
                 const item = document.createElement('div');
@@ -273,12 +273,6 @@ export function RealTime(User, session) {
         };
     }
 
-    function decodeHTML(html) {
-        const txt = document.createElement("textarea");
-        txt.innerHTML = html;
-        return txt.value;
-    }
-
     const showConversation = throttle((data) => {
         // Store the full conversation data for paging
         conversationData = data.conversation;
@@ -347,38 +341,10 @@ export function RealTime(User, session) {
         const oldScrollHeight = chatBox.scrollHeight;
 
         messagesToShow.forEach(elem => {
-            const messageDiv = document.createElement('div');
-            const rawTimestamp = elem.sent_on;
-            const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'));
-            
-            const options = {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            };
-
-            elem.sent_on = parsedTimestamp.toLocaleString('en-US', options)
-              .replace(/,/, ', ') 
-              .replace(/(\d{1,2}:\d{2})\s/, '$1 '); 
+            console.log(elem)
+            let messageDiv = document.createElement('div');
             messageDiv.classList.add("message", elem.sender_id === User.id ? "sent" : "received");
-
-            messageDiv.textContent = decodeHTML(elem.body);
-            
-            let puser = document.createElement('span')
-            puser.classList.add('message-author')
-            puser.textContent = elem.username
-            messageDiv.appendChild(puser)
-
-            let p = document.createElement('p');
-            p.classList.add('message-time')
-            p.innerHTML = `
-                <time datetime="${elem.sent_on || ''}">${elem.sent_on || 'Unknown'}</time>
-            `
-            messageDiv.appendChild(p)
-            console.log(messageDiv)
+            messageDiv = arrangemessage(messageDiv, elem)
 
             if (prepend) {
                 chatBox.insertBefore(messageDiv, chatBox.firstChild);
@@ -396,10 +362,9 @@ export function RealTime(User, session) {
     }
 
     const displayMessage = (data) => {
-        const messageElement = document.createElement("div");
+        let messageElement = document.createElement("div");
         messageElement.classList.add("message", data.sender.username === User.username ? "sent" : "received");
-        let text = decodeHTML(data.message)
-        messageElement.innerText = text;
+        messageElement = arrangemessage(messageElement, data.message)
         let chatBox = document.getElementById("chatBox")
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -459,4 +424,43 @@ async function checksession(session) {
         console.error(error);
         SignInPage();
     }
+}
+
+function arrangemessage(messageDiv, elem) {
+    const rawTimestamp = elem.sent_on;
+    const parsedTimestamp = new Date(rawTimestamp.replace(' +0000 UTC', 'Z'));
+
+    const options = {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+    };
+
+    elem.sent_on = parsedTimestamp.toLocaleString('en-US', options)
+        .replace(/,/, ', ')
+        .replace(/(\d{1,2}:\d{2})\s/, '$1 ');
+
+    messageDiv.textContent = decodeHTML(elem.body);
+
+    let puser = document.createElement('span')
+    puser.classList.add('message-author')
+    puser.textContent = elem.username
+    messageDiv.appendChild(puser)
+
+    let p = document.createElement('p');
+    p.classList.add('message-time')
+    p.innerHTML = `
+        <time datetime="${elem.sent_on || ''}">${elem.sent_on || 'Unknown'}</time>
+    `
+    messageDiv.appendChild(p)
+    return messageDiv
+}
+
+function decodeHTML(html) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
 }
