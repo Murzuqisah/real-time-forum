@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS tblMessages (
   id INTEGER PRIMARY KEY,
   receiver_id   INTEGER NOT NULL,
   sender_id INTEGER NOT Null,
+  username  TEXT NOT NULL,
   body TEXT NOT NULL,
   sent_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (receiver_id) REFERENCES tblUsers(id),
