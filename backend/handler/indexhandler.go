@@ -143,8 +143,8 @@ func HandleConnection(client *Client) {
 				continue
 			}
 			_, err = repositories.InsertRecord(util.DB, " tblMessages",
-				[]string{"receiver_id", "sender_id", "body"},
-				receiver.ID, sender.ID, html.EscapeString(msg["message"]))
+				[]string{"receiver_id", "sender_id", "body", "username"},
+				receiver.ID, sender.ID, html.EscapeString(msg["message"]), sender.Username)
 			if err != nil {
 				sendError(client, "unexpected error occured")
 				continue
@@ -209,7 +209,7 @@ func HandleConnection(client *Client) {
 			for i := range messages {
 				messages[i].SentOn = messages[i].SentOn.UTC()
 			}
-			
+
 			sendJSON(client, map[string]any{
 				"type":         "conversation",
 				"conversation": messages,
