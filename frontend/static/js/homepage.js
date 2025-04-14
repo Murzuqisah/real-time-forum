@@ -290,7 +290,7 @@ function postingform() {
     return postForm
 }
 
-function formatTimestamp(timestamp) {
+export function formatTimestamp(timestamp) {
     const now = new Date();
     const pastTime = new Date(timestamp);
     const timeDifference = Math.floor((now - pastTime) / 1000);
