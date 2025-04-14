@@ -273,7 +273,6 @@ func online() (users []string) {
 }
 
 func register(sender string, client *Client) {
-	// getposts(client)
 	id, err := strconv.Atoi(sender)
 	if err != nil {
 		sendError(client, "unexpected error occured")
