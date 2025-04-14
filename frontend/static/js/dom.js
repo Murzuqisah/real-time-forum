@@ -197,6 +197,7 @@ export function RealTime(User, session) {
         userList.appendChild(header);
         const chatList = document.createElement('div');
         chatList.classList.add('chat-list');
+        data.users.sort((a ,b) => a.username.localeCompare(b.username))
         data.users.forEach(elem => {
             if (elem.username !== User.username) {
                 const item = document.createElement('div');
