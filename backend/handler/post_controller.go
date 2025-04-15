@@ -146,5 +146,10 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	posts := []models.Post{}
-	PostDetails(posts)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"error": "ok",
+		"posts": posts,
+	})
 }
