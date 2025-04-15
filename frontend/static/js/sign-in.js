@@ -87,8 +87,8 @@ export const SignInPage = () => {
   formContainer.appendChild(h2)
 
   // Check if we're coming from the sign-up page
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('from') === 'signup') {
+  if (sessionStorage.getItem('pagestate') === 'fromsignup') {
+    sessionStorage.clear()
     // Add success message
     let successMessage = document.createElement('div');
     successMessage.classList.add('success-message');
@@ -171,28 +171,20 @@ export const SignInPage = () => {
 
 export function navigate(event, page) {
   event.preventDefault()
-  if (!page.startsWith('/')) {
-      page = '/' + page;
-  }
-
-  if (location.origin + page !== location.href) {
-      history.pushState({ page }, "", page);
-      renderPage();
-  }
+  history.pushState({ page }, "", "/");
+  renderPage(page);
 }
 
-export function renderPage() {
-  let page = location.pathname;
-
+export function renderPage(page) {
   switch (page) {
-      case "/sign-up":
-          SignUpPage();
-          break;
-      case "/sign-in":
-          SignInPage();
-          break;
-      default:
-          console.log("Error page");
+    case "/sign-up":
+      SignUpPage();
+      break;
+    case "/sign-in":
+      SignInPage();
+      break;
+    default:
+      console.log("Error page");
   }
 }
 
@@ -200,8 +192,8 @@ export async function login(email, password) {
   try {
     const response = await fetch('/sign-in', {
       method: "POST",
-      headers: { 'Content-Type': 'application/json'},
-      body: JSON.stringify({email:email, password: password})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
     });
 
     if (!response.ok) {
