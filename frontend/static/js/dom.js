@@ -318,6 +318,15 @@ export async function RealTime() {
         messageElement.classList.add("message", data.sender.username === Username ? "sent" : "received");
         messageElement = arrangemessage(messageElement, data.message)
         let chatBox = document.getElementById("chatBox")
+        let userslist = document.getElementById("chatListContainer")
+        if (userslist.style.display !== 'none') {
+            socket.send(JSON.stringify({
+                type: "chats",
+                sender: UserId,
+                username: Username,
+            }));
+            return
+        }
         chatBox.appendChild(messageElement);
         chatBox.scrollTop = chatBox.scrollHeight;
         const input = document.getElementById('messageInput');
