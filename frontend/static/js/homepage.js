@@ -546,13 +546,15 @@ function postItem(article, item) {
         article.appendChild(img);
     }
 
-    if (Array.isArray(item.categories)) {
+    if (Array.isArray(item.categorie)) {
         let categoryDiv = document.createElement('div');
         categoryDiv.classList.add('category-div');
-        item.categories.forEach(cat => {
+        item.categorie.forEach(cat => {
             let page = document.createElement('p');
             page.classList.add('post-category');
-            page.textContent = cat;
+            page.innerHTML = `
+                <span>${cat.category}</span>
+            `
             categoryDiv.appendChild(page);
         });
         article.appendChild(categoryDiv);
