@@ -18,6 +18,10 @@ export const HomePage = (data) => {
         document.head.appendChild(script);
     });
 
+    let title = document.createElement('title');
+    title.textContent = 'Forum';
+    document.head.appendChild(title);
+
     // Append the header
     let header = document.createElement('header');
     let navbar = document.createElement('nav');
