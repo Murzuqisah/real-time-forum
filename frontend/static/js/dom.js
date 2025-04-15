@@ -241,6 +241,7 @@ export async function RealTime() {
         chatHeader.appendChild(headerSpan);
 
         const nameDiv = document.createElement('div');
+        nameDiv.classList.add('namediv')
         nameDiv.id = "name";
         nameDiv.textContent = data.user.username;
         Object.assign(nameDiv.style, {
@@ -327,13 +328,23 @@ export async function RealTime() {
             }));
             return
         }
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        const input = document.getElementById('messageInput');
-        if (input) {
-            input.value = "";
-            input.placeholder = 'Type a message...';
+
+        let nameDiv = document.getElementById('name')
+        console.log('namediv', nameDiv)
+        console.log('user', Username)
+
+      
+
+        if (Username === data.sender.username || (Username !== data.sender.username && data.sender.username == nameDiv.textContent)) {
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            const input = document.getElementById('messageInput');
+            if (input) {
+                input.value = "";
+                input.placeholder = 'Type a message...';
+            }
         }
+
     };
 
     const updateChatStatuses = (data) => {
