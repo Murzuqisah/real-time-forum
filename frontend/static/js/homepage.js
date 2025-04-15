@@ -250,6 +250,52 @@ function postingform() {
     textarea.name = "post-content";
     textarea.placeholder = "Write your post here...";
     textarea.required = true;
+    let categories = document.createElement('fieldset');
+    categories.classList.add('categories');
+    categories.name = 'categories'
+    categories.innerHTML = `
+             <legend>Select Category</legend>
+            <label>
+              <input type="checkbox" name="category[]" value="Technology" />
+              Technology
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Health" />
+              Health
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Education" />
+              Education
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Sports" />
+              Sports
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Entertainment" />
+              Entertainment
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Finance" />
+              Finance
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Travel" />
+              Travel
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Food" />
+              Food
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Lifestyle" />
+              Lifestyle
+            </label>
+            <label>
+              <input type="checkbox" name="category[]" value="Science" />
+              Science
+            </label>
+    `
     let postOperation = document.createElement('div');
     postOperation.classList.add('post-operation');
     let fileInput = document.createElement('input');
@@ -266,6 +312,7 @@ function postingform() {
     upload.appendChild(inputTitle);
     upload.appendChild(labelContent);
     upload.appendChild(textarea);
+    upload.appendChild(categories);
     upload.appendChild(postOperation);
     upload.appendChild(button);
     postdiv.appendChild(upload)
