@@ -3,6 +3,10 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS tblUsers (
   id INTEGER PRIMARY KEY,
   username TEXT UNIQUE NOT NULL, 
+  firstname TEXT NOT NULL,
+  lastname TEXT NOT NULL,
+  age TEXT NOT NULL,
+  gender TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   user_password TEXT NULL,
   joined_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
