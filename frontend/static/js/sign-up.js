@@ -276,8 +276,8 @@ async function signUp(username, email, password, confirmedPassword, age, firstna
     console.log(data);
     if (data.error === 'ok') {
       console.log(data)
-      navigate(e, '/sign-in?from=signup');
-      // No need for alert as we'll show a message on the sign-in page
+      sessionStorage.setItem('pagestate', 'fromsignup')
+      navigate(e, '/sign-in');
     } else {
       showAlert(data.error);
     }
