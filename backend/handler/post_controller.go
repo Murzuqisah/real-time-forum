@@ -74,20 +74,43 @@ func GetAllPostsAPI(db *sql.DB) http.HandlerFunc {
 // FilterPosts - Handles filtering posts by category or user
 func FilterPosts(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/filter" {
-		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Bad request",
+		})
 		return
 	}
 
 	if r.Method != http.MethodGet {
 		log.Println("Method not allowed", r.Method)
-		util.ErrorHandler(w, "Method not allowed", http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Method not allowed",
+		})
 		return
 	}
 
-	err := r.ParseForm()
+	_, err := getSessionID(r)
+	if err != nil {
+		log.Println("Invalid Session")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid session",
+		})
+		return
+	}
+
+	err = r.ParseForm()
 	if err != nil {
 		log.Println("Error parsing form", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
@@ -97,10 +120,28 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		posts, err := repositories.FilterPostsByCategories(util.DB, categories)
 		if err != nil {
 			log.Println("error filtering posts:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 			return
 		}
-		PostDetails(posts)
+		posts, err = PostDetails(posts)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"error": "ok",
+			"posts": posts,
+		})
 		return
 	}
 
