@@ -25,6 +25,11 @@ var (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.FileServer(http.Dir("./frontend/templates"))
+		return
+	}
+
 	var data LoginData
 
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -83,7 +88,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"error":   "ok",
 		"user":    user,
 		"session": session,
-		"posts": posts,
+		"posts":   posts,
 	})
 }
 

@@ -17,13 +17,17 @@ type SignUpData struct {
 	Email             string `json:"email"`
 	Password          string `json:"password"`
 	ConfirmedPassword string `json:"confirmedPassword"`
-	Age               string    `json:"age"`
+	Age               string `json:"age"`
 	FirstName         string `json:"firstname"`
 	LastName          string `json:"lastname"`
 	Gender            string `json:"gender"`
 }
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+		return
+	}
 	var user models.User
 	var data SignUpData
 
