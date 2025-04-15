@@ -106,27 +106,29 @@ export async function RealTime() {
         document.getElementById('userListContainer').style.display = 'none';
         document.getElementById("chatContainer").style.display = "none";
         document.getElementById("chatListContainer").style.display = "flex";
-        if (data.users.length > 0) {
-            const chatList = document.getElementById('chatList');
-            chatList.innerHTML = "";
-
-            const loading = document.createElement('div');
-            loading.textContent = "Loading chats...";
-            chatList.appendChild(loading);
-            chatList.innerHTML = ""
-            data.users.forEach(elem => {
-                const chat = document.createElement('div');
-                chat.classList.add('chat');
-                chat.textContent = elem.username;
-                chat.dataset.username = elem.username;
-                const statusIndicator = document.createElement('p');
-                statusIndicator.classList.add('status');
-                statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
-                chat.appendChild(statusIndicator);
-                const handler = createHandler(elem, socket);
-                chat.addEventListener('click', handler);
-                chatList.appendChild(chat);
-            });
+        if (data.users) {
+            if (data.users.length > 0) {
+                const chatList = document.getElementById('chatList');
+                chatList.innerHTML = "";
+    
+                const loading = document.createElement('div');
+                loading.textContent = "Loading chats...";
+                chatList.appendChild(loading);
+                chatList.innerHTML = ""
+                data.users.forEach(elem => {
+                    const chat = document.createElement('div');
+                    chat.classList.add('chat');
+                    chat.textContent = elem.username;
+                    chat.dataset.username = elem.username;
+                    const statusIndicator = document.createElement('p');
+                    statusIndicator.classList.add('status');
+                    statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                    chat.appendChild(statusIndicator);
+                    const handler = createHandler(elem, socket);
+                    chat.addEventListener('click', handler);
+                    chatList.appendChild(chat);
+                });
+            }
         }
     };
 
