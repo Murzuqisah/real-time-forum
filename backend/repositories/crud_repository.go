@@ -154,14 +154,21 @@ func UserDetails(row *sql.Row) (models.User, error) {
 }
 
 func GetActiveChats(senderid int) ([]models.User, error) {
-	check := make(map[int]bool) // Initialize map
 	var users []models.User
 
 	query := `
-		SELECT DISTINCT receiver_id FROM tblMessages WHERE sender_id = ?
-		UNION
-		SELECT DISTINCT sender_id FROM tblMessages WHERE receiver_id = ?`
-	rows, err := util.DB.Query(query, senderid, senderid)
+		SELECT 
+			CASE 
+				WHEN sender_id = ? THEN receiver_id 
+				ELSE sender_id 
+			END AS other_user,
+			MAX(sent_on) AS latest_ts
+		FROM tblMessages
+		WHERE sender_id = ? OR receiver_id = ?
+		GROUP BY other_user
+		ORDER BY latest_ts DESC;
+		`
+	rows, err := util.DB.Query(query, senderid, senderid, senderid)
 	if err != nil {
 		log.Println("DB Query Error:", err)
 		return nil, errors.New("failed to fetch active chats")
@@ -170,20 +177,18 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 
 	for rows.Next() {
 		var userid int
-		if err := rows.Scan(&userid); err != nil {
+		var latestTs string // Consider using time.Time if timestamp is parsed correctly
+		if err := rows.Scan(&userid, &latestTs); err != nil {
 			log.Println("Row Scan Error:", err)
 			continue
 		}
 
-		if !check[userid] {
-			check[userid] = true
-			user, err := GetUserBYId(userid)
-			if err != nil {
-				log.Println("GetUserBYId Error for ID", userid, ":", err)
-				continue
-			}
-			users = append(users, user)
+		user, err := GetUserBYId(userid)
+		if err != nil {
+			log.Println("GetUserBYId Error for ID", userid, ":", err)
+			continue
 		}
+		users = append(users, user)
 	}
 
 	if err := rows.Err(); err != nil {
