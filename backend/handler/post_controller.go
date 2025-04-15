@@ -12,6 +12,11 @@ import (
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
+type FetchData struct {
+	Categories []string `json:"category"`
+	Check      string   `json:"error"`
+}
+
 func GetAllPosts(db *sql.DB, tmpl *template.Template, posts []models.Post) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// fetch comments for each post
@@ -73,16 +78,20 @@ func GetAllPostsAPI(db *sql.DB) http.HandlerFunc {
 
 // FilterPosts - Handles filtering posts by category or user
 func FilterPosts(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/filter" {
+	var data FetchData
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		log.Println("failed to decode: ", err)
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{
-			"error": "Bad request",
+			"error": "unknown error occured. Try again later",
 		})
 		return
 	}
 
-	if r.Method != http.MethodGet {
+
+	if r.Method != http.MethodPost {
 		log.Println("Method not allowed", r.Method)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -92,7 +101,7 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := getSessionID(r)
+	_, err = getSessionID(r)
 	if err != nil {
 		log.Println("Invalid Session")
 		w.Header().Set("Content-Type", "application/json")
@@ -103,18 +112,7 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = r.ParseForm()
-	if err != nil {
-		log.Println("Error parsing form", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error": "unknown error occured. Try again later",
-		})
-		return
-	}
-
-	categories := r.Form["category"]
+	categories := data.Categories
 
 	if len(categories) != 0 {
 		posts, err := repositories.FilterPostsByCategories(util.DB, categories)
@@ -136,6 +134,11 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
+
+		for i := range posts {
+			posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]any{
@@ -143,6 +146,43 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 			"posts": posts,
 		})
 		return
+	}
+
+	if data.Check == "none" {
+		posts, err := repositories.GetPosts(util.DB)
+		if err != nil {
+			log.Println("Error fetching posts:", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
+			return
+		}
+
+		posts, err = PostDetails(posts)
+		if err != nil {
+			log.Println("Error processing posts:", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
+			return
+		}
+
+		for i := range posts {
+			posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"error": "ok",
+			"posts": posts,
+		})
+		return
+
 	}
 
 	posts := []models.Post{}
