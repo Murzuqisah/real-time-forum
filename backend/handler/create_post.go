@@ -175,11 +175,11 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// categories := r.Form["category[]"]
+	categories := r.Form["category[]"]
 
-	// for _, category := range categories {
-	// 	repositories.InsertRecord(util.DB, "tblPostCategories", []string{"post_id", "category"}, id, category)
-	// }
+	for _, category := range categories {
+		repositories.InsertRecord(util.DB, "tblPostCategories", []string{"post_id", "category"}, id, category)
+	}
 
 	user, err := repositories.GetUserBySession(cookie)
 	if err != nil {
