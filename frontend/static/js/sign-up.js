@@ -215,16 +215,20 @@ export const SignUpPage = () => {
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
     let confirmedPassword = document.getElementById('confirmed-password').value;
+    let age = document.getElementById('age').value;
+    let firstname = document.getElementById('firstname').value;
+    let lastname = document.getElementById('lastname').value;
+    let gender = document.getElementById('gender').value;
 
     if (password !== confirmedPassword) {
       showAlert('Passwords do not match');
       return;
     }
-    if (!username || !email || !password || !confirmedPassword) {
+    if (!username || !email || !password || !confirmedPassword || !firstname || !lastname || !age || !gender) {
       showAlert('Username, email, and password are required for sign up');
       return;
     }
-    signUp(username, email, password, confirmedPassword, e)
+    signUp(username, email, password, confirmedPassword, age, firstname, lastname, gender, e)
 
   })
   signupForm.appendChild(div1);
@@ -253,32 +257,31 @@ export const SignUpPage = () => {
   document.body.appendChild(main)
 }
 
-async function signUp(username, email, password, confirmedPassword, e) {
-  await fetch('/sign-up', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ username, email, password, confirmedPassword })
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+async function signUp(username, email, password, confirmedPassword, age, firstname, lastname, gender, e) {
+  try {
+    const response = await fetch('/sign-up', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, email, password, confirmedPassword, age, firstname, lastname, gender })
     })
-    .then(data => {
-      console.log(data);
-      if (data.error === 'ok') {
-        // Always redirect to sign-in page after successful sign-up
-        // Pass a success parameter to show a message
-        navigate(e, '/sign-in?from=signup');
-        // No need for alert as we'll show a message on the sign-in page
-      } else {
-        showAlert(data.error);
-      }
-    })
-    .catch(error => {
-      showAlert(`Error: ${error.message}`);
-    });
+
+    if (!response.ok) {
+      let data = await response.json()
+      throw new Error(data.error);
+    }
+    const data = await response.json();
+
+    console.log(data);
+    if (data.error === 'ok') {
+      console.log(data)
+      navigate(e, '/sign-in?from=signup');
+      // No need for alert as we'll show a message on the sign-in page
+    } else {
+      showAlert(data.error);
+    }
+  } catch (error) {
+    showAlert(`Error: ${error.message}`);
+  }
 }
