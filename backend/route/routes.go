@@ -24,6 +24,7 @@ func InitRoutes() *http.ServeMux {
 	r.HandleFunc("/post", handler.CreatePost)
 	r.HandleFunc("/comment", handler.Comment)
 	r.HandleFunc("/reaction", handler.ReactionHandler)
+	r.HandleFunc("/filter", handler.FilterPosts)
 
 	r.Handle("/ws", websocket.Handler(handler.HandleWebsocket))
 	return r
