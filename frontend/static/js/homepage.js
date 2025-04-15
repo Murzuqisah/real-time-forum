@@ -55,25 +55,18 @@ export const HomePage = (data) => {
     // Create sidebar
     let aside = document.createElement('aside');
     aside.classList.add('sidebar');
-    aside.innerHTML = `
-        <h2>Filter By:</h2>
-        <form class="filter-form" action="/filter" method="get">
-            <fieldset>
-                <legend>Categories</legend>
-                <label><input type="checkbox" name="category" value="Technology" /> Technology</label>
-                <label><input type="checkbox" name="category" value="Health" /> Health</label>
-                <label><input type="checkbox" name="category" value="Education" /> Education</label>
-                <label><input type="checkbox" name="category" value="Sports" /> Sports</label>
-                <label><input type="checkbox" name="category" value="Entertainment" /> Entertainment</label>
-                <label><input type="checkbox" name="category" value="Finance" /> Finance</label>
-                <label><input type="checkbox" name="category" value="Travel" /> Travel</label>
-                <label><input type="checkbox" name="category" value="Food" /> Food</label>
-                <label><input type="checkbox" name="category" value="Lifestyle" /> Lifestyle</label>
-                <label><input type="checkbox" name="category" value="Science" /> Science</label>
-            </fieldset>
-            <button class="apply">Apply Filter</button>
-        </form>
-    `;
+    let asideh2 = document.createElement('h2');
+    asideh2.textContent = 'Filter By';
+    aside.appendChild(asideh2)
+    let asideform = document.createElement('form');
+    asideform.classList.add('filter-form');
+    let asideset = document.createElement('fieldset');
+    asideset.innerHTML = `
+       <legend>Categories</legend>
+    `
+    asideset = asideCategories(asideset)
+    asideform.appendChild(asideset)
+    aside.appendChild(asideform)
     document.body.appendChild(aside);
 
 
@@ -108,13 +101,17 @@ export const HomePage = (data) => {
     profile.classList.add('profile');
     profile = chat(profile)
     document.body.appendChild(profile);
+
+    asidebutton.addEventListener('click', (e) => {
+        e.preventDefault()
+        filter(asideform)
+    }) 
 };
 
 export function renderPosts(data, postsContainer) {
     if (!data || !Array.isArray(data.posts)) {
         console.log("error in the data posts")
-        console.log(data)
-        return postsContainer;
+        data.posts = [];
     }
 
     postsContainer.innerHTML = "";
@@ -725,4 +722,70 @@ export function showAlert(message, type = "error") {
     }, 4000);
 
     alertBox.style.display = "block";
+}
+
+const asideCategories = (asideform) => {
+    const categories = ["Technology", "Health", "Education", "Sports", "Entertainment", "Finance", "Travel", "Food", "Lifestyle", "Science"];
+    
+    categories.forEach(category => {
+        let label = document.createElement('label');
+        let input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'category';
+        input.value = category;
+        
+        // Changed event from 'checked' to 'change' and updated handler
+        input.addEventListener('change', () => {
+            // Get all currently checked checkboxes
+            const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                .map(checkbox => checkbox.value);
+            
+            // Determine what to send to the backend
+            const categoriesToSend = checkedCategories.length > 0 ? checkedCategories : 'none';
+            filter(categoriesToSend);
+        });
+        
+        // Improved label structure (checkbox before text)
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(` ${category}`));
+        asideform.appendChild(label);
+    });
+    
+    return asideform;
+}
+
+async function filter(categories) {
+    let cat
+    let err
+    if ( Array.isArray(categories)) {
+        cat = categories
+        err = 'something'
+    } else {
+        cat = []
+        err = 'none'
+    }
+    try {
+        const response = await fetch('/filter', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ category: cat, error: err }),
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error);
+        }
+
+        const data = await response.json();
+        if (data.error === 'ok') {
+            const postsContainer = document.getElementById('postcontainer');
+            renderPosts(data, postsContainer);
+        } else {
+            showAlert(data.error);
+        }
+    } catch (error) {
+        showAlert(`Error: ${error.message}`);
+    }
 }
