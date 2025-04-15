@@ -414,8 +414,6 @@ export async function RealTime() {
     });
 }
 
-
-
 async function checksession(session) {
     try {
         const response = await fetch('/check', {
