@@ -101,11 +101,6 @@ export const HomePage = (data) => {
     profile.classList.add('profile');
     profile = chat(profile)
     document.body.appendChild(profile);
-
-    asidebutton.addEventListener('click', (e) => {
-        e.preventDefault()
-        filter(asideform)
-    }) 
 };
 
 export function renderPosts(data, postsContainer) {
