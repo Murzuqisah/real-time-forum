@@ -3,13 +3,14 @@ package util
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 /*
 ValidateInput checks for the validity of input values provided via the form.
 */
-func ValidateFormFields(userName, email, password, firstname, lastname, gender string, age int) error {
+func ValidateFormFields(userName, email, password, firstname, lastname, gender, age string) error {
 	if len(strings.TrimSpace(userName)) == 0 || len(strings.TrimSpace(lastname)) == 0 || len(strings.TrimSpace(firstname)) == 0 {
 		return fmt.Errorf("username, lastname and firstname fields cannot be empty")
 	}
@@ -26,7 +27,9 @@ func ValidateFormFields(userName, email, password, firstname, lastname, gender s
 		}
 	}
 
-	if age <= 14 {
+	check, err := strconv.Atoi(age)
+
+	if check <= 14 || err != nil {
 		return fmt.Errorf("user must be 15 years and above")
 	}
 
