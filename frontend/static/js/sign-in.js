@@ -184,7 +184,7 @@ export function renderPage(page) {
       SignInPage();
       break;
     default:
-      ErrorPage(Object({code: 404, message: "Page Not Found"}));
+      showAlert('unknown page')
   }
 }
 
