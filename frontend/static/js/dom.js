@@ -87,6 +87,31 @@ export async function RealTime() {
             });
         }
 
+        const input = document.getElementById('messageInput');
+        if (input) {
+            input.addEventListener('keydown', (e) => {
+                const receiverElem = document.getElementById('name');
+                if (e.key !== 'Enter') {
+                    socket.send(JSON.stringify({
+                        type: 'typing',
+                        receiver: receiverElem?.textContent,
+                        sender: Username,
+                    }))
+                    return;
+                }
+
+                e.preventDefault();
+                msg = input.value;
+                socket.send(JSON.stringify({
+                    type: 'messaging',
+                    sender: Username,
+                    receiver: receiverElem?.textContent,
+                    message: msg,
+                    username: Username,
+                }));
+            })
+        }
+
         const floatingButton = document.getElementById('floatingButton');
         if (floatingButton) {
             floatingButton.addEventListener('click', function (e) {
@@ -114,7 +139,7 @@ export async function RealTime() {
             if (data.users.length > 0) {
                 const chatList = document.getElementById('chatList');
                 chatList.innerHTML = "";
-    
+
                 const loading = document.createElement('div');
                 loading.textContent = "Loading chats...";
                 chatList.appendChild(loading);
@@ -342,7 +367,7 @@ export async function RealTime() {
         console.log('namediv', nameDiv)
         console.log('user', Username)
 
-      
+
 
         if (Username === data.sender.username || (Username !== data.sender.username && data.sender.username == nameDiv.textContent)) {
             chatBox.appendChild(messageElement);
@@ -355,6 +380,34 @@ export async function RealTime() {
         }
 
     };
+
+    const displayTyping = (data) => {
+        let typingTimeout;
+        if (Username === data.receiver.username) {
+            let nameDiv = document.getElementById('name')
+            if (nameDiv) {
+                const chatbox = document.getElementById('chatBox')
+                let typing = document.createElement('div');
+                typing.id = "typingIndicator";
+                typing.classList.add("typing-indicator")
+                typing.style.display = 'none';
+                typing.innerHTML = `
+                    <span></span><span></span><span></span>
+                `
+                chatbox.appendChild(typing)
+
+                if (nameDiv.textContent === data.sender.username) {
+                    typing.style.display = 'flex'
+
+                    clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(() => {
+                        typing.style.display = 'none';
+                    }, 3000);
+
+                }
+            }
+        }
+    }
 
     const updateChatStatuses = (data) => {
         const chats = document.querySelectorAll('.chat');
@@ -400,6 +453,8 @@ export async function RealTime() {
             case 'onlineusers':
                 updateChatStatuses(data);
                 break;
+            case 'typing':
+                displayTyping(data)
             default:
                 showAlert('unexpected error occured. Try again later')
         }
@@ -413,7 +468,7 @@ export async function RealTime() {
     async function logOut() {
         try {
             const response = await fetch('/logout')
-    
+
             if (!response.ok) {
                 const data = await response.json();
                 throw new Error(data.error)
