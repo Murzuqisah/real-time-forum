@@ -201,8 +201,8 @@ const chat = (profile) => {
     chatbox.id = 'chatBox'
     let chatinput = document.createElement('div')
     chatinput.classList.add('chat-input')
-    let input = document.createElement('input')
-    input.type = 'text'
+    let input = document.createElement('textarea')
+    input.classList.add("chat-input-textarea")
     input.id = 'messageInput'
     input.placeholder = 'Type a message...'
     let send = document.createElement('button')
