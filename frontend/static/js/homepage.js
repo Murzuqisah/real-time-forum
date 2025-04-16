@@ -8,6 +8,7 @@ export const HomePage = (data) => {
     document.body.innerHTML = ""
     document.body.innerHTML = `
     <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
+    <div id="custom-notification" class="notification" style="display: none;"></div>
     `
     let scriptFiles = [
         "/frontend/static/js/script.js",
@@ -740,7 +741,7 @@ const postItem = (article, item) => {
     return article
 }
 
-export function showAlert(message, type = "error") {
+export const showAlert = (message, type = "error") => {
     const alertBox = document.getElementById("custom-alert");
     alertBox.className = `alert alert-${type} show`;
     alertBox.textContent = message;
@@ -751,6 +752,19 @@ export function showAlert(message, type = "error") {
     }, 4000);
 
     alertBox.style.display = "block";
+}
+
+export const notification = (message) => {
+    const alertBox = document.getElementById("custom-notification");
+    alertBox.className = `notification show`
+    alertBox.textContent = message
+
+    setTimeout(() => {
+        alertBox.classList.remove('show');
+        alertBox.style.display = 'none'
+    }, 7000)
+
+    alertBox.style.display = 'block'
 }
 
 const asideCategories = (asideform) => {
