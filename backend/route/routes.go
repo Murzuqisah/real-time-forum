@@ -16,7 +16,9 @@ func InitRoutes() *http.ServeMux {
 	uploadFs := http.FileServer(http.Dir("./uploads"))
 	r.Handle("/uploads/", http.StripPrefix("/uploads/", uploadFs))
 
-	r.Handle("/", http.FileServer(http.Dir("./frontend/templates")))
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+	})
 
 	r.HandleFunc("/sign-up", handler.SignupHandler)
 	r.HandleFunc("/sign-in", handler.LoginHandler)
