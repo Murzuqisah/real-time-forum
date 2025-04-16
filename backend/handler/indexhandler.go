@@ -115,7 +115,7 @@ func (client *Client) processMessages() {
 				sendError(client, "unexpected error occured")
 				continue
 			}
-			log.Println("Check receiver", msg["receiver"])
+			
 			receiver, err := repositories.GetUserByName(msg["receiver"])
 			if err != nil {
 				sendError(client, "unexpected error occured")
@@ -203,6 +203,29 @@ func (client *Client) processMessages() {
 			})
 		case "register":
 			register(msg["sender"], client)
+		case "typing":
+			sender, err := repositories.GetUserByName(msg["sender"])
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
+			
+			receiver, err := repositories.GetUserByName(msg["receiver"])
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
+			mu.RLock()
+			receiverClient, exists := onlineUsers[receiver.Username]
+			mu.RUnlock()
+			if exists {
+				sendJSON(receiverClient, map[string]any{
+					"type":     "typing",
+					"status":   "ok",
+					"sender":   sender,
+					"receiver": receiver,
+				})
+			}
 		default:
 			log.Println("Unknown message type:", msg["type"])
 			sendError(client, "Invalid message type")
