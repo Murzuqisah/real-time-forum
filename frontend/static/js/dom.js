@@ -245,6 +245,15 @@ export async function RealTime() {
                 chatBox.appendChild(messageDiv);
             }
         });
+        
+        let typing = document.createElement('div');
+        typing.id = "typingIndicator";
+        typing.classList.add("typing-indicator")
+        typing.style.display = 'none';
+        typing.innerHTML = `
+            <span></span><span></span><span></span>
+        `
+        chatBox.appendChild(typing)
 
         if (prepend) {
             chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight;
@@ -396,17 +405,8 @@ export async function RealTime() {
         if (Username === data.receiver.username) {
             let nameDiv = document.getElementById('name')
             if (nameDiv) {
-                const chatbox = document.getElementById('chatBox')
-                let typing = document.createElement('div');
-                typing.id = "typingIndicator";
-                typing.classList.add("typing-indicator")
-                typing.style.display = 'none';
-                typing.innerHTML = `
-                    <span></span><span></span><span></span>
-                `
-                chatbox.appendChild(typing)
-
                 if (nameDiv.textContent === data.sender.username) {
+                    let typing = document.getElementById("typingIndicator")
                     typing.style.display = 'flex'
 
                     clearTimeout(typingTimeout);
