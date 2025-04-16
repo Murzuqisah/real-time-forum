@@ -26,7 +26,7 @@ var (
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		http.FileServer(http.Dir("./frontend/templates"))
+		http.ServeFile(w, r, "frontend/templates/index.html")
 		return
 	}
 
