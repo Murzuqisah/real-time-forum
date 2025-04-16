@@ -184,7 +184,7 @@ export function renderPage(page) {
       SignInPage();
       break;
     default:
-      console.log("Error page");
+      ErrorPage(Object({code: 404, message: "Page Not Found"}));
   }
 }
 
@@ -218,7 +218,6 @@ export async function login(email, password) {
       showAlert(data.error);
     }
   } catch (error) {
-    console.error('Login error:', error);
     showAlert(`Error: ${error.message}`);
   }
 }
