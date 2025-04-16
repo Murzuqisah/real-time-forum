@@ -19,6 +19,8 @@ export async function RealTime() {
     const MESSAGES_PER_PAGE = 10;
     let currentPage = 1;
     let conversationData = [];
+    let logout = document.querySelector('.logout-button');
+    let shouldreconnect = true;
 
     const connectWebSocket = () => {
         return new Promise((resolve, reject) => {
@@ -51,7 +53,9 @@ export async function RealTime() {
             });
 
             socket.addEventListener('close', () => {
-                setTimeout(connectWebSocket, 3000);
+                if (shouldreconnect) {
+                    setTimeout(connectWebSocket, 3000);
+                }
             })
 
             attachUIEventListeners()
@@ -398,6 +402,32 @@ export async function RealTime() {
                 break;
             default:
                 showAlert('unexpected error occured. Try again later')
+        }
+    }
+
+    logout.addEventListener('click', (e) => {
+        e.preventDefault()
+        logOut()
+    })
+
+    async function logOut() {
+        try {
+            const response = await fetch('/logout')
+    
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error)
+            }
+            shouldreconnect = false;
+            sessionStorage.clear();
+            socket.close();
+            SignInPage();
+            showAlert("Logged out successfully");
+        } catch (error) {
+            shouldreconnect = false;
+            sessionStorage.clear();
+            socket.close();
+            showAlert(`Error: ${error.message}`);
         }
     }
 
