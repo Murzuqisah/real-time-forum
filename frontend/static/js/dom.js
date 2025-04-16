@@ -75,7 +75,10 @@ export async function RealTime() {
         if (sendBtn) {
             sendBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const msg = document.getElementById('messageInput').value;
+                let msg = document.getElementById('messageInput').value;
+                if (msg.trim() === "") {
+                    return
+                }
                 const receiverElem = document.getElementById('name');
                 socket.send(JSON.stringify({
                     type: 'messaging',
@@ -100,15 +103,22 @@ export async function RealTime() {
                     return;
                 }
 
-                e.preventDefault();
-                msg = input.value;
-                socket.send(JSON.stringify({
-                    type: 'messaging',
-                    sender: Username,
-                    receiver: receiverElem?.textContent,
-                    message: msg,
-                    username: Username,
-                }));
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    let msg = document.getElementById('messageInput').value;
+                    if (msg.trim() === "") {
+                        return
+                    }
+                    e.preventDefault();
+                    msg = input.value;
+                    socket.send(JSON.stringify({
+                        type: 'messaging',
+                        sender: Username,
+                        receiver: receiverElem?.textContent,
+                        message: msg,
+                        username: Username,
+                    }));
+                }
+
             })
         }
 
