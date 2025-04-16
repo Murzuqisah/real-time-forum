@@ -607,9 +607,15 @@ body.dark-theme .profile p {
   cursor: pointer;
 }
 
+img.small {
+  align-items: center;
+  width: 20%;  
+  height: auto;
+}
+
 .chat-list-container,
 .chat-container,
-.user-list-container {
+.user-list-container{
   width: 400px;
   height: calc(80vh - 80px);
   border: 1px solid #ccc;
@@ -861,7 +867,8 @@ body.dark-theme .session-status {
   color: var(--tertiary-color);
 }
 
-.logout-button {
+.logout-button, 
+.profile-name {
   padding: 0.5rem 1rem;
   margin: 0.5rem 0;
   font-size: 1rem;
