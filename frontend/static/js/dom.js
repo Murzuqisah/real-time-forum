@@ -465,6 +465,7 @@ export async function RealTime() {
                 break;
             case 'typing':
                 displayTyping(data)
+                break
             default:
                 showAlert('unexpected error occured. Try again later')
         }
