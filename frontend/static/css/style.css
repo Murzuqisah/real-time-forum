@@ -726,19 +726,6 @@ img.small {
   flex-wrap: wrap;
 }
 
-/*
-.chat-input input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 10px;
-  text-wrap: wrap;
-  flex-wrap: wrap;
-  overflow: auto;
-}
-*/
-
 .chat-input-textarea {
   flex: 1;
   padding: 8px;
@@ -1195,6 +1182,9 @@ body.dark-theme .comment-box {
 }
 
 .typing-indicator {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
   display: flex;
   align-items: center;
   margin: 5px 10px;
