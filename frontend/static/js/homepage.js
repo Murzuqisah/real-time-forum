@@ -1,3 +1,5 @@
+import { SignInPage } from "./sign-in.js";
+
 export const HomePage = (data) => {
     document.head.innerHTML = ""
     document.head.innerHTML = `
@@ -220,6 +222,28 @@ const chat = (profile) => {
     chatcontainer.appendChild(chatbox)
     chatcontainer.appendChild(chatinput)
     profile.appendChild(chatcontainer)
+
+    logout.addEventListener('click', (e) => {
+        e.preventDefault()
+        logOut()
+    })
+
+    async function logOut() {
+        try {
+            const response = await fetch('/logout')
+    
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error)
+            }
+            sessionStorage.clear()
+            SignInPage()
+            showAlert("Logged out successfully")
+        } catch (error) {
+            sessionStorage.clear()
+            showAlert(`Error: ${error.message}`);
+        }
+    }
 
     return profile
 }
