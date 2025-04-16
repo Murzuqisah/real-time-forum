@@ -723,15 +723,34 @@ img.small {
   padding: 10px;
   background: #ffffff;
   border-top: 1px solid #ccc;
+  flex-wrap: wrap;
 }
 
+/*
 .chat-input input {
   flex: 1;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 10px;
+  text-wrap: wrap;
+  flex-wrap: wrap;
+  overflow: auto;
 }
+*/
+
+.chat-input-textarea {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+  resize: none; /* Optional: disable resizing */
+  overflow-y: auto; /* Adds scroll when needed */
+  min-height: 40px; /* Optional: adjusts height */
+  line-height: 1.5;
+}
+
 
 .chat-input button {
   background: var(--secondary-color);
