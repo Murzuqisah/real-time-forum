@@ -103,7 +103,7 @@ export const HomePage = (data) => {
     document.body.appendChild(profile);
 };
 
-export function renderPosts(data, postsContainer) {
+export const renderPosts = (data, postsContainer) => {
     if (!data || !Array.isArray(data.posts)) {
         console.log("error in the data posts")
         data.posts = [];
@@ -124,7 +124,19 @@ export function renderPosts(data, postsContainer) {
     return postsContainer
 }
 
-function chat(profile) {
+const chat = (profile) => {
+    let name = sessionStorage.getItem('username')
+    let p = document.createElement('p')
+    p.classList.add('profile-name')
+    p.textContent = name
+    profile.appendChild(p)
+
+    let form = document.createElement('form')
+    let logout = document.createElement('button')
+    logout.classList.add('logout-button')
+    logout.textContent = 'Log Out'
+    form.appendChild(logout)
+    profile.appendChild(form)
     let chatListContainer = document.createElement('div')
     chatListContainer.classList.add('chat-list-container')
     chatListContainer.id = 'chatListContainer'
@@ -212,7 +224,7 @@ function chat(profile) {
     return profile
 }
 
-function postingform() {
+const postingform = () => {
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
     postForm.id = 'post-form'
@@ -342,7 +354,7 @@ function postingform() {
     return postForm
 }
 
-export function formatTimestamp(timestamp) {
+export const formatTimestamp = (timestamp) => {
     const now = new Date();
     const pastTime = new Date(timestamp);
     const timeDifference = Math.floor((now - pastTime) / 1000);
@@ -378,7 +390,7 @@ export function formatTimestamp(timestamp) {
     }
 }
 
-function submitcomment(addcomment, commentsection, commentcount, item) {
+const submitcomment = (addcomment, commentsection, commentcount, item) => {
     fetch('/comment', {
         method: "POST",
         body: new FormData(addcomment),
@@ -401,7 +413,7 @@ function submitcomment(addcomment, commentsection, commentcount, item) {
         })
 }
 
-function commentItem(comment) {
+const commentItem = (comment) => {
     let comment_item = document.createElement('div')
     comment_item.classList.add('comment')
 
@@ -466,7 +478,7 @@ function commentItem(comment) {
     return comment_item
 }
 
-function reactionHandler(dislikecount, likecount, item, type) {
+const reactionHandler = (dislikecount, likecount, item, type) => {
     fetch('/reaction', {
         method: "POST",
         body: JSON.stringify({ reaction: type, postid: item.id })
@@ -487,7 +499,6 @@ function reactionHandler(dislikecount, likecount, item, type) {
             }
         })
 }
-
 
 const createPost = (form) => {
     fetch('/post', {
@@ -513,7 +524,7 @@ const createPost = (form) => {
         })
 };
 
-function postItem(article, item) {
+const postItem = (article, item) => {
     let headerDiv = document.createElement('div');
 
     const rawTimestamp = item.created_on
@@ -704,7 +715,6 @@ function postItem(article, item) {
 
     return article
 }
-
 
 export function showAlert(message, type = "error") {
     const alertBox = document.getElementById("custom-alert");
