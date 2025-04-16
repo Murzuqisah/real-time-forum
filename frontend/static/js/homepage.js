@@ -746,38 +746,38 @@ export const notification = (message) => {
 
 const asideCategories = (asideform) => {
     const categories = ["Technology", "Health", "Education", "Sports", "Entertainment", "Finance", "Travel", "Food", "Lifestyle", "Science"];
-    
+
     categories.forEach(category => {
         let label = document.createElement('label');
         let input = document.createElement('input');
         input.type = 'checkbox';
         input.name = 'category';
         input.value = category;
-        
+
         // Changed event from 'checked' to 'change' and updated handler
         input.addEventListener('change', () => {
             // Get all currently checked checkboxes
             const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
                 .map(checkbox => checkbox.value);
-            
+
             // Determine what to send to the backend
             const categoriesToSend = checkedCategories.length > 0 ? checkedCategories : 'none';
             filter(categoriesToSend);
         });
-        
+
         // Improved label structure (checkbox before text)
         label.appendChild(input);
         label.appendChild(document.createTextNode(` ${category}`));
         asideform.appendChild(label);
     });
-    
+
     return asideform;
 }
 
 async function filter(categories) {
     let cat
     let err
-    if ( Array.isArray(categories)) {
+    if (Array.isArray(categories)) {
         cat = categories
         err = 'something'
     } else {
