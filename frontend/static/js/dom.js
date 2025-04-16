@@ -1,4 +1,4 @@
-import { HomePage, showAlert } from './homepage.js';
+import { HomePage, showAlert, notification } from './homepage.js';
 import { SignInPage } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -317,6 +317,9 @@ export async function RealTime() {
     };
 
     const displayMessage = (data) => {
+        if (Username !== data.sender.username) {
+            notification(`Message received from ${data.sender.username}`)
+        }
         let messageElement = document.createElement("div");
         messageElement.classList.add("message", data.sender.username === Username ? "sent" : "received");
         messageElement = arrangemessage(messageElement, data.message)
