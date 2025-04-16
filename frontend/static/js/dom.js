@@ -232,6 +232,7 @@ export async function RealTime() {
         const end = totalMessages - ((page - 1) * MESSAGES_PER_PAGE);
         const messagesToShow = conversationData.slice(start, end);
         const oldScrollHeight = chatBox.scrollHeight;
+        const typing = document.getElementById("typingIndicator")
 
         messagesToShow.forEach(elem => {
             console.log(elem)
@@ -242,18 +243,11 @@ export async function RealTime() {
             if (prepend) {
                 chatBox.insertBefore(messageDiv, chatBox.firstChild);
             } else {
-                chatBox.appendChild(messageDiv);
+                chatBox.insertBefore(messageDiv, typing);
             }
         });
-        
-        let typing = document.createElement('div');
-        typing.id = "typingIndicator";
-        typing.classList.add("typing-indicator")
-        typing.style.display = 'none';
-        typing.innerHTML = `
-            <span></span><span></span><span></span>
-        `
-        chatBox.appendChild(typing)
+
+
 
         if (prepend) {
             chatBox.scrollTop = chatBox.scrollHeight - oldScrollHeight;
@@ -316,6 +310,16 @@ export async function RealTime() {
                 loadMessages(currentPage, true);
             }
         });
+
+        let typing = document.createElement('div');
+        typing.id = "typingIndicator";
+        typing.classList.add("typing-indicator")
+        typing.style.display = 'none';
+        typing.innerHTML = `
+            <span></span><span></span><span></span>
+        `
+        chatBox.appendChild(typing)
+
     }, 100);
 
     const showUsersList = (data) => {
@@ -403,21 +407,28 @@ export async function RealTime() {
     const displayTyping = (data) => {
         let typingTimeout;
         if (Username === data.receiver.username) {
-            let nameDiv = document.getElementById('name')
-            if (nameDiv) {
-                if (nameDiv.textContent === data.sender.username) {
-                    let typing = document.getElementById("typingIndicator")
-                    typing.style.display = 'flex'
+            const nameDiv = document.getElementById('name');
+            if (nameDiv?.textContent === data.sender.username) {
+                const typing = document.getElementById("typingIndicator");
+                typing.style.display = 'flex';
 
-                    clearTimeout(typingTimeout);
-                    typingTimeout = setTimeout(() => {
-                        typing.style.display = 'none';
-                    }, 3000);
+                // Check if the user is near the bottom of the chat
+                const chatBox = document.getElementById('chatBox');
+                const isNearBottom =
+                    chatBox.scrollHeight - chatBox.clientHeight - chatBox.scrollTop < 100;
 
+                // Auto-scroll to show the typing indicator if near the bottom
+                if (isNearBottom) {
+                    chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
                 }
+
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    typing.style.display = 'none';
+                }, 3000);
             }
         }
-    }
+    };
 
     const updateChatStatuses = (data) => {
         const chats = document.querySelectorAll('.chat');
