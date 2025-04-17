@@ -110,7 +110,7 @@ export const SignInPage = () => {
   div1.classList.add('input-group');
   let label1 = document.createElement('label');
   label1.htmlFor = 'email';
-  label1.textContent = 'Email';
+  label1.textContent = 'Nickname/Email';
   let input1 = document.createElement('input');
   input1.id = 'email';
   input1.name = 'email';
