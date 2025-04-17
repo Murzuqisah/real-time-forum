@@ -330,7 +330,7 @@ const postingform = () => {
         let postBody = textarea.value;
         let postFile = fileInput.files[0];
 
-        if (!postTitle || !postBody) {
+        if (!postTitle || !postBody || postTitle.trim() === "" || postBody.trim() === "") {
             showAlert('Please fill in all fields.');
             return;
         }
