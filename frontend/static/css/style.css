@@ -863,6 +863,9 @@ img.small {
 .message-content {
   display: inline-block;
   padding-bottom: 2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  width: 100%;
 }
 
 
