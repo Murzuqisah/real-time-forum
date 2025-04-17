@@ -21,6 +21,7 @@ export async function RealTime() {
     let conversationData = [];
     let logout = document.querySelector('.logout-button');
     let shouldreconnect = true;
+    let typingTimeout;
 
     const connectWebSocket = () => {
         return new Promise((resolve, reject) => {
@@ -139,6 +140,27 @@ export async function RealTime() {
                 console.log('clicked post add')
             });
         }
+
+        document.querySelectorAll('.chat-input-textarea').forEach(textarea => {
+            textarea.addEventListener('input', function () {
+                // Reset height to auto to get correct scrollHeight
+                this.style.height = 'auto';
+
+                // Calculate maximum allowed height (7 lines)
+                const maxHeight = 184; // Should match CSS max-height
+
+                if (this.scrollHeight <= maxHeight) {
+                    // Expand to content height if under max
+                    this.style.height = `${this.scrollHeight}px`;
+                } else {
+                    // Show scrollbar when reaching max height
+                    this.style.height = `${maxHeight}px`;
+                }
+            });
+
+            // Initialize with proper height
+            textarea.dispatchEvent(new Event('input'));
+        });
     };
 
     const showChatList = (data) => {
@@ -402,30 +424,33 @@ export async function RealTime() {
             }
         }
 
-    };
+    }; 
 
     const displayTyping = (data) => {
-        let typingTimeout;
         if (Username === data.receiver.username) {
             const nameDiv = document.getElementById('name');
             if (nameDiv?.textContent === data.sender.username) {
                 const typing = document.getElementById("typingIndicator");
+                const wasAlreadyVisible = typing.style.display === 'flex';
+
                 typing.style.display = 'flex';
 
-                // Check if the user is near the bottom of the chat
+                // Scroll logic
                 const chatBox = document.getElementById('chatBox');
                 const isNearBottom =
                     chatBox.scrollHeight - chatBox.clientHeight - chatBox.scrollTop < 100;
 
-                // Auto-scroll to show the typing indicator if near the bottom
                 if (isNearBottom) {
                     chatBox.scrollTop = chatBox.scrollHeight - chatBox.clientHeight;
                 }
 
+                // Clear existing timeout regardless of visibility state
                 clearTimeout(typingTimeout);
+
+                // Reset timer (5000ms for visible state, 3000ms for new appearance)
                 typingTimeout = setTimeout(() => {
                     typing.style.display = 'none';
-                }, 3000);
+                }, wasAlreadyVisible ? 5000 : 3000);
             }
         }
     };
