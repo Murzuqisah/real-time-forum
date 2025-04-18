@@ -98,6 +98,16 @@ export const HomePage = (data) => {
     img.alt = 'create-post'
     floatingButton.appendChild(img)
 
+    let closeButtonContainer = document.createElement('div');
+    closeButtonContainer.classList.add('close-modal');
+    closeButtonContainer.innerHTML = '&times;';
+    closeButtonContainer.addEventListener('click', function () {
+        const createPostForm = document.querySelector('.create-post');
+        createPostForm.classList.add('hidden');
+    });
+    floating.appendChild(closeButtonContainer);
+
+
     floating.appendChild(createPost)
     floating.appendChild(floatingButton)
     document.body.appendChild(floating)
