@@ -1,3 +1,4 @@
+import { showAlert } from "./homepage.js"
 import { navigate } from "./sign-in.js"
 export const SignUpPage = () => {
   document.head.innerHTML = ""
@@ -15,7 +16,9 @@ export const SignUpPage = () => {
   justify-content: center;
 }
   </style>
+  <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
   `
+
   let scriptFiles = [
     "/frontend/static/js/signup_validation.js",
     "/frontend/static/css/sign-up.css",
@@ -75,7 +78,7 @@ export const SignUpPage = () => {
   div1.classList.add('input-group');
   let label1 = document.createElement('label');
   label1.htmlFor = 'name';
-  label1.textContent = 'Username';
+  label1.textContent = 'Nickname';
   let input1 = document.createElement('input');
   input1.type = 'text';
   input1.id = 'username';
@@ -83,6 +86,58 @@ export const SignUpPage = () => {
   input1.required = true;
   div1.appendChild(label1);
   div1.appendChild(input1);
+
+  let div8 = document.createElement('div');
+  div8.classList.add('input-group');
+  let label5 = document.createElement('label');
+  label5.htmlFor = 'age';
+  label5.textContent = 'Age';
+  let input5 = document.createElement('input');
+  input5.type = 'number';
+  input5.id = 'age';
+  input5.name = 'age';
+  input5.required = true;
+  div8.appendChild(label5);
+  div8.appendChild(input5);
+
+  let div9 = document.createElement('div');
+  div9.classList.add('input-group');
+  let label6 = document.createElement('label');
+  label6.htmlFor = 'gender';
+  label6.textContent = 'Gender';
+  let input6 = document.createElement('input');
+  input6.type = 'text';
+  input6.id = 'gender';
+  input6.name = 'gender';
+  input6.required = true;
+  div9.appendChild(label6);
+  div9.appendChild(input6);
+
+  let div10 = document.createElement('div');
+  div10.classList.add('input-group');
+  let label7 = document.createElement('label');
+  label7.htmlFor = 'firstname';
+  label7.textContent = 'First Name';
+  let input7 = document.createElement('input');
+  input7.type = 'text';
+  input7.id = 'firstname';
+  input7.name = 'firstname';
+  input7.required = true;
+  div10.appendChild(label7);
+  div10.appendChild(input7);
+
+  let div11 = document.createElement('div');
+  div11.classList.add('input-group');
+  let label8 = document.createElement('label');
+  label8.htmlFor = 'lastname';
+  label8.textContent = 'Last Name';
+  let input8 = document.createElement('input');
+  input8.type = 'text';
+  input8.id = 'lastname';
+  input8.name = 'lastname';
+  input8.required = true;
+  div11.appendChild(label8);
+  div11.appendChild(input8);
 
   let div2 = document.createElement('div');
   div2.classList.add('input-group');
@@ -100,7 +155,7 @@ export const SignUpPage = () => {
   let div3 = document.createElement('div');
   div3.classList.add('password');
   let div4 = document.createElement('div');
-  div4.classList.add('input-group');
+  div4.classList.add('password');
   let label3 = document.createElement('label');
   label3.htmlFor = 'password';
   label3.textContent = 'Password';
@@ -156,25 +211,31 @@ export const SignUpPage = () => {
   button3.textContent = 'Create Account';
   button3.addEventListener('click', (e) => {
     e.preventDefault()
-    console.log('Signing up...');
-
     let username = document.getElementById('username').value;
     let email = document.getElementById('email').value;
     let password = document.getElementById('password').value;
     let confirmedPassword = document.getElementById('confirmed-password').value;
+    let age = document.getElementById('age').value;
+    let firstname = document.getElementById('firstname').value;
+    let lastname = document.getElementById('lastname').value;
+    let gender = document.getElementById('gender').value;
 
     if (password !== confirmedPassword) {
-      alert('Passwords do not match');
+      showAlert('Passwords do not match');
       return;
     }
-    if (!username || !email || !password || !confirmedPassword) {
-      alert('Username, email, and password are required for sign up');
+    if (!username || !email || !password || !confirmedPassword || !firstname || !lastname || !age || !gender) {
+      showAlert('Username, email, and password are required for sign up');
       return;
     }
-    signUp(username, email, password, confirmedPassword, e)
+    signUp(username, email, password, confirmedPassword, age, firstname, lastname, gender, e)
 
   })
   signupForm.appendChild(div1);
+  signupForm.appendChild(div8);
+  signupForm.appendChild(div9);
+  signupForm.appendChild(div10);
+  signupForm.appendChild(div11);
   signupForm.appendChild(div2);
   signupForm.appendChild(div3);
   signupForm.appendChild(div4);
@@ -196,29 +257,31 @@ export const SignUpPage = () => {
   document.body.appendChild(main)
 }
 
-async function signUp(username, email, password, confirmedPassword, e) {
-  await fetch('/sign-up', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ username, email, password, confirmedPassword })
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json(); 
+async function signUp(username, email, password, confirmedPassword, age, firstname, lastname, gender, e) {
+  try {
+    const response = await fetch('/sign-up', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, email, password, confirmedPassword, age, firstname, lastname, gender })
     })
-    .then(data => {
-      console.log(data);
-      if (data.error === 'ok') {
-        navigate(e, '/sign-in');
-      } else {
-        alert(data.error);
-      }
-    })
-    .catch(error => {
-      alert(`Error: ${error.message}`);
-    });
+
+    if (!response.ok) {
+      let data = await response.json()
+      throw new Error(data.error);
+    }
+    const data = await response.json();
+
+    console.log(data);
+    if (data.error === 'ok') {
+      console.log(data)
+      sessionStorage.setItem('pagestate', 'fromsignup')
+      navigate(e, '/sign-in');
+    } else {
+      showAlert(data.error);
+    }
+  } catch (error) {
+    showAlert(`Error: ${error.message}`);
+  }
 }

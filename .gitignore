@@ -1,3 +1,4 @@
 uploads/
 backend/database/forum.db
 .env
+stash.js

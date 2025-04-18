@@ -12,6 +12,11 @@ import (
 	"github.com/jesee-kuya/forum/backend/util"
 )
 
+type FetchData struct {
+	Categories []string `json:"category"`
+	Check      string   `json:"error"`
+}
+
 func GetAllPosts(db *sql.DB, tmpl *template.Template, posts []models.Post) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// fetch comments for each post
@@ -73,64 +78,118 @@ func GetAllPostsAPI(db *sql.DB) http.HandlerFunc {
 
 // FilterPosts - Handles filtering posts by category or user
 func FilterPosts(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/filter" {
-		util.ErrorHandler(w, "Page does not exist", http.StatusNotFound)
-		return
-	}
-
-	if r.Method != http.MethodGet {
-		log.Println("Method not allowed", r.Method)
-		util.ErrorHandler(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	err := r.ParseForm()
+	var data FetchData
+	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		log.Println("Error parsing form", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		log.Println("failed to decode: ", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
-	categories := r.Form["category"]
-	filter := r.FormValue("filter")
+
+	if r.Method != http.MethodPost {
+		log.Println("Method not allowed", r.Method)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Method not allowed",
+		})
+		return
+	}
+
+	_, err = getSessionID(r)
+	if err != nil {
+		log.Println("Invalid Session")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid session",
+		})
+		return
+	}
+
+	categories := data.Categories
 
 	if len(categories) != 0 {
 		posts, err := repositories.FilterPostsByCategories(util.DB, categories)
 		if err != nil {
 			log.Println("error filtering posts:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 			return
 		}
-		PostDetails(posts)
+		posts, err = PostDetails(posts)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
+			return
+		}
+
+		for i := range posts {
+			posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"error": "ok",
+			"posts": posts,
+		})
 		return
 	}
 
-	cookie, err := getSessionID(r)
-	if err != nil {
-		log.Println("Invalid Session:", err)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	if data.Check == "none" {
+		posts, err := repositories.GetPosts(util.DB)
+		if err != nil {
+			log.Println("Error fetching posts:", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
+			return
+		}
+
+		posts, err = PostDetails(posts)
+		if err != nil {
+			log.Println("Error processing posts:", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
+			return
+		}
+
+		for i := range posts {
+			posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]any{
+			"error": "ok",
+			"posts": posts,
+		})
 		return
-	}
-	sessionData, err := getSessionData(cookie)
-	if err != nil {
-		log.Println("Invalid Session:", err)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
+
 	}
 
 	posts := []models.Post{}
-
-	if filter == "created" {
-		posts, err = repositories.FilterPostsByUser(util.DB, sessionData["userId"].(int))
-	}
-	if filter == "liked" {
-		posts, err = repositories.FilterPostsByLikes(util.DB, sessionData["userId"].(int))
-	}
-	if err != nil {
-		log.Println(err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-		return
-	}
-
-	PostDetails(posts)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"error": "ok",
+		"posts": posts,
+	})
 }

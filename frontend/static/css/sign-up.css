@@ -160,3 +160,22 @@ body.dark-theme input {
 body.dark-theme .switch-form a {
   color: var(--primary-color);
 }
+
+#custom-alert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  max-width: 300px;
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#custom-alert.show {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  color: var(--tertiary-color);
+}
+

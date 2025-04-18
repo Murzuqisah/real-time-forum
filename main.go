@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/route"
@@ -11,6 +12,7 @@ import (
 )
 
 func main() {
+	os.Create(".env")
 	err := util.LoadEnv(".env")
 	if err != nil {
 		fmt.Println("Error loading .env file:", err)
@@ -34,7 +36,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Printf("Server started at ws://localhost%s\n", port)
+	log.Printf("Server started at http://localhost%s\n", port)
 	if err = server.ListenAndServe(); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
