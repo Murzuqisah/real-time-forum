@@ -16,11 +16,17 @@ func InitRoutes() *http.ServeMux {
 	uploadFs := http.FileServer(http.Dir("./uploads"))
 	r.Handle("/uploads/", http.StripPrefix("/uploads/", uploadFs))
 
-	r.Handle("/", http.FileServer(http.Dir("./frontend/templates")))
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+	})
 
 	r.HandleFunc("/sign-up", handler.SignupHandler)
 	r.HandleFunc("/sign-in", handler.LoginHandler)
 	r.HandleFunc("/check", handler.CheckSession)
+	r.HandleFunc("/post", handler.CreatePost)
+	r.HandleFunc("/comment", handler.Comment)
+	r.HandleFunc("/reaction", handler.ReactionHandler)
+	r.HandleFunc("/filter", handler.FilterPosts)
 
 	r.Handle("/ws", websocket.Handler(handler.HandleWebsocket))
 	return r

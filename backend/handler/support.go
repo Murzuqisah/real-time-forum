@@ -4,14 +4,14 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
 
 func CreateSession(id int) string {
-	mu.Lock()
-	defer mu.Unlock()
-
+	Mu.Lock()
+	defer Mu.Unlock()
 	sessionID := uuid.Must(uuid.NewV4()).String()
 	SessionStore[sessionID] = id
 	log.Println(SessionStore)
@@ -52,4 +52,36 @@ func DeleteSession(userId int) {
 			break
 		}
 	}
+}
+
+func SetSessionCookie(w http.ResponseWriter, sessionID string) {
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  time.Now().UTC().Add(24 * time.Hour),
+		HttpOnly: true,
+		// In development environment, set Secure to false if not using HTTPS
+		Secure: false,
+		// Allow JavaScript access to the cookie in development
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, cookie)
+	log.Printf("Set session cookie: %s", sessionID)
+}
+
+func SetSessionCookie(w http.ResponseWriter, sessionID string) {
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  time.Now().UTC().Add(24 * time.Hour),
+		HttpOnly: true,
+		// In development environment, set Secure to false if not using HTTPS
+		Secure: false,
+		// Allow JavaScript access to the cookie in development
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, cookie)
+	log.Printf("Set session cookie: %s", sessionID)
 }

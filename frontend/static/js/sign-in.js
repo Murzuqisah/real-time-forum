@@ -1,5 +1,7 @@
 import { SignUpPage } from "./sign-up.js"
 import { RealTime } from "./dom.js"
+import { HomePage } from "./homepage.js"
+import { showAlert } from "./homepage.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -16,8 +18,20 @@ export const SignInPage = () => {
   flex-direction: column;
   justify-content: center;
 }
+  .success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+  }
   </style>
+  <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
   `
+
   let scriptFiles = [
     "/frontend/static/js/script.js",
     "/frontend/static/js/signin_validation.js",
@@ -72,13 +86,31 @@ export const SignInPage = () => {
   h2.textContent = 'Sign In'
   formContainer.appendChild(h2)
 
+  // Check if we're coming from the sign-up page
+  if (sessionStorage.getItem('pagestate') === 'fromsignup') {
+    sessionStorage.clear()
+    // Add success message
+    let successMessage = document.createElement('div');
+    successMessage.classList.add('success-message');
+    successMessage.textContent = 'Account created successfully! Please sign in.';
+    formContainer.appendChild(successMessage);
+  }
+
   let signinForm = document.createElement('form')
+  signinForm.id = 'signin-form'
+  // Prevent default form submission which would expose credentials in URL
+  signinForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const email = document.getElementById('email').value
+    const password = document.getElementById('password').value
+    login(email, password)
+  })
 
   let div1 = document.createElement('div');
   div1.classList.add('input-group');
   let label1 = document.createElement('label');
   label1.htmlFor = 'email';
-  label1.textContent = 'Email';
+  label1.textContent = 'Nickname/Email';
   let input1 = document.createElement('input');
   input1.id = 'email';
   input1.name = 'email';
@@ -113,7 +145,7 @@ export const SignInPage = () => {
 
   let button1 = document.createElement('button');
   button1.id = 'sign-in-btn'
-  button1.type = 'submit';
+  button1.type = 'submit'; // Keep as submit to work with form submission
   button1.classList.add('sign-in-btn', 'btn');
   button1.textContent = 'Sign In';
 
@@ -139,55 +171,53 @@ export const SignInPage = () => {
 
 export function navigate(event, page) {
   event.preventDefault()
-  if (!page.startsWith('/')) {
-      page = '/' + page;
-  }
-
-  if (location.origin + page !== location.href) {
-      history.pushState({ page }, "", page);
-      renderPage();
-  }
+  history.pushState({ page }, "", "/");
+  renderPage(page);
 }
 
-export function renderPage() {
-  let page = location.pathname;
-  console.log("Current page:", page);
-
-  if (!page || page === "/") {
-      page = "/sign-in";
-  }
-
+export function renderPage(page) {
   switch (page) {
-      case "/sign-up":
-          SignUpPage();
-          break;
-      case "/sign-in":
-          SignInPage();
-          break;
-      default:
-          console.log("Error page");
+    case "/sign-up":
+      SignUpPage();
+      break;
+    case "/sign-in":
+      SignInPage();
+      break;
+    default:
+      showAlert('unknown page')
   }
 }
 
 export async function login(email, password) {
-  await fetch('/sign-in',{
-    method: "POST",
-    headers: { 'Content-Type': 'application/json'},
-    body: JSON.stringify({email:email, password: password})
-  } )
-  .then(response => {
+  try {
+    const response = await fetch('/sign-in', {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    });
+
     if (!response.ok) {
-      throw new Error('unexpected error occured')
+      let data = await response.json()
+      throw new Error(data.error);
     }
-    return response.json();
-  })
-  .then(data => {
+
+    const data = await response.json();
+
     if (data.error === 'ok') {
-      console.log(data)
-      RealTime(data.user, data.session)
+      console.log('Login successful:', data);
+      // Store session in sessionStorage
+      sessionStorage.setItem('session', data.session);
+      sessionStorage.setItem('pageState', 'home');
+      sessionStorage.setItem("username", data.user.username)
+      sessionStorage.setItem("userId", data.user.id.toString())
+      HomePage(data);
+      await RealTime();
+      // Update URL without exposing credentials
+      history.pushState({}, '', '/');
     } else {
-      alert(data.error)
+      showAlert(data.error);
     }
-  })
-  .catch(error => alert(`Error: ${error.message}`))
+  } catch (error) {
+    showAlert(`Error: ${error.message}`);
+  }
 }

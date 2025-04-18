@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jesee-kuya/forum/backend/models"
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
 )
@@ -21,14 +22,22 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	var url string
 	if r.Method != http.MethodPost {
 		log.Println("Invalid request method:", r.Method)
-		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
 	// Create the img directory if it does not exist
 	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
 		log.Println("Failed to create uploads directory:", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
@@ -36,17 +45,25 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(20 << 20)
 	if err != nil {
 		log.Println("Failed parsing multipart form:", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
-	file, header, err := r.FormFile("file")
+	file, header, err := r.FormFile("uploaded-file")
 	if err != nil {
 		if err.Error() == "http: no such file" {
 			log.Println("No file uploaded, continuing process.")
 		} else {
 			log.Println("Failed retrieving media file:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 			return
 		}
 	}
@@ -56,7 +73,11 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 		if header.Size > 20<<20 {
 			log.Println("File size exceeds 20MB limit")
-			util.ErrorHandler(w, "The uploaded file is too large. Please upload a file less than 20MB.", http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "The uploaded file is too large. Please upload a file less than 20MB.",
+			})
 			return
 		}
 
@@ -64,14 +85,22 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		fileExt, err := ValidateMimeType(file)
 		if err != nil {
 			log.Println("Invalid extension associated with file:", err)
-			util.ErrorHandler(w, "Invalid extension associated with file", http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Invalid extension associated with file",
+			})
 			return
 		}
 
 		_, err = file.Seek(0, 0)
 		if err != nil {
 			log.Println("Failed to reset file pointer:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 			return
 		}
 
@@ -79,7 +108,11 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		tempFile, err := os.CreateTemp("uploads", "upload-*"+fileExt)
 		if err != nil {
 			log.Println("Failed to read file:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 			return
 		}
 		defer tempFile.Close()
@@ -87,7 +120,11 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		fileBytes, err := io.ReadAll(file)
 		if err != nil {
 			log.Println("Failed to read file:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 			return
 		}
 
@@ -95,26 +132,46 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		_, err = tempFile.Write(fileBytes)
 		if err != nil {
 			log.Println("Failed to write file:", err)
-			util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
-			return
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "unknown error occured. Try again later",
+			})
 		}
 		tempFilePath := tempFile.Name()
 		url = fmt.Sprintf("%v", tempFilePath)
 	}
 
+	cookie, err := getSessionID(r)
+	if err != nil {
+		log.Println("Invalid Session")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
 
-	var userId string
-	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("title")), html.EscapeString(r.FormValue("content")), url, userId)
+	id, err := repositories.InsertRecord(util.DB, "tblPosts", []string{"post_title", "body", "media_url", "user_id"}, html.EscapeString(r.FormValue("post-title")), html.EscapeString(r.FormValue("post-content")), url, SessionStore[cookie])
 	if err != nil {
 		log.Println("failed to add post", err)
-		http.Redirect(w, r, "/sign-in", http.StatusSeeOther)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		log.Println("error parsing form:", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
@@ -123,10 +180,46 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	for _, category := range categories {
 		repositories.InsertRecord(util.DB, "tblPostCategories", []string{"post_id", "category"}, id, category)
 	}
+
+	user, err := repositories.GetUserBySession(cookie)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	post, err := repositories.GetPost(int(id))
+	if err != nil {
+		log.Println("Failed to get post:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+	details, err := PostDetails([]models.Post{post})
+	if err != nil {
+		log.Println("Failed to get post details:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+	post = details[0]
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"redirect": "/home",
+	json.NewEncoder(w).Encode(map[string]any{
+		"error":   "ok",
+		"user":    user,
+		"session": cookie,
+		"item":    post,
 	})
 }
 

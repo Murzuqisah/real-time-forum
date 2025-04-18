@@ -10,6 +10,10 @@ import (
 type User struct {
 	ID                int       `json:"id"`
 	Username          string    `json:"username"`
+	Age               string       `json:"age"`
+	FirstName         string    `json:"firstname"`
+	LastName          string    `json:"lastname"`
+	Gender            string    `json:"gender"`
 	Email             string    `json:"email"`
 	Password          string    `json:"password,omitempty"`
 	ConfirmedPassword string    `json:"confirmed-password"`
@@ -51,9 +55,10 @@ type Reaction struct {
 }
 
 type Message struct {
-	ID         int    `json:"id"`
-	ReceiverId int    `json:"receiver_id"`
-	SenderId   int    `json:"sender_id"`
-	Body       string `json:"body"`
-	SentOn     string `json:"sent_on"`
+	ID         int       `json:"id"`
+	ReceiverId int       `json:"receiver_id"`
+	SenderId   int       `json:"sender_id"`
+	Username   string    `json:"username"`
+	Body       string    `json:"body"`
+	SentOn     time.Time `json:"sent_on"`
 }

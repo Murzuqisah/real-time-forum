@@ -154,14 +154,21 @@ func UserDetails(row *sql.Row) (models.User, error) {
 }
 
 func GetActiveChats(senderid int) ([]models.User, error) {
-	check := make(map[int]bool) // Initialize map
 	var users []models.User
 
 	query := `
-		SELECT DISTINCT receiver_id FROM tblMessages WHERE sender_id = ?
-		UNION
-		SELECT DISTINCT sender_id FROM tblMessages WHERE receiver_id = ?`
-	rows, err := util.DB.Query(query, senderid, senderid)
+		SELECT 
+			CASE 
+				WHEN sender_id = ? THEN receiver_id 
+				ELSE sender_id 
+			END AS other_user,
+			MAX(sent_on) AS latest_ts
+		FROM tblMessages
+		WHERE sender_id = ? OR receiver_id = ?
+		GROUP BY other_user
+		ORDER BY latest_ts DESC;
+		`
+	rows, err := util.DB.Query(query, senderid, senderid, senderid)
 	if err != nil {
 		log.Println("DB Query Error:", err)
 		return nil, errors.New("failed to fetch active chats")
@@ -170,20 +177,18 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 
 	for rows.Next() {
 		var userid int
-		if err := rows.Scan(&userid); err != nil {
+		var latestTs string // Consider using time.Time if timestamp is parsed correctly
+		if err := rows.Scan(&userid, &latestTs); err != nil {
 			log.Println("Row Scan Error:", err)
-			continue 
+			continue
 		}
 
-		if !check[userid] { 
-			check[userid] = true
-			user, err := GetUserBYId(userid)
-			if err != nil {
-				log.Println("GetUserBYId Error for ID", userid, ":", err)
-				continue 
-			}
-			users = append(users, user)
+		user, err := GetUserBYId(userid)
+		if err != nil {
+			log.Println("GetUserBYId Error for ID", userid, ":", err)
+			continue
 		}
+		users = append(users, user)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -194,12 +199,25 @@ func GetActiveChats(senderid int) ([]models.User, error) {
 	return users, nil
 }
 
+func Getmessage(id int) (models.Message, error) {
+	var message models.Message
+
+	query := `
+	SELECT receiver_id , sender_id, body, sent_on, username
+	FROM tblMessages 
+	WHERE id = ?
+	`
+
+	row := util.DB.QueryRow(query, id)
+	err := row.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn, &message.Username)
+	return message, err
+}
 
 func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 	var messages []models.Message
 
 	query := `
-		SELECT receiver_id , sender_id, body, sent_on 
+		SELECT receiver_id , sender_id, body, sent_on, username 
 		FROM tblMessages 
 		WHERE (receiver_id  = ? AND sender_id = ?) 
 		   OR (receiver_id  = ? AND sender_id = ?)
@@ -214,7 +232,7 @@ func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 
 	for rows.Next() {
 		var message models.Message
-		if err := rows.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn); err != nil {
+		if err := rows.Scan(&message.ReceiverId, &message.SenderId, &message.Body, &message.SentOn, &message.Username); err != nil {
 			log.Println("Row Scan Error:", err)
 			return nil, errors.New("unexpected error occured")
 		}

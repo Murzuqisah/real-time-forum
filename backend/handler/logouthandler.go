@@ -1,47 +1,49 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
-	"github.com/jesee-kuya/forum/backend/util"
 )
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		log.Println("method not allowed")
-		util.ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
 	cookie, err := getSessionID(r)
 	if err != nil {
 		log.Println("Invalid Session:", err)
-		util.ErrorHandler(w, "Invalid Session", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid session",
+		})
 		return
 	}
 
 	err = repositories.DeleteSession(cookie)
 	if err != nil {
-		log.Println("error deleting session from DB:", err)
-		util.ErrorHandler(w, "An Unexpected Error Occurred. Try Again Later", http.StatusInternalServerError)
+		log.Println("error deleting session:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
 	mu.Lock()
 	delete(SessionStore, cookie)
-	mu.Unlock()
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    "",
-		Expires:  time.Now().Add(-1 * time.Hour),
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	})
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }

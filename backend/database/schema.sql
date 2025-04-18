@@ -3,9 +3,12 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS tblUsers (
   id INTEGER PRIMARY KEY,
   username TEXT UNIQUE NOT NULL, 
+  firstname TEXT NOT NULL,
+  lastname TEXT NOT NULL,
+  age TEXT NOT NULL,
+  gender TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   user_password TEXT NULL,
-  auth_provider TEXT NOT NULL DEFAULT '',
   joined_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -51,8 +54,9 @@ CREATE TABLE IF NOT EXISTS tblMessages (
   id INTEGER PRIMARY KEY,
   receiver_id   INTEGER NOT NULL,
   sender_id INTEGER NOT Null,
+  username  TEXT NOT NULL,
   body TEXT NOT NULL,
-  sent_on TIMESTAMP CURRENT_TIMESTAMP,
+  sent_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (receiver_id) REFERENCES tblUsers(id),
   FOREIGN KEY (sender_id) REFERENCES tblUsers(id)
 )

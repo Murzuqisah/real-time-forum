@@ -22,10 +22,15 @@ type LoginData struct {
 
 var (
 	SessionStore = make(map[string]int)
-	mu           sync.Mutex
+	Mu           sync.Mutex
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+		return
+	}
+
 	var data LoginData
 
 	err := json.NewDecoder(r.Body).Decode(&data)
@@ -36,20 +41,43 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, session, err := Login(data.Password, data.Email)
 	if err != nil {
-		util.ErrorHandler(w, "Invalid Credentials", http.StatusUnauthorized)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	// set a secure session cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    session,
-		Expires:  time.Now().Add(24 * time.Hour),
-		Path:     "/",
-		HttpOnly: true,
-	})
+	SetSessionCookie(w, session)
 
 	log.Println(SessionStore)
+
+	posts, err := repositories.GetPosts(util.DB)
+	if err != nil {
+		log.Println("Error fetching posts:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	posts, err = PostDetails(posts)
+	if err != nil {
+		log.Println("Error processing posts:", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
+		return
+	}
+
+	for i := range posts {
+		posts[i].CreatedOn = posts[i].CreatedOn.UTC()
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -57,6 +85,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		"error":   "ok",
 		"user":    user,
 		"session": session,
+		"posts":   posts,
 	})
 }
 
