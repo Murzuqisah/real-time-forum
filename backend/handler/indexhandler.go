@@ -210,6 +210,22 @@ func (client *Client) processMessages() {
 			})
 		case "register":
 			register(msg["sender"], client)
+		case "read":
+			senderid, err := strconv.Atoi(msg["sender"])
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
+			receiverid, err := strconv.Atoi(msg["receiver"])
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
+			err = repositories.UpdateMessage(senderid, receiverid)
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
 		case "typing":
 			sender, err := repositories.GetUserByName(msg["sender"])
 			if err != nil {
