@@ -246,3 +246,57 @@ func GetConversation(senderid, receiverid int) ([]models.Message, error) {
 
 	return messages, nil
 }
+
+func UnreadMessages(senderId int) (map[string]int, error) {
+	var messages []models.Message
+	unread := make(map[string]int)
+	query := `
+	SELECT sender_id
+	FROM tblMessages
+	WHERE (receiver_id = ? AND text_status = ? ) 
+	`
+
+	rows, err := util.DB.Query(query, senderId, "unread")
+	if err != nil {
+		log.Println("Db querry error:", err)
+		return nil, errors.New("unexpected error occured")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var message models.Message
+		if err := rows.Scan(&message.SenderId); err != nil {
+			log.Println("Row Scan Error:", err)
+			return nil, errors.New("unexpected error occured")
+		}
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Rows Iteration Error:", err)
+		return nil, errors.New("error iterating through messages")
+	}
+	for _, v := range messages {
+		user, err := GetUserBYId(v.SenderId)
+		if err != nil {
+			log.Println("error getting user: ", err)
+			return nil, errors.New("unexpected error occured")
+		}
+		unread[user.Username]++
+	}
+	return unread, nil
+}
+
+func UpdateMessage(senderid, receiverid int) error {
+	query := `
+	UPDATE tblMessages
+	SET text_status = ?
+	Where sender_id = ? AND receiver_id = ?
+	`
+	_, err := util.DB.Exec(query, "read", senderid, receiverid)
+	if err != nil {
+		log.Println("error executing query: ", err)
+		return err
+	}
+	return nil
+}

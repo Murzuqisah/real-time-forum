@@ -184,7 +184,13 @@ export async function RealTime() {
                     const statusIndicator = document.createElement('p');
                     statusIndicator.classList.add('status');
                     statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                    const msgcount = document.createElement('p');
+                    msgcount.classList.add('unread')
+                    msgcount.textContent = unread(data.unread, elem.username)
                     chat.appendChild(statusIndicator);
+                    if (unread(data.unread, elem.username) > 0 ) {
+                        chat.appendChild(msgcount)
+                    }
                     const handler = createHandler(elem, socket);
                     chat.addEventListener('click', handler);
                     chatList.appendChild(chat);
@@ -214,6 +220,11 @@ export async function RealTime() {
             receiver: elem.id.toString(),
             username: Username,
         }));
+        socket.send(JSON.stringify({
+            type: 'read',
+            receiver: UserId,
+            sender: elem.id.toString(),
+        }))
         console.log('conversation sent')
     };
 
@@ -408,6 +419,12 @@ export async function RealTime() {
             return
         }
 
+        socket.send(JSON.stringify({
+            type: 'read',
+            receiver: UserId,
+            sender: data.sender.id.toString(),
+        }))
+
         let nameDiv = document.getElementById('name')
         console.log('namediv', nameDiv)
         console.log('user', Username)
@@ -415,16 +432,19 @@ export async function RealTime() {
 
 
         if (Username === data.sender.username || (Username !== data.sender.username && data.sender.username == nameDiv.textContent)) {
-            chatBox.appendChild(messageElement);
+            const typing = document.getElementById("typingIndicator")
+            chatBox.insertBefore(messageElement, typing);
             chatBox.scrollTop = chatBox.scrollHeight;
             const input = document.getElementById('messageInput');
-            if (input) {
-                input.value = "";
-                input.placeholder = 'Type a message...';
+            if (Username === data.sender.username) {
+                if (input) {
+                    input.value = "";
+                    input.placeholder = 'Type a message...';
+                }
             }
         }
 
-    }; 
+    };
 
     const displayTyping = (data) => {
         if (Username === data.receiver.username) {
@@ -450,7 +470,7 @@ export async function RealTime() {
                 // Reset timer (5000ms for visible state, 3000ms for new appearance)
                 typingTimeout = setTimeout(() => {
                     typing.style.display = 'none';
-                }, wasAlreadyVisible ? 5000 : 3000);
+                }, wasAlreadyVisible ? 2000 : 2000);
             }
         }
     };
@@ -458,12 +478,23 @@ export async function RealTime() {
     const updateChatStatuses = (data) => {
         const chats = document.querySelectorAll('.chat');
         chats.forEach(chat => {
+            let unreadCount = 0
+            const unread = chat.querySelector('.unread')
+            if (unread) {
+                unreadCount = unread.textContent
+            }
             const username = chat.dataset.username;
             chat.innerHTML = username;
             const statusIndicator = document.createElement('p');
             statusIndicator.classList.add('status');
             statusIndicator.textContent = status(data.online, username) ? "Online" : "Offline";
+            const msgcount = document.createElement('p');
+            msgcount.classList.add('unread')
+            msgcount.textContent = unreadCount;
             chat.appendChild(statusIndicator);
+            if (unreadCount > 0) {
+                chat.appendChild(msgcount)
+            }
         });
     };
 
@@ -619,3 +650,14 @@ const status = (onlineUsersList, username) => {
     }
     return onlineUsersList.includes(username);
 };
+
+const unread = (unread, username) => {
+    if (!unread) {
+        return ""
+    }
+
+    if (username in unread) {
+        return unread[username].toString()
+    }
+    return ""
+}
