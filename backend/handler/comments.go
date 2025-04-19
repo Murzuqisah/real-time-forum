@@ -12,6 +12,11 @@ import (
 )
 
 func Comment(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+		return
+	}
+	
 	if r.Method != http.MethodPost {
 		log.Println("Invalid request method:", r.Method)
 		w.Header().Set("Content-Type", "application/json")

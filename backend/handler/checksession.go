@@ -10,6 +10,11 @@ import (
 )
 
 func CheckSession(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+		return
+	}
+	
 	var data struct {
 		Session string `json:"session"`
 	}

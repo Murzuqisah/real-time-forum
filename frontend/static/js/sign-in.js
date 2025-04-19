@@ -169,13 +169,13 @@ export const SignInPage = () => {
   document.body.appendChild(main)
 }
 
-export function navigate(event, page) {
+export const navigate = (event, page) => {
   event.preventDefault()
   history.pushState({ page }, "", "/");
   renderPage(page);
 }
 
-export function renderPage(page) {
+export const renderPage = (page) => {
   switch (page) {
     case "/sign-up":
       SignUpPage();

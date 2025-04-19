@@ -108,7 +108,6 @@ export const HomePage = (data) => {
 
 export const renderPosts = (data, postsContainer) => {
     if (!data || !Array.isArray(data.posts)) {
-        console.log("error in the data posts")
         data.posts = [];
     }
 
