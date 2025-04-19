@@ -300,9 +300,15 @@ func register(sender string, client *Client) {
 		sendError(client, "unexpected error occured")
 		return
 	}
+	unread, err := repositories.UnreadMessages(id)
+	if err != nil {
+		sendError(client, "unexpected error occured")
+		return
+	}
 	sendJSON(client, map[string]any{
 		"type":   "chats",
 		"users":  users,
 		"online": online(),
+		"unread": unread,
 	})
 }
