@@ -436,9 +436,11 @@ export async function RealTime() {
             chatBox.insertBefore(messageElement, typing);
             chatBox.scrollTop = chatBox.scrollHeight;
             const input = document.getElementById('messageInput');
-            if (input) {
-                input.value = "";
-                input.placeholder = 'Type a message...';
+            if (Username === data.sender.username) {
+                if (input) {
+                    input.value = "";
+                    input.placeholder = 'Type a message...';
+                }
             }
         }
 
