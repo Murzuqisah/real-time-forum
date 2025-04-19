@@ -115,7 +115,7 @@ func (client *Client) processMessages() {
 				sendError(client, "unexpected error occured")
 				continue
 			}
-			
+
 			receiver, err := repositories.GetUserByName(msg["receiver"])
 			if err != nil {
 				sendError(client, "unexpected error occured")
@@ -165,10 +165,17 @@ func (client *Client) processMessages() {
 				sendError(client, "unexpected error occured")
 				continue
 			}
+
+			unread, err := repositories.UnreadMessages(id)
+			if err != nil {
+				sendError(client, "unexpected error occured")
+				continue
+			}
 			sendJSON(client, map[string]any{
 				"type":   "chats",
 				"users":  users,
 				"online": online(),
+				"unread": unread,
 			})
 		case "conversation":
 			senderid, err := strconv.Atoi(msg["sender"])
@@ -209,7 +216,7 @@ func (client *Client) processMessages() {
 				sendError(client, "unexpected error occured")
 				continue
 			}
-			
+
 			receiver, err := repositories.GetUserByName(msg["receiver"])
 			if err != nil {
 				sendError(client, "unexpected error occured")
