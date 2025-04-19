@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"strconv"
 	"sync"
 	"time"
 
@@ -35,7 +34,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		util.ErrorHandler(w, "Invalid Request", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "unknown error occured. Try again later",
+		})
 		return
 	}
 
@@ -117,19 +120,7 @@ func Login(password, email string) (models.User, string, error) {
 	}
 
 	if user.ID != 0 {
-		mu.Lock()
-		userIDStr := strconv.Itoa(user.ID)
-		_, exists := SessionStore[userIDStr]
-		mu.Unlock()
-
-		if exists {
-			DeleteSession(user.ID)
-			err = repositories.DeleteSessionByUser(user.ID)
-			if err != nil {
-				log.Printf("Failed to delete session token: %v", err)
-				return user, "", errors.New("an Unexpected Error Occurred. Try Again Later")
-			}
-		}
+		DeleteSession(user.ID)
 	}
 
 	err = repositories.DeleteSessionByUser(user.ID)

@@ -33,28 +33,24 @@ func ValidateInputHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	username, email := strings.TrimSpace(r.FormValue("username")), strings.TrimSpace(r.FormValue("email"))
-	if username == "" && email == "" {
-		log.Println("Invalid input provided.")
-		util.ErrorHandler(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
 	var query, value string
 
 	if username != "" {
 		query = "SELECT id FROM tblUsers WHERE username = ?"
 		value = username
-	} else {
+	} else if email != "" {
 		query = "SELECT id FROM tblUsers WHERE email = ?"
 		value = email
+	} else {
+		log.Println("Invalid input provided.")
+		util.ErrorHandler(w, "Bad Request", http.StatusBadRequest)
+		return
 	}
 
 	var userID int
 	err := util.DB.QueryRow(query, value).Scan(&userID)
-
 	// Provided credentials are unique
 	if err == sql.ErrNoRows {
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]bool{"available": true})
 		return
 	} else if err != nil {
@@ -63,6 +59,5 @@ func ValidateInputHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Provided credentials are taken
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]bool{"available": false})
 }

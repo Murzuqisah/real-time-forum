@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 )
@@ -46,8 +45,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
-	mu.Lock()
 	delete(SessionStore, cookie)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

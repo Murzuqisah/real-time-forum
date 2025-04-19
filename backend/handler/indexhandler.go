@@ -110,8 +110,6 @@ func (client *Client) processMessages() {
 				"online": online(),
 			})
 		case "messaging":
-			msgMutex.Lock()
-
 			sender, err := repositories.GetUserByName(msg["sender"])
 			if err != nil {
 				sendError(client, "unexpected error occured")
