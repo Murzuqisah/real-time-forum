@@ -286,3 +286,17 @@ func UnreadMessages(senderId int) (map[string]int, error) {
 	}
 	return unread, nil
 }
+
+func UpdateMessage(senderid, receiverid int) error {
+	query := `
+	UPDAGE tblMessages
+	SET read_status = ?
+	Where sender_id = ? AND receiver_id = ?
+	`
+	_, err := util.DB.Exec(query, "read", senderid, receiverid)
+	if err != nil {
+		log.Println("error executing query: ", err)
+		return err
+	}
+	return nil
+}
