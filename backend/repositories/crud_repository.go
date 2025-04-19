@@ -253,7 +253,7 @@ func UnreadMessages(senderId int) (map[string]int, error) {
 	query := `
 	SELECT sender_id
 	FROM tblMessages
-	WHERE (receiver_id = ? AND text_status = ) 
+	WHERE (receiver_id = ? AND text_status = ? ) 
 	`
 
 	rows, err := util.DB.Query(query, senderId, "unread")
@@ -277,7 +277,12 @@ func UnreadMessages(senderId int) (map[string]int, error) {
 		return nil, errors.New("error iterating through messages")
 	}
 	for _, v := range messages {
-		unread[v.Username]++
+		user, err := GetUserBYId(v.SenderId)
+		if err != nil {
+			log.Println("error getting user: ", err)
+			return nil, errors.New("unexpected error occured")
+		}
+		unread[user.Username]++
 	}
 	return unread, nil
 }
