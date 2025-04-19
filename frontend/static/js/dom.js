@@ -188,7 +188,9 @@ export async function RealTime() {
                     msgcount.classList.add('unread')
                     msgcount.textContent = unread(data.unread, elem.username)
                     chat.appendChild(statusIndicator);
-                    chat.appendChild(msgcount)
+                    if (unread(data.unread, elem.username) > 0 ) {
+                        chat.appendChild(msgcount)
+                    }
                     const handler = createHandler(elem, socket);
                     chat.addEventListener('click', handler);
                     chatList.appendChild(chat);
@@ -483,7 +485,9 @@ export async function RealTime() {
             msgcount.classList.add('unread')
             msgcount.textContent = unreadCount;
             chat.appendChild(statusIndicator);
-            chat.appendChild(msgcount)
+            if (unreadCount > 0) {
+                chat.appendChild(msgcount)
+            }
         });
     };
 
