@@ -473,12 +473,17 @@ export async function RealTime() {
     const updateChatStatuses = (data) => {
         const chats = document.querySelectorAll('.chat');
         chats.forEach(chat => {
+            const unreadCount = chat.querySelector('.unread').textContent;
             const username = chat.dataset.username;
             chat.innerHTML = username;
             const statusIndicator = document.createElement('p');
             statusIndicator.classList.add('status');
             statusIndicator.textContent = status(data.online, username) ? "Online" : "Offline";
+            const msgcount = document.createElement('p');
+            msgcount.classList.add('unread')
+            msgcount.textContent = unreadCount;
             chat.appendChild(statusIndicator);
+            chat.appendChild(msgcount)
         });
     };
 
