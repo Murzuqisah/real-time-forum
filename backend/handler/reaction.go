@@ -16,6 +16,11 @@ type Reaction struct {
 }
 
 func ReactionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+		return
+	}
+	
 	var msg Reaction
 
 	err := json.NewDecoder((r.Body)).Decode((&msg))

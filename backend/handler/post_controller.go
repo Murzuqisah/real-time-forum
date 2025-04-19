@@ -79,6 +79,11 @@ func GetAllPostsAPI(db *sql.DB) http.HandlerFunc {
 // FilterPosts - Handles filtering posts by category or user
 func FilterPosts(w http.ResponseWriter, r *http.Request) {
 	var data FetchData
+	if r.Method == http.MethodGet {
+		http.ServeFile(w, r, "frontend/templates/index.html")
+		return
+	}
+	
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		log.Println("failed to decode: ", err)
@@ -89,7 +94,6 @@ func FilterPosts(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-
 
 	if r.Method != http.MethodPost {
 		log.Println("Method not allowed", r.Method)
