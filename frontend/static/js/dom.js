@@ -432,7 +432,8 @@ export async function RealTime() {
 
 
         if (Username === data.sender.username || (Username !== data.sender.username && data.sender.username == nameDiv.textContent)) {
-            chatBox.appendChild(messageElement);
+            const typing = document.getElementById("typingIndicator")
+            chatBox.insertBefore(messageElement, typing);
             chatBox.scrollTop = chatBox.scrollHeight;
             const input = document.getElementById('messageInput');
             if (input) {
@@ -467,7 +468,7 @@ export async function RealTime() {
                 // Reset timer (5000ms for visible state, 3000ms for new appearance)
                 typingTimeout = setTimeout(() => {
                     typing.style.display = 'none';
-                }, wasAlreadyVisible ? 5000 : 3000);
+                }, wasAlreadyVisible ? 2000 : 2000);
             }
         }
     };
@@ -475,7 +476,11 @@ export async function RealTime() {
     const updateChatStatuses = (data) => {
         const chats = document.querySelectorAll('.chat');
         chats.forEach(chat => {
-            const unreadCount = chat.querySelector('.unread').textContent;
+            let unreadCount = 0
+            const unread = chat.querySelector('.unread')
+            if (unread) {
+                unreadCount = unread.textContent
+            }
             const username = chat.dataset.username;
             chat.innerHTML = username;
             const statusIndicator = document.createElement('p');
