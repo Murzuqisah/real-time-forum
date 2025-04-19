@@ -184,7 +184,11 @@ export async function RealTime() {
                     const statusIndicator = document.createElement('p');
                     statusIndicator.classList.add('status');
                     statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                    const msgcount = document.createElement('p');
+                    msgcount.classList.add('unread')
+                    msgcount.textContent = unread(data.unread, elem.username)
                     chat.appendChild(statusIndicator);
+                    chat.appendChild(msgcount)
                     const handler = createHandler(elem, socket);
                     chat.addEventListener('click', handler);
                     chatList.appendChild(chat);
@@ -214,6 +218,11 @@ export async function RealTime() {
             receiver: elem.id.toString(),
             username: Username,
         }));
+        socket.send(JSON.stringify({
+            type: 'read',
+            receiver: UserId,
+            sender: elem.id.toString(),
+        }))
         console.log('conversation sent')
     };
 
@@ -408,6 +417,12 @@ export async function RealTime() {
             return
         }
 
+        socket.send(JSON.stringify({
+            type: 'read',
+            receiver: UserId,
+            sender: data.sender.id.toString(),
+        }))
+
         let nameDiv = document.getElementById('name')
         console.log('namediv', nameDiv)
         console.log('user', Username)
@@ -424,7 +439,7 @@ export async function RealTime() {
             }
         }
 
-    }; 
+    };
 
     const displayTyping = (data) => {
         if (Username === data.receiver.username) {
@@ -619,3 +634,14 @@ const status = (onlineUsersList, username) => {
     }
     return onlineUsersList.includes(username);
 };
+
+const unread = (unread, username) => {
+    if (!unread) {
+        return ""
+    }
+
+    if (username in unread) {
+        return unread[username].toString()
+    }
+    return ""
+}
