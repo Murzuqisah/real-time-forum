@@ -800,7 +800,7 @@ img.small {
 }
 
 .chat .unread {
-  background-color: #ff0000; 
+  background-color: var(--primary-color);
   color: white;             
   font-size: 12px;          
   font-weight: bold;       
