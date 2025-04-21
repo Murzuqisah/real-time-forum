@@ -75,75 +75,39 @@ export const HomePage = (data) => {
 
     let postsContainer = document.createElement('main');
     postsContainer.classList.add('posts');
-    postsContainer.id = 'postcontainer'
-    postsContainer = renderPosts(data, postsContainer)
+    postsContainer.id = 'postcontainer';
+
+    postsContainer = renderPosts(data, postsContainer);
     postsContainer.appendChild(postingform());
 
-    document.body.appendChild(postsContainer);
-
-    // Hide the floating create post button when the modal is open
     let floating = document.createElement('div')
     floating.classList.add('floating-create-post-btn-container')
-    floating.style.display = 'none'
+
     let createPost = document.createElement('p')
-    createPost.textContent = 'Create a Post'
+    createPost.textContent = 'Create a Post';
+
     let floatingButton = document.createElement('button')
     floatingButton.type = 'submit'
     floatingButton.classList.add('floating-create-post-btn')
     floatingButton.id = 'floatingButton'
-    floatingButton.ariaLabel = 'Create a new post'
-    let img = document.createElement('img')
-    img.classList.add('web-icon')
+    floatingButton.ariaLabel = 'Create a new post';
+
+    let img = document.createElement('img');
+    img.classList.add('web-icon');
     img.src = '/frontend/static/assets/plus-solid.svg'
-    img.alt = 'create-post'
+    img.alt = 'create-post';
+
     floatingButton.appendChild(img)
 
-    let closeButtonContainer = document.createElement('div');
-    closeButtonContainer.classList.add('close-modal');
-    closeButtonContainer.innerHTML = '&times;';
-    closeButtonContainer.addEventListener('click', function () {
-        const createPostForm = document.querySelector('.create-post');
-        createPostForm.classList.add('hidden');
-    });
-    floating.appendChild(closeButtonContainer);
+    floating.appendChild(createPost);
+    floating.appendChild(floatingButton);
 
-
-    floating.appendChild(createPost)
-    floating.appendChild(floatingButton)
-    document.body.appendChild(floating)
-
+    // document.body.appendChild(floating)
+    postsContainer.appendChild(floating)
 
     document.body.appendChild(postsContainer);
     let profile = document.createElement('aside');
     profile.classList.add('profile');
-
-    let profileSection = document.createElement('div');
-    profileSection.classList.add('profile-section');
-
-    let profileHeader = document.createElement('div');
-    profileHeader.classList.add('profile-header');
-
-    let profileImg = document.createElement('img');
-    profileImg.src = '/frontend/static/assets/user-solid.svg';
-    profileImg.alt = 'User Icon';
-    profileHeader.appendChild(profileImg);
-
-    let profileName = document.createElement('h3');
-    profileName.id = 'profileName';
-    profileName.textContent = 'Username';
-
-    let profileEmail = document.createElement('p');
-    profileEmail.id = 'profileEmail';
-    profileEmail.textContent = 'email';
-
-    profileSection.appendChild(profileHeader);
-    profileSection.appendChild(profileImg);
-    profileSection.appendChild(profileName);
-    profileSection.appendChild(profileEmail);
-
-    profile.appendChild(profileSection);
-    profile.appendChild(onlineStatus);
-
     profile = chat(profile)
     document.body.appendChild(profile);
 };
@@ -153,12 +117,7 @@ export const renderPosts = (data, postsContainer) => {
         data.posts = [];
     }
 
-    const createPostTop = document.querySelector('.create-post-top');
     postsContainer.innerHTML = "";
-
-    if (createPostTop) {
-        postsContainer.appendChild(createPostTop);
-    }
 
     data.posts.forEach(item => {
         item = item || {};
@@ -188,8 +147,8 @@ const chat = (profile) => {
     profile.appendChild(form)
     let chatListContainer = document.createElement('div')
     chatListContainer.classList.add('chat-list-container')
-    chatListContainer.id = 'chatListContainer';
-    let header = document.createElement('div');
+    chatListContainer.id = 'chatListContainer'
+    let header = document.createElement('div')
     header.classList.add('header')
     header.textContent = "Chats"
     let chatlist = document.createElement('div')

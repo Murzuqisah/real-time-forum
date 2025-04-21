@@ -402,13 +402,51 @@ body.dark-theme .create-post form textarea {
   margin: 10px 0;
 }
 
+.floating-create-post-btn {
+  background: var(--primary-color);
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: var(--light-box-shadow);
+  transition: transform 0.3s;
+
+  /* position: fixed;
+  top: 65px;
+  left: 27%;
+  transform: translateX(-45%);
+  background: var(--primary-color);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: var(--light-box-shadow);
+  transition: transfor75m 0.3s; */
+}
+
 .floating-create-post-btn-container {
-  position: fixed;
+  position: absolute;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 20px;
+  /* position: fixed;
   bottom: 20px;
   right: 20px;
   display: flex;
-  align-items: center;
-}floating-create-post-btn-container
+  align-items: center; */
+}
 
 .floating-create-post-btn-container p {
   position: absolute;
@@ -430,28 +468,11 @@ body.dark-theme .create-post form textarea {
   opacity: 1;
 }
 
-.floating-create-post-btn {
-  position: fixed;
-  top: 70px;
-  left: 28%;
-  transform: translateX(-45%);
-  background: var(--primary-color);
-  border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: var(--light-box-shadow);
-  transition: transfor75m 0.3s;
-}
-
 .floating-create-post-btn img {
-  height: 100px;
-  width: 1.2rem;
+  width: 24px;
+  height: 24px;
+  /* height: 100px;
+  width: 1.2rem; */
   filter: invert(100%) sepia(3%) saturate(2485%) hue-rotate(188deg) brightness(112%) contrast(95%);
 }
 
@@ -479,8 +500,8 @@ body.dark-theme .close-modal {
 }
 
 .posts {
-  padding-top: 7rem;
-  margin-top: 2rem;
+  padding-top: 2.5rem;
+  margin-top: 2.5rem;
   overflow-y: auto;
   padding-right: 10px;
 }
