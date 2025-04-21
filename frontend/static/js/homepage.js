@@ -80,32 +80,33 @@ export const HomePage = (data) => {
     postsContainer = renderPosts(data, postsContainer);
     postsContainer.appendChild(postingform());
 
-    let floating = document.createElement('div')
-    floating.classList.add('floating-create-post-btn-container')
+    let floating = document.createElement('div');
+    floating.classList.add('floating-create-post-btn-container');
 
-    let createPost = document.createElement('p')
+    let createPost = document.createElement('span');
     createPost.textContent = 'Create a Post';
+    createPost.classList.add('floating-create-post-btn-label');
 
-    let floatingButton = document.createElement('button')
-    floatingButton.type = 'submit'
-    floatingButton.classList.add('floating-create-post-btn')
-    floatingButton.id = 'floatingButton'
+    let floatingButton = document.createElement('button');
+    floatingButton.type = 'submit';
+    floatingButton.classList.add('floating-create-post-btn');
+    floatingButton.id = 'floatingButton';
     floatingButton.ariaLabel = 'Create a new post';
 
     let img = document.createElement('img');
     img.classList.add('web-icon');
-    img.src = '/frontend/static/assets/plus-solid.svg'
+    img.src = '/frontend/static/assets/plus-solid.svg';
     img.alt = 'create-post';
 
-    floatingButton.appendChild(img)
+    floatingButton.appendChild(img);
 
     floating.appendChild(createPost);
     floating.appendChild(floatingButton);
 
     // document.body.appendChild(floating)
-    postsContainer.appendChild(floating)
-
+    postsContainer.appendChild(floating);
     document.body.appendChild(postsContainer);
+
     let profile = document.createElement('aside');
     profile.classList.add('profile');
     profile = chat(profile)
@@ -234,10 +235,23 @@ const chat = (profile) => {
 const postingform = () => {
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
-    postForm.id = 'post-form'
+    postForm.id = 'post-form';
 
-    let postdiv = document.createElement('div')
-    postdiv.classList.add('post-popup')
+    let postdiv = document.createElement('div');
+    postdiv.classList.add('post-popup');
+
+    // cancel button
+    let cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.classList.add('close-modal');
+    cancelBtn.textContent = 'X';
+    cancelBtn.title = 'Close';
+
+    cancelBtn.addEventListener('click', () => {
+        postForm.classList.add('hidden');
+    });
+
+    postdiv.appendChild(cancelBtn);
 
     let upload = document.createElement('form');
     upload.name = "upload";
