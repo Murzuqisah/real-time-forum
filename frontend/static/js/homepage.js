@@ -109,6 +109,7 @@ export const HomePage = (data) => {
 
     let profile = document.createElement('aside');
     profile.classList.add('profile');
+
     profile = chat(profile)
     document.body.appendChild(profile);
 };

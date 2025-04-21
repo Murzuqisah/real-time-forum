@@ -715,14 +715,17 @@ img.small {
 }
 
 .chat-container {
-  display: none;
-  /* Initially hidden */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6rem;
 }
 
 .chat-list-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 6rem;
 }
 
 .header {
@@ -1001,10 +1004,19 @@ body.dark-theme .session-status {
   color: var(--tertiary-color);
 }
 
-.logout-button,
+.logout-button {
+  position: absolute;
+  top: 4.5rem;
+  border-radius: 2rem;
+  font-size: 1.3rem;
+  background-color: crimson;
+  margin-left: 20rem;
+}
+
 .profile-name {
   padding: 0.5rem 1rem;
   margin: 0.5rem 0;
+  margin-top: 3rem;
   font-size: 1rem;
   font-weight: bold;
   color: var(--dark-text-color);
