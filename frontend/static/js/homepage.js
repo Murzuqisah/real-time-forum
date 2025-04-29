@@ -55,7 +55,7 @@ export const HomePage = (data) => {
     header.appendChild(navbar);
     document.body.appendChild(header);
 
-    // Create sidebar
+    // Create sidebarfloating-create-post-btn
     let aside = document.createElement('aside');
     aside.classList.add('sidebar');
     let asideh2 = document.createElement('h2');
@@ -67,7 +67,7 @@ export const HomePage = (data) => {
     asideset.innerHTML = `
        <legend>Categories</legend>
     `
-    asideset = asideCategories(asideset)
+    asideset = filterCategories(asideset)
     asideform.appendChild(asideset)
     aside.appendChild(asideform)
     document.body.appendChild(aside);
@@ -79,35 +79,9 @@ export const HomePage = (data) => {
 
     postsContainer = renderPosts(data, postsContainer);
     postsContainer.appendChild(postingform());
-
-    let floating = document.createElement('div');
-    floating.classList.add('floating-create-post-btn-container');
-
-    let createPost = document.createElement('span');
-    createPost.textContent = 'Create a Post';
-    createPost.classList.add('floating-create-post-btn-label');
-
-    let floatingButton = document.createElement('button');
-    floatingButton.type = 'submit';
-    floatingButton.classList.add('floating-create-post-btn');
-    floatingButton.id = 'floatingButton';
-    floatingButton.ariaLabel = 'Create a new post';
-
-    let img = document.createElement('img');
-    img.classList.add('web-icon');
-    img.src = '/frontend/static/assets/plus-solid.svg';
-    img.alt = 'create-post';
-
-    floatingButton.appendChild(img);
-
-    floating.appendChild(createPost);
-    floating.appendChild(floatingButton);
-
-    // document.body.appendChild(floating)
-    postsContainer.appendChild(floating);
     document.body.appendChild(postsContainer);
 
-    let profile = document.createElement('aside');
+    let profile = document.createElement('div');
     profile.classList.add('profile');
 
     profile = chat(profile)
@@ -120,6 +94,22 @@ export const renderPosts = (data, postsContainer) => {
     }
 
     postsContainer.innerHTML = "";
+    let floating = document.createElement('div')
+    floating.classList.add('floating-create-post-btn-container')
+    floating.style.display = 'none'
+    let createPost = document.createElement('p')
+    createPost.textContent = 'Create a Post'
+    let floatingButton = document.createElement('button')
+    floatingButton.type = 'submit'
+    floatingButton.classList.add('floating-create-post-btn')
+    let img = document.createElement('img')
+    img.classList.add('web-icon')
+    img.src = '/frontend/static/assets/plus-solid.svg'
+    img.alt = 'create-post'
+    floatingButton.appendChild(img)
+    floating.appendChild(createPost)
+    floating.appendChild(floatingButton)
+    postsContainer.appendChild(floating)
 
     data.posts.forEach(item => {
         item = item || {};
@@ -130,13 +120,28 @@ export const renderPosts = (data, postsContainer) => {
         postsContainer.appendChild(article);
     });
 
+    floatingButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        const createPostForm = document.querySelector('.create-post');
+        if (createPostForm.classList.contains('hidden')) {
+            createPostForm.classList.remove('hidden');
+            createPostForm.style.opacity = 1;
+            createPostForm.style.visibility = 'visible';
+        } else {
+            createPostForm.style.opacity = 0;
+            createPostForm.style.visibility = 'hidden';
+            setTimeout(() => createPostForm.classList.add('hidden'), 500);
+        }
+        console.log('clicked post add')
+    });
+
 
     return postsContainer
 }
 
 const chat = (profile) => {
     let name = sessionStorage.getItem('username')
-    let p = document.createElement('p')
+    let p = document.createElement('div')
     p.classList.add('profile-name')
     p.textContent = name
     profile.appendChild(p)
@@ -733,17 +738,6 @@ const asideCategories = (asideform) => {
         input.name = 'category';
         input.value = category;
 
-        // Changed event from 'checked' to 'change' and updated handler
-        input.addEventListener('change', () => {
-            // Get all currently checked checkboxes
-            const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
-                .map(checkbox => checkbox.value);
-
-            // Determine what to send to the backend
-            const categoriesToSend = checkedCategories.length > 0 ? checkedCategories : 'none';
-            filter(categoriesToSend);
-        });
-
         // Improved label structure (checkbox before text)
         label.appendChild(input);
         label.appendChild(document.createTextNode(` ${category}`));
@@ -787,4 +781,34 @@ async function filter(categories) {
     } catch (error) {
         showAlert(`Error: ${error.message}`);
     }
+}
+
+const filterCategories = (asideform) => {
+    const categories = ["Technology", "Health", "Education", "Sports", "Entertainment", "Finance", "Travel", "Food", "Lifestyle", "Science"];
+
+    categories.forEach(category => {
+        let label = document.createElement('label');
+        let input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'category';
+        input.value = category;
+
+        // Changed event from 'checked' to 'change' and updated handler
+        input.addEventListener('change', () => {
+            // Get all currently checked checkboxes
+            const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            // Determine what to send to the backend
+            const categoriesToSend = checkedCategories.length > 0 ? checkedCategories : 'none';
+            filter(categoriesToSend);
+        });
+
+        // Improved label structure (checkbox before text)
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(` ${category}`));
+        asideform.appendChild(label);
+    });
+
+    return asideform;
 }

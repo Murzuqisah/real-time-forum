@@ -123,24 +123,6 @@ export async function RealTime() {
             })
         }
 
-        const floatingButton = document.getElementById('floatingButton');
-        if (floatingButton) {
-            floatingButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                const createPostForm = document.querySelector('.create-post');
-                if (createPostForm.classList.contains('hidden')) {
-                    createPostForm.classList.remove('hidden');
-                    createPostForm.style.opacity = 1;
-                    createPostForm.style.visibility = 'visible';
-                } else {
-                    createPostForm.style.opacity = 0;
-                    createPostForm.style.visibility = 'hidden';
-                    setTimeout(() => createPostForm.classList.add('hidden'), 500);
-                }
-                console.log('clicked post add')
-            });
-        }
-
         document.querySelectorAll('.chat-input-textarea').forEach(textarea => {
             textarea.addEventListener('input', function () {
                 // Reset height to auto to get correct scrollHeight
