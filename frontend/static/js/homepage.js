@@ -94,22 +94,22 @@ export const renderPosts = (data, postsContainer) => {
     }
 
     postsContainer.innerHTML = "";
-    let floating = document.createElement('div')
-    floating.classList.add('floating-create-post-btn-container')
-    floating.style.display = 'none'
+    let floating = document.createElement('div');
+    floating.classList.add('floating-create-post-btn-container');
+    floating.style.display = 'flex';
     let createPost = document.createElement('p')
     createPost.textContent = 'Create a Post'
     let floatingButton = document.createElement('button')
     floatingButton.type = 'submit'
     floatingButton.classList.add('floating-create-post-btn')
     let img = document.createElement('img')
-    img.classList.add('web-icon')
-    img.src = '/frontend/static/assets/plus-solid.svg'
-    img.alt = 'create-post'
-    floatingButton.appendChild(img)
-    floating.appendChild(createPost)
-    floating.appendChild(floatingButton)
-    postsContainer.appendChild(floating)
+    img.classList.add('web-icon');
+    img.src = '/frontend/static/assets/plus-solid.svg';
+    img.alt = 'create-post';
+    floatingButton.appendChild(img);
+    floating.appendChild(createPost);
+    floating.appendChild(floatingButton);
+    postsContainer.appendChild(floating);
 
     data.posts.forEach(item => {
         item = item || {};
