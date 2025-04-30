@@ -139,104 +139,142 @@ export const renderPosts = (data, postsContainer) => {
     return postsContainer
 }
 
-const chat = (profile) => {
-    let name = sessionStorage.getItem('username')
-    let p = document.createElement('div')
-    p.classList.add('profile-name')
-    p.textContent = name
-    profile.appendChild(p)
+const chat = () => {
+    let username = sessionStorage.getItem('username') || 'Username';
 
-    let form = document.createElement('form')
-    let logout = document.createElement('button')
-    logout.classList.add('logout-button')
-    logout.textContent = 'Log Out'
-    form.appendChild(logout)
-    profile.appendChild(form)
-    let chatListContainer = document.createElement('div')
-    chatListContainer.classList.add('chat-list-container')
-    chatListContainer.id = 'chatListContainer'
-    let header = document.createElement('div')
-    header.classList.add('header')
-    header.textContent = "Chats"
-    let chatlist = document.createElement('div')
-    chatlist.classList.add('chat-list')
-    chatlist.id = 'chatList'
-    let newchat = document.createElement('div')
-    newchat.classList.add('new-chat')
-    newchat.id = 'newChat'
-    newchat.textContent = 'Start New Chat'
-    chatListContainer.appendChild(header)
-    chatListContainer.appendChild(chatlist)
-    chatListContainer.appendChild(newchat)
-    profile.appendChild(chatListContainer)
+    // Create outer profile container
+    let profile = document.createElement('aside');
+    profile.classList.add('profile');
 
-    let userlist = document.createElement('div')
-    userlist.classList.add('user-list-container')
-    userlist.id = 'userListContainer'
-    userlist.style.display = 'none'
+    // Profile Section (Image, Name, Email, Logout)
+    let profileSection = document.createElement('div');
+    profileSection.classList.add('profile-section');
 
-    let back = document.createElement('div')
-    back.classList.add('header')
-    let button = document.createElement('button')
-    button.classList.add('back-button')
-    button.textContent = 'Back'
-    back.appendChild(button)
-    back.textContent = 'Select User'
+    // Logout button (top-right)
+    let logoutBtn = document.createElement('button');
+    logoutBtn.classList.add('logout-button');
+    logoutBtn.textContent = 'Log Out';
+    profileSection.appendChild(logoutBtn);
 
-    let list = document.createElement('div')
-    list.classList.add('user-list')
-    list.id = 'userList'
+    // Profile image
+    let profileImg = document.createElement('img');
+    profileImg.classList.add('profile-image');
+    profileImg.src = '/frontend/static/assets/user-solid.svg';
+    profileImg.alt = 'User Icon';
+    profileSection.appendChild(profileImg);
 
-    userlist.appendChild(back)
-    userlist.appendChild(list)
-    profile.appendChild(userlist)
+    // Name & Email
+    let profileName = document.createElement('h3');
+    profileName.classList.add('profile-name');
+    profileName.textContent = username;
 
+    let profileInfo = document.createElement('div');
+    profileInfo.classList.add('profile-info');
+    profileInfo.appendChild(profileName);
 
-    let chatcontainer = document.createElement('div')
-    chatcontainer.classList.add('chat-container')
-    chatcontainer.id = 'chatContainer'
-    chatcontainer.style.display = 'none'
+    profileSection.appendChild(profileInfo);
+    profile.appendChild(profileSection);
 
-    let backbutton = document.createElement('div')
-    backbutton.classList.add('header')
-    backbutton.id = 'chatHeader'
-    let bcbutton = document.createElement('button')
-    bcbutton.classList.add('back-button')
-    bcbutton.textContent = 'Back'
+    // Chat List Container
+    let chatListContainer = document.createElement('div');
+    chatListContainer.classList.add('chat-list-container');
+    chatListContainer.id = 'chatListContainer';
 
-    let span = document.createElement('span')
-    span.id = 'chatHeader'
-    backbutton.appendChild(bcbutton)
-    backbutton.appendChild(span)
-    let chatbox = document.createElement('div')
-    chatbox.classList.add('chat-box')
-    chatbox.id = 'chatBox'
-    let chatinput = document.createElement('div')
-    chatinput.classList.add('chat-input')
-    let input = document.createElement('textarea')
-    input.classList.add("chat-input-textarea")
-    input.id = 'messageInput'
-    input.placeholder = 'Type a message...'
-    let send = document.createElement('button')
-    send.id = 'send'
-    let sendimg = document.createElement('img')
-    sendimg.classList.add('icon')
-    sendimg.src = 'frontend/static/assets/paper-plane-regular.svg'
-    sendimg.alt = 'thumbs-up-regular'
-    sendimg.style.height = '25px'
-    sendimg.style.width = '1.2rem'
-    sendimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-    sendimg.style.marginRight = '5px'
-    send.appendChild(sendimg)
-    chatinput.appendChild(input)
-    chatinput.appendChild(send)
+    let chatHeader = document.createElement('div');
+    chatHeader.classList.add('header');
+    chatHeader.textContent = "Chats";
 
-    chatcontainer.appendChild(backbutton)
-    chatcontainer.appendChild(chatbox)
-    chatcontainer.appendChild(chatinput)
-    profile.appendChild(chatcontainer)
-    return profile
-}
+    let chatList = document.createElement('div');
+    chatList.classList.add('chat-list');
+    chatList.id = 'chatList';
+
+    let newChat = document.createElement('div');
+    newChat.classList.add('new-chat');
+    newChat.id = 'newChat';
+    newChat.textContent = 'Start New Chat';
+
+    chatListContainer.appendChild(chatHeader);
+    chatListContainer.appendChild(chatList);
+    chatListContainer.appendChild(newChat);
+    profile.appendChild(chatListContainer);
+
+    // User List Panel
+    let userListContainer = document.createElement('div');
+    userListContainer.classList.add('user-list-container');
+    userListContainer.id = 'userListContainer';
+    userListContainer.style.display = 'none';
+
+    let back = document.createElement('div');
+    back.classList.add('header');
+    let backButton = document.createElement('button');
+    backButton.classList.add('back-button');
+    backButton.textContent = 'Back';
+    back.appendChild(backButton);
+    back.textContent = 'Select User';
+
+    let userList = document.createElement('div');
+    userList.classList.add('user-list');
+    userList.id = 'userList';
+
+    userListContainer.appendChild(back);
+    userListContainer.appendChild(userList);
+    profile.appendChild(userListContainer);
+
+    // Chat Container
+    let chatContainer = document.createElement('div');
+    chatContainer.classList.add('chat-container');
+    chatContainer.id = 'chatContainer';
+    chatContainer.style.display = 'none';
+
+    let chatHeaderBar = document.createElement('div');
+    chatHeaderBar.classList.add('header');
+    chatHeaderBar.id = 'chatHeader';
+
+    let chatBackButton = document.createElement('button');
+    chatBackButton.classList.add('back-button');
+    chatBackButton.textContent = 'Back';
+
+    let chatHeaderSpan = document.createElement('span');
+    chatHeaderSpan.id = 'chatHeaderUser';
+    chatHeaderBar.appendChild(chatBackButton);
+    chatHeaderBar.appendChild(chatHeaderSpan);
+
+    let chatBox = document.createElement('div');
+    chatBox.classList.add('chat-box');
+    chatBox.id = 'chatBox';
+
+    let chatInput = document.createElement('div');
+    chatInput.classList.add('chat-input');
+
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'messageInput';
+    input.placeholder = 'Type a message...';
+
+    let send = document.createElement('button');
+    send.id = 'send';
+
+    let sendImg = document.createElement('img');
+    sendImg.classList.add('icon');
+    sendImg.src = 'frontend/static/assets/paper-plane-regular.svg';
+    sendImg.alt = 'Send';
+    sendImg.style.height = 'auto';
+    sendImg.style.width = 'fit-content';
+    sendImg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)';
+    sendImg.style.marginRight = '5px';
+
+    send.appendChild(sendImg);
+    chatInput.appendChild(input);
+    chatInput.appendChild(send);
+
+    chatContainer.appendChild(chatHeaderBar);
+    chatContainer.appendChild(chatBox);
+    chatContainer.appendChild(chatInput);
+    profile.appendChild(chatContainer);
+
+    return profile;
+};
+
 
 const postingform = () => {
     let postForm = document.createElement('section');
