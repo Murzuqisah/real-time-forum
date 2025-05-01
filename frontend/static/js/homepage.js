@@ -634,31 +634,33 @@ const postItem = (article, item) => {
     article.appendChild(dislikebutton)
 
     // Create the comment button
-    let commentbutton = document.createElement('button')
-    commentbutton.classList.add('comment-button')
-    commentbutton.ariaLabel = 'View or add comments'
+    let commentbutton = document.createElement('button');
+    commentbutton.classList.add('comment-button');
+    commentbutton.setAttribute('aria-label', 'View or add comments');
 
-    // Icon for the comment button
-    let commentimg = document.createElement('img')
-    commentimg.classList.add('icon')
-    commentimg.style.height = '25px'
-    commentimg.style.width = '1.2rem'
-    commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-    commentimg.style.marginRight = '5px'
-    commentimg.src = '/frontend/static/assets/comment-regular.svg'
-    commentimg.alt = 'comment-regular'
+    const commentSVG = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256" class="icon">
+    <g transform="scale(2.81 2.91)">
+        <path d="M 69.962 54.45 H 20.038 c -1.104 0 -2 -0.896 -2 -2 s 0.896 -2 2 -2 h 49.924 c 1.104 0 2 0.896 2 2 S 71.066 54.45 69.962 54.45 z" fill="currentColor"/>
+        <path d="M 69.962 39.792 H 20.038 c -1.104 0 -2 -0.896 -2 -2 s 0.896 -2 2 -2 h 49.924 c 1.104 0 2 0.896 2 2 S 71.066 39.792 69.962 39.792 z" fill="currentColor"/>
+        <path d="M 24.414 85.854 c -0.512 0 -1.023 -0.195 -1.414 -0.586 l -9.807 -9.806 H 9.094 C 4.08 75.462 0 71.382 0 66.367 V 23.874 c 0 -5.015 4.08 -9.094 9.094 -9.094 h 71.812 c 5.015 0 9.094 4.08 9.094 9.094 v 42.493 c 0 5.015 -4.079 9.095 -9.094 9.095 H 35.634 l -9.807 9.806 C 25.437 85.658 24.925 85.854 24.414 85.854 z" fill="currentColor"/>
+    </g>
+    </svg>
+    `;
+    
+    commentbutton.innerHTML = commentSVG;
 
-    // Comment count
-    let commentcount = document.createElement('span')
-    commentcount.classList.add('comment-count')
-    commentcount.textContent = item.comment_count
+    // Add comment count
+    let commentcount = document.createElement('span');
+    commentcount.classList.add('comment-count');
+    commentcount.textContent = item.comment_count;
 
-    // Append icon and count to the button
-    commentbutton.appendChild(commentimg)
-    commentbutton.append(commentcount)
+    // Append count next to SVG
+    commentbutton.appendChild(commentcount);
 
     // Append the button to the article
-    article.appendChild(commentbutton)
+    article.appendChild(commentbutton);
+
 
     // Create the comment section (initially hidden)
     let commentsection = document.createElement('div')
