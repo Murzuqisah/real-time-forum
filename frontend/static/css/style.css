@@ -1024,6 +1024,36 @@ body.dark-theme .logout-button:hover {
   background-color: var(--tertiary-color);
 }
 
+.like-button,
+.dislike-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: none;
+  background: none;
+  color: #333;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.like-button:hover,
+.dislike-button:hover {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.like-button svg,
+.dislike-button svg {
+  fill: currentColor;
+  transition: fill 0.2s ease;
+}
+
+body.dark-theme .like-button,
+body.dark-theme .dislike-button {
+  color: #ccc;
+}
+
 .comments-section {
   margin-top: 1rem;
   padding: 0.75rem;

@@ -595,24 +595,25 @@ const postItem = (article, item) => {
     postactions.classList.add('post-actions')
     postactions.id = item.id.toString()
 
-    let likebutton = document.createElement('button')
-    likebutton.classList.add('like-button')
-    likebutton.id = item.id.toString()
-    likebutton.ariaLabel = 'like this post'
-    let likeimg = document.createElement('img')
-    likeimg.classList.add('icon')
-    likeimg.src = '/frontend/static/assets/thumbs-up-regular.svg'
-    likeimg.alt = 'thumbs-up-regular'
-    likeimg.style.height = '25px'
-    likeimg.style.width = '1.2rem'
-    likeimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-    likeimg.style.marginRight = '5px'
-    likebutton.appendChild(likeimg)
-    let likecount = document.createElement('span')
-    likecount.classList.add('like-count')
-    likecount.textContent = item.likes
-    likebutton.appendChild(likecount)
-    article.appendChild(likebutton)
+    const likeButton = document.createElement('button');
+    likeButton.classList.add('like-button');
+    likeButton.id = item.id.toString();
+    likeButton.setAttribute('aria-label', 'Like this post');
+
+    const likeSVG = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" class="icon">
+    <g transform="translate(1.4 1.4) scale(2.81 2.81)">
+        <!-- Paste full <path> tags from your like SVG here -->
+        <path d="M 83.502 58.364 h -0.239 ... z" fill="currentColor"/>
+    </g>
+    </svg>`;
+    likeButton.innerHTML = likeSVG;
+
+    const likeCount = document.createElement('span');
+    likeCount.classList.add('like-count');
+    likeCount.textContent = item.likes;
+    likeButton.appendChild(likeCount);
+    article.appendChild(likeButton);
 
     let dislikebutton = document.createElement('button')
     dislikebutton.classList.add('dislike-button')
@@ -647,7 +648,7 @@ const postItem = (article, item) => {
     </g>
     </svg>
     `;
-    
+
     commentbutton.innerHTML = commentSVG;
 
     // Add comment count
