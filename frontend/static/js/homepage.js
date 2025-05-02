@@ -60,18 +60,6 @@ export const HomePage = (data) => {
     sidebarToggle.innerHTML = "<span></span><span></span><span></span>"
     navbar.appendChild(sidebarToggle)
 
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener("click", () => {
-            aside.classList.toggle("sidebar-open")
-            document.getElementById("sidebar-overlay").classList.toggle("active")
-        })
-    }
-
-    document.getElementById("sidebar-overlay").addEventListener("click", () => {
-        aside.classList.remove("sidebar-open")
-        document.getElementById("sidebar-overlay").classList.remove("active")
-    })
-
     header.appendChild(navbar)
     document.body.appendChild(header)
 
@@ -155,10 +143,11 @@ export const renderPosts = (data, postsContainer) => {
         console.log('clicked post add')
     });
 
+
     return postsContainer
 }
 
-const chat = (profile) => {
+const chat = () => {
     let username = sessionStorage.getItem('username') || 'Username';
 
     // Create outer profile container
@@ -297,6 +286,7 @@ const chat = (profile) => {
 
     return profile;
 };
+
 
 const postingform = () => {
     let postForm = document.createElement('section');
