@@ -14,7 +14,7 @@ export const HomePage = (data) => {
         "/frontend/static/js/script.js",
     ];
 
-    scriptFiles.forEach(src => {
+    scriptFiles.forEach((src) => {
         let script = document.createElement("script");
         script.src = src;
         script.defer = true;
@@ -52,8 +52,28 @@ export const HomePage = (data) => {
     themeToggler.appendChild(sunny);
     rightContainer.appendChild(themeToggler);
     navbar.appendChild(rightContainer);
-    header.appendChild(navbar);
-    document.body.appendChild(header);
+
+    // mobile sidebar toggler
+    const sidebarToggle = document.createElement('button');
+    sidebarToggle.id = "sidebar-toggle"
+    sidebarToggle.className = "sidebar-toggle"
+    sidebarToggle.innerHTML = "<span></span><span></span><span></span>"
+    navbar.appendChild(sidebarToggle)
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener("click", () => {
+            aside.classList.toggle("sidebar-open")
+            document.getElementById("sidebar-overlay").classList.toggle("active")
+        })
+    }
+
+    document.getElementById("sidebar-overlay").addEventListener("click", () => {
+        aside.classList.remove("sidebar-open")
+        document.getElementById("sidebar-overlay").classList.remove("active")
+    })
+
+    header.appendChild(navbar)
+    document.body.appendChild(header)
 
     // Create sidebarfloating-create-post-btn
     let aside = document.createElement('aside');
@@ -135,11 +155,10 @@ export const renderPosts = (data, postsContainer) => {
         console.log('clicked post add')
     });
 
-
     return postsContainer
 }
 
-const chat = () => {
+const chat = (profile) => {
     let username = sessionStorage.getItem('username') || 'Username';
 
     // Create outer profile container
@@ -279,11 +298,13 @@ const chat = () => {
     return profile;
 };
 
-
 const postingform = () => {
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
+    let overlay = document.createElement('div');
+    overlay.classList.add('overlay');
     postForm.id = 'post-form';
+    document.body.appendChild(overlay);
 
     let postdiv = document.createElement('div');
     postdiv.classList.add('post-popup');
@@ -292,14 +313,19 @@ const postingform = () => {
     let cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.classList.add('close-modal');
-    cancelBtn.textContent = 'X';
+    cancelBtn.innerHTML = '&times;';
     cancelBtn.title = 'Close';
 
     cancelBtn.addEventListener('click', () => {
         postForm.classList.add('hidden');
+        overlay.classList.remove('active');
     });
 
     postdiv.appendChild(cancelBtn);
+
+    let postTitle = document.createElement('h2');
+    postTitle.textContent = 'Create a New Post';
+    postdiv.appendChild(postTitle);
 
     let upload = document.createElement('form');
     upload.name = "upload";
@@ -647,7 +673,7 @@ const postItem = (article, item) => {
     </g>
     </svg>
     `;
-    
+
     commentbutton.innerHTML = commentSVG;
 
     let commentcount = document.createElement('span');
@@ -655,7 +681,7 @@ const postItem = (article, item) => {
     commentcount.textContent = item.comment_count;
 
     commentbutton.appendChild(commentcount);
-    
+
     postactions.appendChild(likebutton);
     postactions.appendChild(dislikebutton);
     postactions.appendChild(commentbutton);
