@@ -61,7 +61,7 @@ export const SignInPage = () => {
   logo.appendChild(logoLink)
   navbar.appendChild(logo)
   let themeToggler = document.createElement('div')
-  themeToggler.classList.add('theme-toggler')
+  themeToggler.classList.add('theme-toggler');
   let moon = document.createElement('img')
   moon.classList.add('moon')
   moon.src = '/frontend/static/assets/moon-regular.svg'
@@ -72,6 +72,9 @@ export const SignInPage = () => {
   sunny.alt = 'Sunny Icon'
   themeToggler.appendChild(moon)
   themeToggler.appendChild(sunny)
+  themeToggler.style.alignItems = 'flex-end';
+  themeToggler.style.justifyContent = 'space-between';
+  themeToggler.style.marginLeft = '110rem';
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
 

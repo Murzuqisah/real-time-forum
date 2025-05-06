@@ -57,6 +57,7 @@ export const SignUpPage = () => {
   sunny.alt = 'Sunny Icon'
   themeToggler.appendChild(moon)
   themeToggler.appendChild(sunny)
+  themeToggler.style.marginLeft = '110rem';
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
 
@@ -102,16 +103,31 @@ export const SignUpPage = () => {
 
   let div9 = document.createElement('div');
   div9.classList.add('input-group');
+
   let label6 = document.createElement('label');
   label6.htmlFor = 'gender';
   label6.textContent = 'Gender';
-  let input6 = document.createElement('input');
-  input6.type = 'text';
-  input6.id = 'gender';
-  input6.name = 'gender';
-  input6.required = true;
+
+  let select = document.createElement('select');
+  select.id = 'gender';
+  select.className = 'gender';
+  select.name = 'gender';
+  select.required = true;
+
+  let genderOptions = ['Select gender', 'Male', 'Female', 'Other'];
+  genderOptions.forEach((gender, index) => {
+    let genderOption = document.createElement('option');
+    genderOption.value = index === 0 ? '' : gender.toLowerCase();
+    genderOption.textContent = gender;
+    if (index === 0 ) {
+      genderOption.disabled = true;
+      genderOption.selected = true;
+    }  
+    select.appendChild(genderOption);
+  })
+
   div9.appendChild(label6);
-  div9.appendChild(input6);
+  div9.appendChild(select);
 
   let div10 = document.createElement('div');
   div10.classList.add('input-group');
