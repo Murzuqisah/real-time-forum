@@ -238,7 +238,7 @@ export const SignUpPage = () => {
     let firstname = document.getElementById('firstname').value;
     let lastname = document.getElementById('lastname').value;
     let gender = document.getElementById('gender').value;
-
+  
     if (password !== confirmedPassword) {
       showAlert('Passwords do not match');
       return;
@@ -292,9 +292,7 @@ async function signUp(username, email, password, confirmedPassword, age, firstna
     }
     const data = await response.json();
 
-    console.log(data);
     if (data.error === 'ok') {
-      console.log(data)
       sessionStorage.setItem('pagestate', 'fromsignup')
       navigate(e, '/sign-in');
     } else {

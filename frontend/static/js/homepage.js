@@ -132,7 +132,6 @@ export const renderPosts = (data, postsContainer) => {
             createPostForm.style.visibility = 'hidden';
             setTimeout(() => createPostForm.classList.add('hidden'), 500);
         }
-        console.log('clicked post add')
     });
 
 
@@ -519,7 +518,6 @@ const reactionHandler = (dislikecount, likecount, item, type) => {
         })
         .then(data => {
             if (data.error === 'ok') {
-                console.log(data)
                 dislikecount.textContent = data.item.dislikes
                 likecount.textContent = data.item.likes
             } else {

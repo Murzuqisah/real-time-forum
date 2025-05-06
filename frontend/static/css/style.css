@@ -1509,3 +1509,18 @@ to {
 .action-button.active {
   color: #7289da;
 }
+
+@media (max-width: 600px) {
+  form {
+      padding: 1rem;
+  }
+
+  .input-group input,
+  .input-group select {
+      font-size: 0.95rem;
+  }
+
+  button[type="submit"] {
+      font-size: 1rem;
+  }
+}

@@ -98,17 +98,6 @@ func (client *Client) processMessages() {
 		}
 
 		switch msg["type"] {
-		case "getusers":
-			users, err := repositories.GetUsers()
-			if err != nil {
-				sendError(client, "unexpected error occurred")
-				continue
-			}
-			sendJSON(client, map[string]any{
-				"type":   "getusers",
-				"users":  users,
-				"online": online(),
-			})
 		case "messaging":
 			sender, err := repositories.GetUserByName(msg["sender"])
 			if err != nil {
@@ -166,16 +155,24 @@ func (client *Client) processMessages() {
 				continue
 			}
 
+			allUsers, err := repositories.GetUsers()
+			if err != nil {
+				sendError(client, "unexpected error occurred")
+				continue
+			}
+
 			unread, err := repositories.UnreadMessages(id)
 			if err != nil {
 				sendError(client, "unexpected error occured")
 				continue
 			}
+
 			sendJSON(client, map[string]any{
-				"type":   "chats",
-				"users":  users,
-				"online": online(),
-				"unread": unread,
+				"type":     "chats",
+				"users":    users,
+				"allUsers": allUsers,
+				"online":   online(),
+				"unread":   unread,
 			})
 		case "conversation":
 			senderid, err := strconv.Atoi(msg["sender"])
@@ -321,10 +318,18 @@ func register(sender string, client *Client) {
 		sendError(client, "unexpected error occured")
 		return
 	}
+
+	allUsers, err := repositories.GetUsers()
+	if err != nil {
+		sendError(client, "unexpected error occurred")
+		return
+	}
+
 	sendJSON(client, map[string]any{
-		"type":   "chats",
-		"users":  users,
-		"online": online(),
-		"unread": unread,
+		"type":     "chats",
+		"users":    users,
+		"allUsers": allUsers,
+		"online":   online(),
+		"unread":   unread,
 	})
 }

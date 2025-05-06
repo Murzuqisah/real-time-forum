@@ -207,7 +207,6 @@ export async function login(email, password) {
     const data = await response.json();
 
     if (data.error === 'ok') {
-      console.log('Login successful:', data);
       // Store session in sessionStorage
       sessionStorage.setItem('session', data.session);
       sessionStorage.setItem('pageState', 'home');

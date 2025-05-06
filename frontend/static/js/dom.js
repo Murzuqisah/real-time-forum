@@ -64,14 +64,6 @@ export async function RealTime() {
     };
 
     const attachUIEventListeners = () => {
-        const newChat = document.getElementById('newChat');
-        if (newChat) {
-            newChat.addEventListener('click', (e) => {
-                e.preventDefault();
-                socket.send(JSON.stringify({ type: 'getusers' }));
-            });
-        }
-
         const sendBtn = document.getElementById('send');
         if (sendBtn) {
             sendBtn.addEventListener('click', (e) => {
@@ -146,6 +138,7 @@ export async function RealTime() {
     };
 
     const showChatList = (data) => {
+        let results;
         document.getElementById('userListContainer').style.display = 'none';
         document.getElementById("chatContainer").style.display = "none";
         document.getElementById("chatListContainer").style.display = "flex";
@@ -154,11 +147,18 @@ export async function RealTime() {
                 const chatList = document.getElementById('chatList');
                 chatList.innerHTML = "";
 
+                const set = new Set(data.users)
+
+                data.allUsers.sort((a, b) => a.username.localeCompare(b.username))
+                const filter = data.allUsers.filter(item => !set.has(item))
+                results = data.users.concat(filter)
+
+
                 const loading = document.createElement('div');
                 loading.textContent = "Loading chats...";
                 chatList.appendChild(loading);
                 chatList.innerHTML = ""
-                data.users.forEach(elem => {
+                results.forEach(elem => {
                     const chat = document.createElement('div');
                     chat.classList.add('chat');
                     chat.textContent = elem.username;
@@ -174,7 +174,7 @@ export async function RealTime() {
                     const msgcount = document.createElement('p');
                     msgcount.classList.add('unread')
                     msgcount.textContent = unread(data.unread, elem.username)
-                    if (unread(data.unread, elem.username) > 0 ) {
+                    if (unread(data.unread, elem.username) > 0) {
                         chat.appendChild(msgcount)
                     }
                     const handler = createHandler(elem, socket);
@@ -188,9 +188,7 @@ export async function RealTime() {
     const createHandler = (elem, socket) => {
         return function handleChatClick(e) {
             e.preventDefault();
-            console.log('conversation clicked')
             if (socket.readyState === WebSocket.OPEN) {
-                console.log('conversation sending')
                 sendConversation(elem);
             } else {
                 showAlert("Connection not ready. Please try again.");
@@ -199,7 +197,6 @@ export async function RealTime() {
     };
 
     const sendConversation = (elem) => {
-        console.log('entered the sending feature')
         socket.send(JSON.stringify({
             type: "conversation",
             sender: UserId,
@@ -211,7 +208,6 @@ export async function RealTime() {
             receiver: UserId,
             sender: elem.id.toString(),
         }))
-        console.log('conversation sent')
     };
 
     const throttle = (func, limit) => {
@@ -239,7 +235,6 @@ export async function RealTime() {
     const createBackHandler = (onClick) => {
         return function handleback(e) {
             e.preventDefault();
-            console.log('clicked back')
             onClick()
         }
     }
@@ -254,7 +249,6 @@ export async function RealTime() {
         const typing = document.getElementById("typingIndicator")
 
         messagesToShow.forEach(elem => {
-            console.log(elem)
             let messageDiv = document.createElement('div');
             messageDiv.classList.add("message", elem.sender_id.toString() === UserId ? "sent" : "received");
             messageDiv = arrangemessage(messageDiv, elem)
@@ -341,51 +335,6 @@ export async function RealTime() {
 
     }, 100);
 
-    const showUsersList = (data) => {
-        document.getElementById("chatListContainer").style.display = "none";
-        const userList = document.getElementById("userListContainer");
-        userList.innerHTML = "";
-        const header = document.createElement('div');
-        header.classList.add('header');
-        header.textContent = "Users";
-        const backBtn = createBackButton(() => {
-            socket.send(JSON.stringify({
-                type: "chats",
-                sender: UserId,
-                username: Username,
-            }));
-
-        });
-        header.appendChild(backBtn);
-        userList.appendChild(header);
-        const chatList = document.createElement('div');
-        chatList.classList.add('chat-list');
-        data.users.sort((a, b) => a.username.localeCompare(b.username))
-        data.users.forEach(elem => {
-            if (elem.username !== Username) {
-                const item = document.createElement('div');
-                item.classList.add('chat');
-                item.textContent = elem.username;
-                item.dataset.username = elem.username;
-                const statusIndicator = document.createElement('p');
-                statusIndicator.classList.add('status');
-                statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
-                item.appendChild(statusIndicator);
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    socket.send(JSON.stringify({
-                        type: "conversation",
-                        sender: UserId,
-                        receiver: elem.id.toString(),
-                        username: Username,
-                    }));
-                });
-                chatList.appendChild(item);
-            }
-        });
-        userList.appendChild(chatList);
-        userList.style.display = 'flex';
-    };
 
     const displayMessage = (data) => {
         if (Username !== data.sender.username) {
@@ -412,8 +361,6 @@ export async function RealTime() {
         }))
 
         let nameDiv = document.getElementById('name')
-        console.log('namediv', nameDiv)
-        console.log('user', Username)
 
 
 
@@ -494,9 +441,6 @@ export async function RealTime() {
                 } else {
                     showAlert(data.message);
                 }
-                break;
-            case 'getusers':
-                showUsersList(data);
                 break;
             case 'messaging':
                 if (data.status === "ok") {
