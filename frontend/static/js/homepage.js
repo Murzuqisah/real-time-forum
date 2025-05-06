@@ -191,21 +191,9 @@ const chat = () => {
     chatList.classList.add('chat-list');
     chatList.id = 'chatList';
 
-    let newChat = document.createElement('div');
-    newChat.classList.add('new-chat');
-    newChat.id = 'newChat';
-    newChat.textContent = 'Start New Chat';
-
     chatListContainer.appendChild(chatHeader);
     chatListContainer.appendChild(chatList);
-    chatListContainer.appendChild(newChat);
     profile.appendChild(chatListContainer);
-
-    // User List Panel
-    let userListContainer = document.createElement('div');
-    userListContainer.classList.add('user-list-container');
-    userListContainer.id = 'userListContainer';
-    userListContainer.style.display = 'none';
 
     let back = document.createElement('div');
     back.classList.add('header');
@@ -214,14 +202,6 @@ const chat = () => {
     backButton.textContent = 'Back';
     back.appendChild(backButton);
     back.textContent = 'Select User';
-
-    let userList = document.createElement('div');
-    userList.classList.add('user-list');
-    userList.id = 'userList';
-
-    userListContainer.appendChild(back);
-    userListContainer.appendChild(userList);
-    profile.appendChild(userListContainer);
 
     // Chat Container
     let chatContainer = document.createElement('div');

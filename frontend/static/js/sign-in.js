@@ -48,9 +48,9 @@ export const SignInPage = () => {
   document.head.appendChild(title);
 
   let header = document.createElement('header')
-
   let navbar = document.createElement('nav')
   navbar.classList.add('navbar')
+
   let logo = document.createElement('div')
   logo.classList.add('logo')
   let logoLink = document.createElement('a')
@@ -74,7 +74,7 @@ export const SignInPage = () => {
   themeToggler.appendChild(sunny)
   themeToggler.style.alignItems = 'flex-end';
   themeToggler.style.justifyContent = 'space-between';
-  themeToggler.style.marginLeft = '110rem';
+  
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
 

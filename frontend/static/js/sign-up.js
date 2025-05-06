@@ -37,6 +37,7 @@ export const SignUpPage = () => {
   let header = document.createElement('header')
   let navbar = document.createElement('nav')
   navbar.classList.add('navbar')
+
   let logo = document.createElement('div')
   logo.classList.add('logo')
   let logoLink = document.createElement('a')
@@ -57,10 +58,11 @@ export const SignUpPage = () => {
   sunny.alt = 'Sunny Icon'
   themeToggler.appendChild(moon)
   themeToggler.appendChild(sunny)
-  themeToggler.style.marginLeft = '110rem';
+  themeToggler.style.alignItems = 'flex-end';
+  themeToggler.style.justifyContent = 'space-between';
+
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
-
 
   document.body.appendChild(header)
 

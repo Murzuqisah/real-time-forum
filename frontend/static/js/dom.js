@@ -95,6 +95,7 @@ export async function RealTime() {
                     }))
                     return;
                 }
+                    // Sort all users alphabetically by username (case-insensitive)
 
                 if (e.key === 'Enter' && !e.shiftKey) {
                     let msg = document.getElementById('messageInput').value;
@@ -139,21 +140,43 @@ export async function RealTime() {
 
     const showChatList = (data) => {
         let results;
-        document.getElementById('userListContainer').style.display = 'none';
         document.getElementById("chatContainer").style.display = "none";
         document.getElementById("chatListContainer").style.display = "flex";
-        if (data.users) {
-            if (data.users.length > 0) {
+        if (data.allUsers) {
+            console.log(data.allUsers)
+            if (data.allUsers.length > 0) {
                 const chatList = document.getElementById('chatList');
                 chatList.innerHTML = "";
 
-                const set = new Set(data.users)
+                if (data.users) {
+                    const userSet = new Set(data.users.map(user => user.username.toLowerCase()));
+                
+                    const sorted = data.allUsers.sort((a, b) => {
+                        const nameA = a.username.toLowerCase();
+                        const nameB = b.username.toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
+                
+                    let filtered = sorted.filter(user => 
+                        !userSet.has(user.username.toLowerCase())
+                    );
 
-                data.allUsers.sort((a, b) => a.username.localeCompare(b.username))
-                const filter = data.allUsers.filter(item => !set.has(item))
-                results = data.users.concat(filter)
+                    const filtered1 = filtered.filter(user => user.username != Username)
 
+                    results = data.users.concat(filtered1);
+                } else {
 
+                    const sorted = data.allUsers.sort((a, b) => {
+                        const nameA = a.username.toLowerCase();
+                        const nameB = b.username.toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
+
+                    const filtered = sorted.filter(user => user.username != Username)
+
+                    results = filtered;
+                }
+                
                 const loading = document.createElement('div');
                 loading.textContent = "Loading chats...";
                 chatList.appendChild(loading);
