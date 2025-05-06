@@ -97,7 +97,10 @@ export const SignUpPage = () => {
   input5.type = 'number';
   input5.id = 'age';
   input5.name = 'age';
+  input5.min = 15;
   input5.required = true;
+  input5.placeholder = 'Enter your age';
+
   div8.appendChild(label5);
   div8.appendChild(input5);
 
@@ -114,7 +117,7 @@ export const SignUpPage = () => {
   select.name = 'gender';
   select.required = true;
 
-  let genderOptions = ['Select gender', 'Male', 'Female', 'Other'];
+  let genderOptions = ['Select gender', 'Male', 'Female','Non-binary', 'Prefer not to say'];
   genderOptions.forEach((gender, index) => {
     let genderOption = document.createElement('option');
     genderOption.value = index === 0 ? '' : gender.toLowerCase();
