@@ -123,24 +123,6 @@ export async function RealTime() {
             })
         }
 
-        const floatingButton = document.getElementById('floatingButton');
-        if (floatingButton) {
-            floatingButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                const createPostForm = document.querySelector('.create-post');
-                if (createPostForm.classList.contains('hidden')) {
-                    createPostForm.classList.remove('hidden');
-                    createPostForm.style.opacity = 1;
-                    createPostForm.style.visibility = 'visible';
-                } else {
-                    createPostForm.style.opacity = 0;
-                    createPostForm.style.visibility = 'hidden';
-                    setTimeout(() => createPostForm.classList.add('hidden'), 500);
-                }
-                console.log('clicked post add')
-            });
-        }
-
         document.querySelectorAll('.chat-input-textarea').forEach(textarea => {
             textarea.addEventListener('input', function () {
                 // Reset height to auto to get correct scrollHeight
@@ -181,13 +163,17 @@ export async function RealTime() {
                     chat.classList.add('chat');
                     chat.textContent = elem.username;
                     chat.dataset.username = elem.username;
-                    const statusIndicator = document.createElement('p');
-                    statusIndicator.classList.add('status');
-                    statusIndicator.textContent = status(data.online, elem.username) ? "Online" : "Offline";
+                    const statusIndicator = document.createElement('span');
+                    statusIndicator.classList.add('status-dot');
+                    if (status(data.online, elem.username)) {
+                        statusIndicator.classList.add('online');
+                    } else {
+                        statusIndicator.classList.add('offline');
+                    }
+                    chat.appendChild(statusIndicator);
                     const msgcount = document.createElement('p');
                     msgcount.classList.add('unread')
                     msgcount.textContent = unread(data.unread, elem.username)
-                    chat.appendChild(statusIndicator);
                     if (unread(data.unread, elem.username) > 0 ) {
                         chat.appendChild(msgcount)
                     }

@@ -181,7 +181,8 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	categories := r.Form["category[]"]
+	categories := r.Form["category"]
+	log.Println(categories)
 
 	for _, category := range categories {
 		repositories.InsertRecord(util.DB, "tblPostCategories", []string{"post_id", "category"}, id, category)

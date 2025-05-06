@@ -14,7 +14,7 @@ export const HomePage = (data) => {
         "/frontend/static/js/script.js",
     ];
 
-    scriptFiles.forEach(src => {
+    scriptFiles.forEach((src) => {
         let script = document.createElement("script");
         script.src = src;
         script.defer = true;
@@ -52,10 +52,18 @@ export const HomePage = (data) => {
     themeToggler.appendChild(sunny);
     rightContainer.appendChild(themeToggler);
     navbar.appendChild(rightContainer);
-    header.appendChild(navbar);
-    document.body.appendChild(header);
 
-    // Create sidebar
+    // mobile sidebar toggler
+    const sidebarToggle = document.createElement('button');
+    sidebarToggle.id = "sidebar-toggle"
+    sidebarToggle.className = "sidebar-toggle"
+    sidebarToggle.innerHTML = "<span></span><span></span><span></span>"
+    navbar.appendChild(sidebarToggle)
+
+    header.appendChild(navbar)
+    document.body.appendChild(header)
+
+    // Create sidebarfloating-create-post-btn
     let aside = document.createElement('aside');
     aside.classList.add('sidebar');
     let asideh2 = document.createElement('h2');
@@ -67,7 +75,7 @@ export const HomePage = (data) => {
     asideset.innerHTML = `
        <legend>Categories</legend>
     `
-    asideset = asideCategories(asideset)
+    asideset = filterCategories(asideset)
     asideform.appendChild(asideset)
     aside.appendChild(asideform)
     document.body.appendChild(aside);
@@ -75,33 +83,15 @@ export const HomePage = (data) => {
 
     let postsContainer = document.createElement('main');
     postsContainer.classList.add('posts');
-    postsContainer.id = 'postcontainer'
-    postsContainer = renderPosts(data, postsContainer)
+    postsContainer.id = 'postcontainer';
+
+    postsContainer = renderPosts(data, postsContainer);
     postsContainer.appendChild(postingform());
-
-    let floating = document.createElement('div')
-    floating.classList.add('floating-create-post-btn-container')
-    let createPost = document.createElement('p')
-    createPost.textContent = 'Create a Post'
-    let floatingButton = document.createElement('button')
-    floatingButton.type = 'submit'
-    floatingButton.classList.add('floating-create-post-btn')
-    floatingButton.id = 'floatingButton'
-    floatingButton.ariaLabel = 'Create a new post'
-    let img = document.createElement('img')
-    img.classList.add('web-icon')
-    img.src = '/frontend/static/assets/plus-solid.svg'
-    img.alt = 'create-post'
-    floatingButton.appendChild(img)
-
-    floating.appendChild(createPost)
-    floating.appendChild(floatingButton)
-    document.body.appendChild(floating)
-
-
     document.body.appendChild(postsContainer);
-    let profile = document.createElement('aside');
+
+    let profile = document.createElement('div');
     profile.classList.add('profile');
+
     profile = chat(profile)
     document.body.appendChild(profile);
 };
@@ -112,6 +102,22 @@ export const renderPosts = (data, postsContainer) => {
     }
 
     postsContainer.innerHTML = "";
+    let floating = document.createElement('div');
+    floating.classList.add('floating-create-post-btn-container');
+    floating.style.display = 'flex';
+    let createPost = document.createElement('p')
+    createPost.textContent = 'Create a Post'
+    let floatingButton = document.createElement('button')
+    floatingButton.type = 'submit'
+    floatingButton.classList.add('floating-create-post-btn')
+    let img = document.createElement('img')
+    img.classList.add('web-icon');
+    img.src = '/frontend/static/assets/plus-solid.svg';
+    img.alt = 'create-post';
+    floatingButton.appendChild(img);
+    floating.appendChild(createPost);
+    floating.appendChild(floatingButton);
+    postsContainer.appendChild(floating);
 
     data.posts.forEach(item => {
         item = item || {};
@@ -122,116 +128,194 @@ export const renderPosts = (data, postsContainer) => {
         postsContainer.appendChild(article);
     });
 
+    floatingButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        const createPostForm = document.querySelector('.create-post');
+        if (createPostForm.classList.contains('hidden')) {
+            createPostForm.classList.remove('hidden');
+            createPostForm.style.opacity = 1;
+            createPostForm.style.visibility = 'visible';
+        } else {
+            createPostForm.style.opacity = 0;
+            createPostForm.style.visibility = 'hidden';
+            setTimeout(() => createPostForm.classList.add('hidden'), 500);
+        }
+        console.log('clicked post add')
+    });
+
 
     return postsContainer
 }
 
-const chat = (profile) => {
-    let name = sessionStorage.getItem('username')
-    let p = document.createElement('p')
-    p.classList.add('profile-name')
-    p.textContent = name
-    profile.appendChild(p)
+const chat = () => {
+    let username = sessionStorage.getItem('username') || 'Username';
 
-    let form = document.createElement('form')
-    let logout = document.createElement('button')
-    logout.classList.add('logout-button')
-    logout.textContent = 'Log Out'
-    form.appendChild(logout)
-    profile.appendChild(form)
-    let chatListContainer = document.createElement('div')
-    chatListContainer.classList.add('chat-list-container')
-    chatListContainer.id = 'chatListContainer'
-    let header = document.createElement('div')
-    header.classList.add('header')
-    header.textContent = "Chats"
-    let chatlist = document.createElement('div')
-    chatlist.classList.add('chat-list')
-    chatlist.id = 'chatList'
-    let newchat = document.createElement('div')
-    newchat.classList.add('new-chat')
-    newchat.id = 'newChat'
-    newchat.textContent = 'Start New Chat'
-    chatListContainer.appendChild(header)
-    chatListContainer.appendChild(chatlist)
-    chatListContainer.appendChild(newchat)
-    profile.appendChild(chatListContainer)
+    // Create outer profile container
+    let profile = document.createElement('aside');
+    profile.classList.add('profile');
 
-    let userlist = document.createElement('div')
-    userlist.classList.add('user-list-container')
-    userlist.id = 'userListContainer'
-    userlist.style.display = 'none'
+    // Profile Section (Image, Name, Email, Logout)
+    let profileSection = document.createElement('div');
+    profileSection.classList.add('profile-section');
 
-    let back = document.createElement('div')
-    back.classList.add('header')
-    let button = document.createElement('button')
-    button.classList.add('back-button')
-    button.textContent = 'Back'
-    back.appendChild(button)
-    back.textContent = 'Select User'
+    // Logout button (top-right)
+    let logoutBtn = document.createElement('button');
+    logoutBtn.classList.add('logout-button');
+    logoutBtn.textContent = 'Log Out';
+    profileSection.appendChild(logoutBtn);
 
-    let list = document.createElement('div')
-    list.classList.add('user-list')
-    list.id = 'userList'
+    // Profile image
+    const profileImgWrapper = document.createElement('div');
+    profileImgWrapper.classList.add('profile-image');
+    profileImgWrapper.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="50" height="50" viewBox="0 0 256 256" xml:space="preserve">
+        <g style="stroke: none; top: 0.2rem; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
+	    <path d="M 45 0 C 20.147 0 0 20.147 0 45 c 0 24.853 20.147 45 45 45 s 45 -20.147 45 -45 C 90 20.147 69.853 0 45 0 z M 45 22.007 c 8.899 0 16.14 7.241 16.14 16.14 c 0 8.9 -7.241 16.14 -16.14 16.14 c -8.9 0 -16.14 -7.24 -16.14 -16.14 C 28.86 29.248 36.1 22.007 45 22.007 z M 45 83.843 c -11.135 0 -21.123 -4.885 -27.957 -12.623 c 3.177 -5.75 8.144 -10.476 14.05 -13.341 c 2.009 -0.974 4.354 -0.958 6.435 0.041 c 2.343 1.126 4.857 1.696 7.473 1.696 c 2.615 0 5.13 -0.571 7.473 -1.696 c 2.083 -1 4.428 -1.015 6.435 -0.041 c 5.906 2.864 10.872 7.591 14.049 13.341 C 66.123 78.957 56.135 83.843 45 83.843 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(0,0,0); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
+        </g>
+    </svg>
+    `;
+    profileSection.appendChild(profileImgWrapper);
 
-    userlist.appendChild(back)
-    userlist.appendChild(list)
-    profile.appendChild(userlist)
+    let profileName = document.createElement('h3');
+    profileName.classList.add('profile-name');
+    profileName.textContent = username;
 
+    let profileInfo = document.createElement('div');
+    profileInfo.classList.add('profile-info');
+    profileInfo.appendChild(profileName);
 
-    let chatcontainer = document.createElement('div')
-    chatcontainer.classList.add('chat-container')
-    chatcontainer.id = 'chatContainer'
-    chatcontainer.style.display = 'none'
+    profileSection.appendChild(profileInfo);
+    profile.appendChild(profileSection);
 
-    let backbutton = document.createElement('div')
-    backbutton.classList.add('header')
-    backbutton.id = 'chatHeader'
-    let bcbutton = document.createElement('button')
-    bcbutton.classList.add('back-button')
-    bcbutton.textContent = 'Back'
+    // Chat List Container
+    let chatListContainer = document.createElement('div');
+    chatListContainer.classList.add('chat-list-container');
+    chatListContainer.id = 'chatListContainer';
 
-    let span = document.createElement('span')
-    span.id = 'chatHeader'
-    backbutton.appendChild(bcbutton)
-    backbutton.appendChild(span)
-    let chatbox = document.createElement('div')
-    chatbox.classList.add('chat-box')
-    chatbox.id = 'chatBox'
-    let chatinput = document.createElement('div')
-    chatinput.classList.add('chat-input')
-    let input = document.createElement('textarea')
-    input.classList.add("chat-input-textarea")
-    input.id = 'messageInput'
-    input.placeholder = 'Type a message...'
-    let send = document.createElement('button')
-    send.id = 'send'
-    let sendimg = document.createElement('img')
-    sendimg.classList.add('icon')
-    sendimg.src = 'frontend/static/assets/paper-plane-regular.svg'
-    sendimg.alt = 'thumbs-up-regular'
-    sendimg.style.height = '25px'
-    sendimg.style.width = '1.2rem'
-    sendimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-    sendimg.style.marginRight = '5px'
-    send.appendChild(sendimg)
-    chatinput.appendChild(input)
-    chatinput.appendChild(send)
+    let chatHeader = document.createElement('div');
+    chatHeader.classList.add('header');
+    chatHeader.textContent = "Chats";
 
-    chatcontainer.appendChild(backbutton)
-    chatcontainer.appendChild(chatbox)
-    chatcontainer.appendChild(chatinput)
-    profile.appendChild(chatcontainer)
-    return profile
-}
+    let chatList = document.createElement('div');
+    chatList.classList.add('chat-list');
+    chatList.id = 'chatList';
+
+    let newChat = document.createElement('div');
+    newChat.classList.add('new-chat');
+    newChat.id = 'newChat';
+    newChat.textContent = 'Start New Chat';
+
+    chatListContainer.appendChild(chatHeader);
+    chatListContainer.appendChild(chatList);
+    chatListContainer.appendChild(newChat);
+    profile.appendChild(chatListContainer);
+
+    // User List Panel
+    let userListContainer = document.createElement('div');
+    userListContainer.classList.add('user-list-container');
+    userListContainer.id = 'userListContainer';
+    userListContainer.style.display = 'none';
+
+    let back = document.createElement('div');
+    back.classList.add('header');
+    let backButton = document.createElement('button');
+    backButton.classList.add('back-button');
+    backButton.textContent = 'Back';
+    back.appendChild(backButton);
+    back.textContent = 'Select User';
+
+    let userList = document.createElement('div');
+    userList.classList.add('user-list');
+    userList.id = 'userList';
+
+    userListContainer.appendChild(back);
+    userListContainer.appendChild(userList);
+    profile.appendChild(userListContainer);
+
+    // Chat Container
+    let chatContainer = document.createElement('div');
+    chatContainer.classList.add('chat-container');
+    chatContainer.id = 'chatContainer';
+    chatContainer.style.display = 'none';
+
+    let chatHeaderBar = document.createElement('div');
+    chatHeaderBar.classList.add('header');
+    chatHeaderBar.id = 'chatHeader';
+
+    let chatBackButton = document.createElement('button');
+    chatBackButton.classList.add('back-button');
+    chatBackButton.textContent = 'Back';
+
+    let chatHeaderSpan = document.createElement('span');
+    chatHeaderSpan.id = 'chatHeaderUser';
+    chatHeaderBar.appendChild(chatBackButton);
+    chatHeaderBar.appendChild(chatHeaderSpan);
+
+    let chatBox = document.createElement('div');
+    chatBox.classList.add('chat-box');
+    chatBox.id = 'chatBox';
+
+    let chatInput = document.createElement('div');
+    chatInput.classList.add('chat-input');
+
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'messageInput';
+    input.placeholder = 'Type a message...';
+
+    let send = document.createElement('button');
+    send.id = 'send';
+
+    let sendImg = document.createElement('img');
+    sendImg.classList.add('icon');
+    sendImg.src = 'frontend/static/assets/paper-plane-regular.svg';
+    sendImg.alt = 'Send';
+    sendImg.style.height = 'auto';
+    sendImg.style.width = 'fit-content';
+    sendImg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)';
+    sendImg.style.marginRight = '5px';
+
+    send.appendChild(sendImg);
+    chatInput.appendChild(input);
+    chatInput.appendChild(send);
+
+    chatContainer.appendChild(chatHeaderBar);
+    chatContainer.appendChild(chatBox);
+    chatContainer.appendChild(chatInput);
+    profile.appendChild(chatContainer);
+
+    return profile;
+};
+
 
 const postingform = () => {
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
-    postForm.id = 'post-form'
+    let overlay = document.createElement('div');
+    overlay.classList.add('overlay');
+    postForm.id = 'post-form';
+    document.body.appendChild(overlay);
 
-    let postdiv = document.createElement('div')
-    postdiv.classList.add('post-popup')
+    let postdiv = document.createElement('div');
+    postdiv.classList.add('post-popup');
+
+    // cancel button
+    let cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.classList.add('close-modal');
+    cancelBtn.innerHTML = '&times;';
+    cancelBtn.title = 'Close';
+
+    cancelBtn.addEventListener('click', () => {
+        postForm.classList.add('hidden');
+        overlay.classList.remove('active');
+    });
+
+    postdiv.appendChild(cancelBtn);
+
+    let postTitle = document.createElement('h2');
+    postTitle.textContent = 'Create a New Post';
+    postdiv.appendChild(postTitle);
 
     let upload = document.createElement('form');
     upload.name = "upload";
@@ -258,49 +342,8 @@ const postingform = () => {
     let categories = document.createElement('fieldset');
     categories.classList.add('categories');
     categories.name = 'categories'
-    categories.innerHTML = `
-             <legend>Select Category</legend>
-            <label>
-              <input type="checkbox" name="category[]" value="Technology" />
-              Technology
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Health" />
-              Health
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Education" />
-              Education
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Sports" />
-              Sports
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Entertainment" />
-              Entertainment
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Finance" />
-              Finance
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Travel" />
-              Travel
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Food" />
-              Food
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Lifestyle" />
-              Lifestyle
-            </label>
-            <label>
-              <input type="checkbox" name="category[]" value="Science" />
-              Science
-            </label>
-    `
+    const categoryList = ["Technology", "Health", "Education", "Sports", "Entertainment", "Finance", "Travel", "Food", "Lifestyle", "Science"];
+    categories = asideCategories(categories);
     let postOperation = document.createElement('div');
     postOperation.classList.add('post-operation');
     let fileInput = document.createElement('input');
@@ -585,7 +628,7 @@ const postItem = (article, item) => {
     likecount.classList.add('like-count')
     likecount.textContent = item.likes
     likebutton.appendChild(likecount)
-    article.appendChild(likebutton)
+    // article.appendChild(likebutton)
 
     let dislikebutton = document.createElement('button')
     dislikebutton.classList.add('dislike-button')
@@ -604,40 +647,41 @@ const postItem = (article, item) => {
     dislikecount.classList.add('dislike-count')
     dislikecount.textContent = item.dislikes
     dislikebutton.appendChild(dislikecount)
-    article.appendChild(dislikebutton)
+    // article.appendChild(dislikebutton)
 
     // Create the comment button
-    let commentbutton = document.createElement('button')
-    commentbutton.classList.add('comment-button')
-    commentbutton.ariaLabel = 'View or add comments'
+    let commentbutton = document.createElement('button');
+    commentbutton.classList.add('comment-button');
+    commentbutton.setAttribute('aria-label', 'View or add comments');
 
-    // Icon for the comment button
-    let commentimg = document.createElement('img')
-    commentimg.classList.add('icon')
-    commentimg.style.height = '25px'
-    commentimg.style.width = '1.2rem'
-    commentimg.style.filter = 'invert(17%) sepia(27%) saturate(7051%) hue-rotate(205deg) brightness(90%) contrast(99%)'
-    commentimg.style.marginRight = '5px'
-    commentimg.src = '/frontend/static/assets/comment-regular.svg'
-    commentimg.alt = 'comment-regular'
+    const commentSVG = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256" class="icon">
+    <g transform="scale(2.81 2.91)">
+        <path d="M 69.962 54.45 H 20.038 c -1.104 0 -2 -0.896 -2 -2 s 0.896 -2 2 -2 h 49.924 c 1.104 0 2 0.896 2 2 S 71.066 54.45 69.962 54.45 z" fill="currentColor"/>
+        <path d="M 69.962 39.792 H 20.038 c -1.104 0 -2 -0.896 -2 -2 s 0.896 -2 2 -2 h 49.924 c 1.104 0 2 0.896 2 2 S 71.066 39.792 69.962 39.792 z" fill="currentColor"/>
+        <path d="M 24.414 85.854 c -0.512 0 -1.023 -0.195 -1.414 -0.586 l -9.807 -9.806 H 9.094 C 4.08 75.462 0 71.382 0 66.367 V 23.874 c 0 -5.015 4.08 -9.094 9.094 -9.094 h 71.812 c 5.015 0 9.094 4.08 9.094 9.094 v 42.493 c 0 5.015 -4.079 9.095 -9.094 9.095 H 35.634 l -9.807 9.806 C 25.437 85.658 24.925 85.854 24.414 85.854 z" fill="currentColor"/>
+    </g>
+    </svg>
+    `;
 
-    // Comment count
-    let commentcount = document.createElement('span')
-    commentcount.classList.add('comment-count')
-    commentcount.textContent = item.comment_count
+    commentbutton.innerHTML = commentSVG;
 
-    // Append icon and count to the button
-    commentbutton.appendChild(commentimg)
-    commentbutton.append(commentcount)
+    let commentcount = document.createElement('span');
+    commentcount.classList.add('comment-count');
+    commentcount.textContent = item.comment_count;
 
-    // Append the button to the article
-    article.appendChild(commentbutton)
+    commentbutton.appendChild(commentcount);
 
-    // Create the comment section (initially hidden)
-    let commentsection = document.createElement('div')
-    commentsection.classList.add('comments-section')
-    commentsection.id = 'comments-section'
-    commentsection.style.display = 'none'  // HIDE by default
+    postactions.appendChild(likebutton);
+    postactions.appendChild(dislikebutton);
+    postactions.appendChild(commentbutton);
+
+    article.appendChild(postactions);
+
+    let commentsection = document.createElement('div');
+    commentsection.classList.add('comments-section');
+    commentsection.id = 'comments-section';
+    commentsection.style.display = 'none';
 
     let h4 = document.createElement('h4')
     h4.textContent = 'Comments'
@@ -753,17 +797,6 @@ const asideCategories = (asideform) => {
         input.name = 'category';
         input.value = category;
 
-        // Changed event from 'checked' to 'change' and updated handler
-        input.addEventListener('change', () => {
-            // Get all currently checked checkboxes
-            const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
-                .map(checkbox => checkbox.value);
-
-            // Determine what to send to the backend
-            const categoriesToSend = checkedCategories.length > 0 ? checkedCategories : 'none';
-            filter(categoriesToSend);
-        });
-
         // Improved label structure (checkbox before text)
         label.appendChild(input);
         label.appendChild(document.createTextNode(` ${category}`));
@@ -807,4 +840,34 @@ async function filter(categories) {
     } catch (error) {
         showAlert(`Error: ${error.message}`);
     }
+}
+
+const filterCategories = (asideform) => {
+    const categories = ["Technology", "Health", "Education", "Sports", "Entertainment", "Finance", "Travel", "Food", "Lifestyle", "Science"];
+
+    categories.forEach(category => {
+        let label = document.createElement('label');
+        let input = document.createElement('input');
+        input.type = 'checkbox';
+        input.name = 'category';
+        input.value = category;
+
+        // Changed event from 'checked' to 'change' and updated handler
+        input.addEventListener('change', () => {
+            // Get all currently checked checkboxes
+            const checkedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            // Determine what to send to the backend
+            const categoriesToSend = checkedCategories.length > 0 ? checkedCategories : 'none';
+            filter(categoriesToSend);
+        });
+
+        // Improved label structure (checkbox before text)
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(` ${category}`));
+        asideform.appendChild(label);
+    });
+
+    return asideform;
 }
