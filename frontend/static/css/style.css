@@ -1608,3 +1608,180 @@ body.dark-theme .comment-button:hover {
     transform: scale(1);
   }
 }
+
+/* Mobile & Tablet screens*/
+@media (max-width: 1200px) {
+  body {
+    gap: 0.5rem;
+  }
+
+  .form-container {
+    width: 450px;
+  }
+}
+
+@media (max-width: 992px) {
+  body {
+    padding-top: 60px;
+  }
+
+  .profile {
+    display: none;
+  }
+
+  .form-container {
+    width: 400px;
+    padding: 1rem 1.5rem;
+  }
+
+  .navbar {
+    padding: 1.5rem 2rem;
+  }
+
+  .navbar .logo a {
+    font-size: 1.5rem;
+  }
+
+  .sidebar {
+    padding: 1rem;
+  }
+
+  .sidebar h2 {
+    font-size: 1.25rem;
+  }
+
+  .post {
+    padding: 0.75rem;
+  }
+
+  .post h3 {
+    font-size: 1.1rem;
+  }
+
+  .create-post {
+    width: 70%;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    grid-template-columns: 1fr;
+    padding-top: 50px;
+  }
+
+  .navbar {
+    padding: 1rem 1.5rem;
+  }
+
+  .navbar .logo a {
+    font-size: 1.25rem;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .form-container {
+    width: 90%;
+    max-width: 350px;
+  }
+
+  .create-post {
+    width: 90%;
+  }
+
+  .post-actions {
+    flex-wrap: wrap;
+  }
+
+  .floating-create-post-btn-container p {
+    display: none;
+  }
+
+  .floating-create-post-btn {
+    right: 1rem;
+    bottom: 1rem;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+    cursor: pointer;
+  }
+
+  .sidebar.mobile-active {
+    display: block;
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 80%;
+    height: calc(100vh - 50px);
+    z-index: 100;
+    overflow-y: auto;
+  }
+
+  .mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+
+  .mobile-overlay.active {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .form-container {
+    width: 95%;
+    padding: 0.75rem 1rem;
+  }
+
+  .post {
+    padding: 0.5rem;
+  }
+
+  .post h3 {
+    font-size: 1rem;
+  }
+
+  .post-category {
+    font-size: 0.8rem;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .post-actions button {
+    padding: 3px 6px;
+    font-size: 0.9rem;
+  }
+
+  .comment {
+    padding: 0.35rem;
+    font-size: 0.85rem;
+  }
+
+  .comments-section {
+    padding: 0.5rem;
+  }
+
+  .comments-section h4 {
+    font-size: 1rem;
+  }
+
+  input {
+    padding: 0.6rem;
+  }
+
+  .btn {
+    padding: 0.6rem;
+  }
+}
+
