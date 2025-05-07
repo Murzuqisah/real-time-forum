@@ -297,7 +297,6 @@ export async function RealTime() {
         currentPage = 1;
 
         document.getElementById('chatListContainer').style.display = 'none';
-        document.getElementById('userListContainer').style.display = 'none';
         const chat = document.getElementById('chatContainer');
         chat.style.display = 'flex';
 

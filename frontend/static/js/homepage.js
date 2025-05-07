@@ -520,10 +520,12 @@ const createPost = (form) => {
         .then(data => {
             if (data.error === 'ok') {
                 let postsContainer = document.getElementById('postcontainer')
+                let addBtn = document.querySelector('.floating-create-post-btn-container')
                 let article = document.createElement('article');
                 article.classList.add('post');
                 article = postItem(article, data.item)
                 postsContainer.prepend(article)
+                postsContainer.prepend(addBtn)
             } else {
                 showAlert(data.error)
             }
@@ -590,7 +592,7 @@ const postItem = (article, item) => {
     likecount.classList.add('like-count')
     likecount.textContent = item.likes
     likebutton.appendChild(likecount)
-    article.appendChild(likebutton)
+    postactions.appendChild(likebutton)
 
     let dislikebutton = document.createElement('button')
     dislikebutton.classList.add('dislike-button')
@@ -609,7 +611,7 @@ const postItem = (article, item) => {
     dislikecount.classList.add('dislike-count')
     dislikecount.textContent = item.dislikes
     dislikebutton.appendChild(dislikecount)
-    article.appendChild(dislikebutton)
+    postactions.appendChild(dislikebutton)
 
     // Create the comment button
     let commentbutton = document.createElement('button');
@@ -637,14 +639,14 @@ const postItem = (article, item) => {
     commentbutton.appendChild(commentcount);
 
     // Append the button to the article
-    article.appendChild(commentbutton);
+    postactions.appendChild(commentbutton);
 
 
     // Create the comment section (initially hidden)
     let commentsection = document.createElement('div')
     commentsection.classList.add('comments-section')
     commentsection.id = 'comments-section'
-    commentsection.style.display = 'none'  // HIDE by default
+    commentsection.style.display = 'none';
 
     let h4 = document.createElement('h4')
     h4.textContent = 'Comments'
@@ -695,6 +697,7 @@ const postItem = (article, item) => {
 
     // Append the comment section to the article
     article.appendChild(commentsection)
+    article.appendChild(postactions)
 
     // 👉 Toggle the visibility on button click
     commentbutton.addEventListener('click', () => {
