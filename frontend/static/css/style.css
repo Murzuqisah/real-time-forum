@@ -501,6 +501,7 @@ body.dark-theme .create-post form textarea {
 }
 
 .floating-create-post-btn-container {
+  position: sticky;
   top: 0.1rem;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.1);
@@ -644,7 +645,7 @@ body.dark-theme .post {
   align-items: center;
   gap: 15px;
   margin-top: 15px;
-  background-color: #dcdcdd;
+  background-color: #7676bb;
   padding: 10px 15px;
   border-top: 0.1px solid #444;
   min-height: 70px;

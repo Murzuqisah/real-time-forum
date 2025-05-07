@@ -143,7 +143,6 @@ export async function RealTime() {
         document.getElementById("chatContainer").style.display = "none";
         document.getElementById("chatListContainer").style.display = "flex";
         if (data.allUsers) {
-            console.log(data.allUsers)
             if (data.allUsers.length > 0) {
                 const chatList = document.getElementById('chatList');
                 chatList.innerHTML = "";
