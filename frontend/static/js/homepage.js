@@ -590,9 +590,10 @@ const postItem = (article, item) => {
     likebutton.appendChild(likeimg)
     let likecount = document.createElement('span')
     likecount.classList.add('like-count')
-    likecount.textContent = item.likes
-    likebutton.appendChild(likecount)
-    postactions.appendChild(likebutton)
+    likecount.textContent = item.likes;
+
+    likebutton.appendChild(likecount);
+    postactions.appendChild(likebutton);
 
     let dislikebutton = document.createElement('button')
     dislikebutton.classList.add('dislike-button')
@@ -609,9 +610,10 @@ const postItem = (article, item) => {
     dislikebutton.appendChild(dislikeimg)
     let dislikecount = document.createElement('span')
     dislikecount.classList.add('dislike-count')
-    dislikecount.textContent = item.dislikes
-    dislikebutton.appendChild(dislikecount)
-    postactions.appendChild(dislikebutton)
+    dislikecount.textContent = item.dislikes;
+
+    dislikebutton.appendChild(dislikecount);
+    postactions.appendChild(dislikebutton);
 
     // Create the comment button
     let commentbutton = document.createElement('button');
@@ -677,7 +679,7 @@ const postItem = (article, item) => {
     addimg.style.height = '20px'
     addimg.style.margin = '0'
     addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
-    addimg.alt = 'paper-plane-regular'
+    addimg.alt = 'paper-plane-regular';
     addbutton.appendChild(addimg)
 
     addcomment.appendChild(addbutton)
