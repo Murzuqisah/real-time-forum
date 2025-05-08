@@ -119,15 +119,15 @@ export const SignUpPage = () => {
   select.name = 'gender';
   select.required = true;
 
-  let genderOptions = ['Select gender', 'Male', 'Female','Non-binary', 'Prefer not to say'];
+  let genderOptions = ['Select gender', 'Male', 'Female', 'Non-binary', 'Prefer not to say'];
   genderOptions.forEach((gender, index) => {
     let genderOption = document.createElement('option');
     genderOption.value = index === 0 ? '' : gender.toLowerCase();
     genderOption.textContent = gender;
-    if (index === 0 ) {
+    if (index === 0) {
       genderOption.disabled = true;
       genderOption.selected = true;
-    }  
+    }
     select.appendChild(genderOption);
   })
 
@@ -174,12 +174,27 @@ export const SignUpPage = () => {
   div2.appendChild(input2);
 
   let div3 = document.createElement('div');
-  div3.classList.add('password');
-  let div4 = document.createElement('div');
-  div4.classList.add('password');
+  div3.classList.add('input-group');
+
+  // Create password labels row
+  let passwordLabels = document.createElement('div');
+  passwordLabels.classList.add('password-labels');
+
   let label3 = document.createElement('label');
   label3.htmlFor = 'password';
   label3.textContent = 'Password';
+
+  let label4 = document.createElement('label');
+  label4.htmlFor = 'confirmed-password';
+  label4.textContent = 'Confirm Password';
+
+  passwordLabels.appendChild(label3);
+  passwordLabels.appendChild(label4);
+
+  // Create password inputs row
+  let passwordInputs = document.createElement('div');
+  passwordInputs.classList.add('password-inputs');
+
   let div5 = document.createElement('div');
   div5.classList.add('password-wrapper');
   let input3 = document.createElement('input');
@@ -197,13 +212,7 @@ export const SignUpPage = () => {
   button1.appendChild(boxIcon1);
   div5.appendChild(input3);
   div5.appendChild(button1);
-  div4.appendChild(label3);
-  div4.appendChild(div5);
-  let div6 = document.createElement('div');
-  div6.classList.add('input-group');
-  let label4 = document.createElement('label');
-  label4.htmlFor = 'confirmed-password';
-  label4.textContent = 'Confirm Password';
+
   let div7 = document.createElement('div');
   div7.classList.add('password-wrapper');
   let input4 = document.createElement('input');
@@ -221,9 +230,13 @@ export const SignUpPage = () => {
   button2.appendChild(boxIcon2);
   div7.appendChild(input4);
   div7.appendChild(button2);
-  div6.appendChild(label4);
-  div6.appendChild(div7);
-  div4.appendChild(div6);
+
+  passwordInputs.appendChild(div5);
+  passwordInputs.appendChild(div7);
+
+  // Add both rows to the password section
+  div3.appendChild(passwordLabels);
+  div3.appendChild(passwordInputs);
 
   let button3 = document.createElement('button');
   button3.id = 'sign-up-btn';
@@ -240,7 +253,7 @@ export const SignUpPage = () => {
     let firstname = document.getElementById('firstname').value;
     let lastname = document.getElementById('lastname').value;
     let gender = document.getElementById('gender').value;
-  
+
     if (password !== confirmedPassword) {
       showAlert('Passwords do not match');
       return;
@@ -259,7 +272,6 @@ export const SignUpPage = () => {
   signupForm.appendChild(div11);
   signupForm.appendChild(div2);
   signupForm.appendChild(div3);
-  signupForm.appendChild(div4);
   signupForm.appendChild(button3);
   formContainer.appendChild(signupForm);
   formContainer.appendChild(document.createElement('br'));

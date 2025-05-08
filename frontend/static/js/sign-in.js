@@ -19,6 +19,8 @@ export const SignInPage = () => {
   justify-content: center;
 }
   .success-message {
+    margin-left: 1rem;
+    align-items: center;
     background-color: #d4edda;
     color: #155724;
     padding: 10px 15px;
