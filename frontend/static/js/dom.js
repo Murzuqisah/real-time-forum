@@ -200,8 +200,6 @@ export async function RealTime() {
                     const msgcount = document.createElement('p');
                     msgcount.classList.add('unread')
                     msgcount.textContent = unread(data.unread, elem.username)
-                    console.log('data', data)
-                    console.log(data.unread)
                     if (unread(data.unread, elem.username) > 0) {
                         chat.appendChild(msgcount)
                     }
@@ -366,6 +364,16 @@ export async function RealTime() {
         if (Username !== data.sender.username) {
             notification(`Message received from ${data.sender.username}`)
         }
+
+        if (document.getElementById('chatContainer').style.display === 'none') {
+            socket.send(JSON.stringify({
+                type: "chats",
+                sender: UserId,
+                username: Username,
+            }));
+            return
+        } 
+
         let messageElement = document.createElement("div");
         messageElement.classList.add("message", data.sender.username === Username ? "sent" : "received");
         messageElement = arrangemessage(messageElement, data.message)
@@ -433,7 +441,6 @@ export async function RealTime() {
             if (unread) {
                 unreadCount = unread.textContent
             }
-            console.log('status', data)
             const username = chat.dataset.username;
             chat.innerHTML = username;
             const statusIndicator = document.createElement('span')
@@ -457,6 +464,7 @@ export async function RealTime() {
     };
 
     const handleSocketMessage = (data) => {
+        console.log(data.type)
         switch (data.type) {
             case 'error':
                 if (data.message === 'invalid session') {
@@ -607,7 +615,6 @@ const status = (onlineUsersList, username) => {
 };
 
 const unread = (unread, username) => {
-    console.log('unread', unread)
     if (!unread) {
         return ""
     }
