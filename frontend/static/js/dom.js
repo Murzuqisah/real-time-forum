@@ -144,6 +144,7 @@ export async function RealTime() {
 
     const showChatList = (data) => {
         let results;
+        document.getElementById('chatContainer').style.display = 'none'
         document.getElementById("chatListContainer").style.display = "flex";
         if (data.allUsers) {
             if (data.allUsers.length > 0) {
