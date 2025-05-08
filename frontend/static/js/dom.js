@@ -372,6 +372,16 @@ export async function RealTime() {
                 username: Username,
             }));
             return
+        } else if (document.getElementById('chatContainer').style.display === 'flex') {
+            const nameDiv = document.getElementById('name');
+            if (nameDiv?.textContent !== data.sender.username && data.sender.username != Username) {
+                socket.send(JSON.stringify({
+                    type: "chats",
+                    sender: UserId,
+                    username: Username,
+                }));
+                return
+            }
         } 
 
         let messageElement = document.createElement("div");
