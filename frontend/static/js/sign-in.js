@@ -1,7 +1,7 @@
 import { SignUpPage } from "./sign-up.js"
 import { RealTime } from "./dom.js"
 import { HomePage } from "./homepage.js"
-import { showAlert } from "./homepage.js"
+import { showAlert, toggleTheme } from "./homepage.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -172,6 +172,7 @@ export const SignInPage = () => {
 
   main.appendChild(formContainer)
   document.body.appendChild(main)
+  themeToggler.addEventListener('click', toggleTheme)
 }
 
 export const navigate = (event, page) => {

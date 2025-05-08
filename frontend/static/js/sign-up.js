@@ -1,4 +1,4 @@
-import { showAlert } from "./homepage.js"
+import { showAlert, toggleTheme } from "./homepage.js"
 import { navigate } from "./sign-in.js"
 export const SignUpPage = () => {
   document.head.innerHTML = ""
@@ -287,6 +287,7 @@ export const SignUpPage = () => {
   main.appendChild(formContainer);
 
   document.body.appendChild(main)
+  themeToggler.addEventListener('click', toggleTheme)
 }
 
 async function signUp(username, email, password, confirmedPassword, age, firstname, lastname, gender, e) {

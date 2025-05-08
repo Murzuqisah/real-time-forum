@@ -86,6 +86,7 @@ export const HomePage = (data) => {
 
     profile = chat(profile, aside)
     document.body.appendChild(profile);
+    themeToggler.addEventListener('click', toggleTheme)
 };
 
 export const renderPosts = (data, postsContainer) => {
@@ -629,7 +630,7 @@ const postItem = (article, item) => {
     </g>
     </svg>
     `;
-    
+
     commentbutton.innerHTML = commentSVG;
 
     // Add comment count
@@ -875,3 +876,21 @@ export function renderNavBar() {
         navLinks.classList.toggle('active');
     });
 }
+
+export const applyTheme = (theme) => {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+    }
+};
+
+export const toggleTheme = () => {
+    const currentTheme = document.body.classList.contains('dark-theme')
+        ? 'dark'
+        : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    sessionStorage.setItem('theme', newTheme);
+};
+

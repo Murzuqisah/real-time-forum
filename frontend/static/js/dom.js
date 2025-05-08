@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         SignInPage();
     }
+
+    const savedTheme = sessionStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
 });
 
 export async function RealTime() {
@@ -95,7 +99,7 @@ export async function RealTime() {
                     }))
                     return;
                 }
-                    // Sort all users alphabetically by username (case-insensitive)
+                // Sort all users alphabetically by username (case-insensitive)
 
                 if (e.key === 'Enter' && !e.shiftKey) {
                     let msg = document.getElementById('messageInput').value;
@@ -149,14 +153,14 @@ export async function RealTime() {
 
                 if (data.users) {
                     const userSet = new Set(data.users.map(user => user.username.toLowerCase()));
-                
+
                     const sorted = data.allUsers.sort((a, b) => {
                         const nameA = a.username.toLowerCase();
                         const nameB = b.username.toLowerCase();
                         return nameA.localeCompare(nameB);
                     });
-                
-                    let filtered = sorted.filter(user => 
+
+                    let filtered = sorted.filter(user =>
                         !userSet.has(user.username.toLowerCase())
                     );
 
@@ -175,7 +179,7 @@ export async function RealTime() {
 
                     results = filtered;
                 }
-                
+
                 const loading = document.createElement('div');
                 loading.textContent = "Loading chats...";
                 chatList.appendChild(loading);
