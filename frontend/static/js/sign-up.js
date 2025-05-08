@@ -72,6 +72,8 @@ export const SignUpPage = () => {
   formContainer.classList.add = 'form-container'
   let h2 = document.createElement('h2');
   h2.textContent = 'Sign Up';
+  h2.style.alignItems = 'center';
+  h2.justifyContent = 'space-between';
   formContainer.appendChild(h2);
 
   let signupForm = document.createElement('form');
@@ -176,7 +178,6 @@ export const SignUpPage = () => {
   let div3 = document.createElement('div');
   div3.classList.add('input-group');
 
-  // Create password labels row
   let passwordLabels = document.createElement('div');
   passwordLabels.classList.add('password-labels');
 
@@ -191,7 +192,6 @@ export const SignUpPage = () => {
   passwordLabels.appendChild(label3);
   passwordLabels.appendChild(label4);
 
-  // Create password inputs row
   let passwordInputs = document.createElement('div');
   passwordInputs.classList.add('password-inputs');
 
@@ -234,7 +234,6 @@ export const SignUpPage = () => {
   passwordInputs.appendChild(div5);
   passwordInputs.appendChild(div7);
 
-  // Add both rows to the password section
   div3.appendChild(passwordLabels);
   div3.appendChild(passwordInputs);
 
