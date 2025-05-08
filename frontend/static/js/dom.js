@@ -431,11 +431,19 @@ export async function RealTime() {
             if (unread) {
                 unreadCount = unread.textContent
             }
+            console.log('status', data)
             const username = chat.dataset.username;
             chat.innerHTML = username;
-            const statusIndicator = document.createElement('p');
-            statusIndicator.classList.add('status');
-            statusIndicator.textContent = status(data.online, username) ? "Online" : "Offline";
+            const statusIndicator = document.createElement('span')
+            statusIndicator.classList.add('status-dot');
+            if (status(data.online, username)) {
+                statusIndicator.classList.add('online');
+                statusIndicator.classList.remove('offline')
+            } else {
+                statusIndicator.classList.add('offline');
+                statusIndicator.classList.remove('online')
+            }
+          
             const msgcount = document.createElement('p');
             msgcount.classList.add('unread')
             msgcount.textContent = unreadCount;

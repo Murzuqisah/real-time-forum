@@ -110,6 +110,10 @@ body.dark-theme input {
   width: 100%;
 }
 
+#move-sign-up {
+  cursor: pointer;
+}
+
 .message-popup {
   visibility: hidden;
   opacity: 0;
