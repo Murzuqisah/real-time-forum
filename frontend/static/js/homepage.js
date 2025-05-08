@@ -84,7 +84,7 @@ export const HomePage = (data) => {
     let profile = document.createElement('div');
     profile.classList.add('profile');
 
-    profile = chat(profile)
+    profile = chat(profile, aside)
     document.body.appendChild(profile);
 };
 
@@ -138,7 +138,7 @@ export const renderPosts = (data, postsContainer) => {
     return postsContainer
 }
 
-const chat = () => {
+const chat = (Profile, aside) => {
     let username = sessionStorage.getItem('username') || 'Username';
 
     // Create outer profile container
@@ -193,7 +193,7 @@ const chat = () => {
 
     chatListContainer.appendChild(chatHeader);
     chatListContainer.appendChild(chatList);
-    profile.appendChild(chatListContainer);
+    aside.appendChild(chatListContainer);
 
     let back = document.createElement('div');
     back.classList.add('header');
@@ -838,4 +838,40 @@ const filterCategories = (asideform) => {
     });
 
     return asideform;
+}
+
+// Mobile hamburger
+export function renderNavBar() {
+    const body = document.getElementById('body');
+
+    const nav = document.createElement('nav');
+    nav.className = 'navbar';
+
+    const logo = document.createElement('div');
+    logo.className = 'logo';
+    logo.textContent = 'Logo';
+
+    const navLinks = document.createElement('ul');
+    navLinks.className = 'nav-links';
+    ['Home', 'Features', 'Contact'].forEach(text => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = text;
+        li.appendChild(a);
+        navLinks.appendChild(li);
+    });
+
+    const hamburger = document.createElement('button');
+    hamburger.className = 'hamburger';
+    hamburger.innerHTML = '☰';
+
+    nav.appendChild(logo);
+    nav.appendChild(navLinks);
+    nav.appendChild(hamburger);
+    body.prepend(nav);
+
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+    });
 }
