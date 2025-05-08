@@ -10,16 +10,6 @@ export const HomePage = (data) => {
     <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
     <div id="custom-notification" class="notification" style="display: none;"></div>
     `
-    let scriptFiles = [
-        "/frontend/static/js/script.js",
-    ];
-
-    scriptFiles.forEach(src => {
-        let script = document.createElement("script");
-        script.src = src;
-        script.defer = true;
-        document.head.appendChild(script);
-    });
 
     let title = document.createElement('title');
     title.textContent = 'Forum';

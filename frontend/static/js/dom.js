@@ -1,4 +1,4 @@
-import { HomePage, showAlert, notification } from './homepage.js';
+import { HomePage, showAlert, notification, applyTheme } from './homepage.js';
 import { SignInPage } from './sign-in.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -144,7 +144,6 @@ export async function RealTime() {
 
     const showChatList = (data) => {
         let results;
-        document.getElementById("chatContainer").style.display = "none";
         document.getElementById("chatListContainer").style.display = "flex";
         if (data.allUsers) {
             if (data.allUsers.length > 0) {
@@ -200,6 +199,8 @@ export async function RealTime() {
                     const msgcount = document.createElement('p');
                     msgcount.classList.add('unread')
                     msgcount.textContent = unread(data.unread, elem.username)
+                    console.log('data', data)
+                    console.log(data.unread)
                     if (unread(data.unread, elem.username) > 0) {
                         chat.appendChild(msgcount)
                     }
@@ -443,7 +444,7 @@ export async function RealTime() {
                 statusIndicator.classList.add('offline');
                 statusIndicator.classList.remove('online')
             }
-          
+
             const msgcount = document.createElement('p');
             msgcount.classList.add('unread')
             msgcount.textContent = unreadCount;
@@ -605,6 +606,7 @@ const status = (onlineUsersList, username) => {
 };
 
 const unread = (unread, username) => {
+    console.log('unread', unread)
     if (!unread) {
         return ""
     }

@@ -35,7 +35,6 @@ export const SignInPage = () => {
   `
 
   let scriptFiles = [
-    "/frontend/static/js/script.js",
     "/frontend/static/js/signin_validation.js",
   ];
 
