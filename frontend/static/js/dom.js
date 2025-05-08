@@ -203,7 +203,7 @@ export async function RealTime() {
                     if (unread(data.unread, elem.username) > 0) {
                         chat.appendChild(msgcount)
                     }
-                    const handler = createHandler(elem, socket);
+                    const handler = createHandler(elem, socket, msgcount);
                     chat.addEventListener('click', handler);
                     chatList.appendChild(chat);
                 });
@@ -211,11 +211,12 @@ export async function RealTime() {
         }
     };
 
-    const createHandler = (elem, socket) => {
+    const createHandler = (elem, socket, msgcount) => {
         return function handleChatClick(e) {
             e.preventDefault();
             if (socket.readyState === WebSocket.OPEN) {
                 sendConversation(elem);
+                msgcount.textContent = "";
             } else {
                 showAlert("Connection not ready. Please try again.");
             }
