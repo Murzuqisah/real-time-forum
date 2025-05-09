@@ -1,4 +1,4 @@
-# forum-authentication
+# real-time-forum
 
 This project is a web forum that allows users to communicate, share posts, comment, and interact with one another through likes/dislikes, filtering, and more.
 
@@ -22,16 +22,18 @@ This project is a web forum that allows users to communicate, share posts, comme
   - Created posts (for the logged-in user)
   - Liked posts (for the logged-in user)
 
-- **Authentication**:  
-   A user can create an account by using the following third-party services:
-  - Google
-  - GitHub
+- **Direct Messages**:
+  Implement direct messages between signed-up users
+
+  - Chat notifications
+  - Real-time typing status
+  - Online status
 
 ---
 
 ## Technologies Used
 
-- **Language**: Go (Golang), HTML, CSS
+- **Language**: Go (Golang), JavaScript(JS), HTML, CSS
 
 - **Database**: SQLite
 
@@ -55,9 +57,12 @@ This project is a web forum that allows users to communicate, share posts, comme
 
 - **Input Requirements:**
 
+  - **Nickname**
+  - **First name**
+  - **Last name**
+  - **Gender**
+  - **Age**
   - **Email**: Must be unique. Cannot register a user if the email is already registered.
-
-  - **Username**
 
   - **Password**: Encrypted when stored (uses `bcrypt` for encryption).
 
@@ -99,57 +104,27 @@ This project is a web forum that allows users to communicate, share posts, comme
 
 ---
 
+### Direct Messages
+
+- Registered users can send direct messages to other registered users, get notified on reception of new messages.
+- Typing status displayed in a chat
+
+- Registered users can view who is online/offline
+
 ## Installation
 
 1. Clone the repository:
 
    ```bash
-   git clone https://learn.zone01kisumu.ke/git/johnodhiambo0/forum-authentication.git
-   cd forum-authentication
+   git clone https://learn.zone01kisumu.ke/git/jamos/real-time-forum.git
+   cd real-time-forum
    ```
 
-2. Create a `.env` file in the root directory and add the following credentials:
-
-   ```env
-   GOOGLE_CLIENT_ID=
-   GOOGLE_CLIENT_SECRET=
-
-   GITHUB_CLIENT_ID=
-   GITHUB_CLIENT_SECRET=
-   ```
-
-   Replace the values with your own credentials obtained from Google and GitHub.
-
-3. Compile and run the program with a file as input:
+2. Compile and run the program with a file as input:
 
    ```bash
    go run main.go
    ```
-
-### Setting up Google and GitHub OAuth
-
-#### Google OAuth Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select an existing one.
-3. Navigate to **APIs & Services > Credentials**.
-4. Click **Create Credentials** > **OAuth 2.0 Client ID**.
-5. Configure the OAuth consent screen with the following information:
-   - **Authorized JavaScript origins:** `http://localhost:9000`
-   - **Authorized redirect URIs:** `http://localhost:9000/auth/google/callback`
-   - **Authorized redirect URIs:** `http://localhost:9000/auth/google/signin/callback`
-6. Copy the **Client ID** and **Client Secret** and paste them into the `.env` file.
-
-#### GitHub OAuth Setup
-
-1. Go to [GitHub Developer Settings](https://github.com/settings/developers).
-2. Click **New OAuth App**.
-3. Fill in the application details:
-   - **Homepage URL**: `http://localhost:9000`
-   - **Authorization callback URL**: `http://localhost:9000/auth/github/callback`
-   - **Authorization callback URL**: `http://localhost:9000/auth/github/signin/callback`
-4. Register the application.
-5. Copy the **Client ID** and **Client Secret** and paste them into the `.env` file.
 
 ### Docker
 
@@ -169,8 +144,8 @@ docker compose up --build
 
 ## Contribution
 
-- To make a contribution to the project, open an issue with a title, a tag, and a description of your idea on the [repository issues' page](https://github.com/jesee-kuya/forum/issues).
+- To make a contribution to the project, open an issue with a title, a tag, and a description of your idea on the [repository issues' page](https://github.com/Murzuqisah/real-time-forum/issues).
 
 ## License
 
-This project is licensed under [MIT](https://github.com/jesee-kuya/forum/blob/main/LICENSE).
+This project is licensed under [MIT](https://github.com/Murzuqisah/real-time-forum/blob/main/LICENSE).
