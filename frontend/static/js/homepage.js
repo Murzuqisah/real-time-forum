@@ -10,16 +10,6 @@ export const HomePage = (data) => {
     <div id="custom-alert" class="alert alert-error" style="display: none;"></div>
     <div id="custom-notification" class="notification" style="display: none;"></div>
     `
-    let scriptFiles = [
-        "/frontend/static/js/script.js",
-    ];
-
-    scriptFiles.forEach((src) => {
-        let script = document.createElement("script");
-        script.src = src;
-        script.defer = true;
-        document.head.appendChild(script);
-    });
 
     let title = document.createElement('title');
     title.textContent = 'Forum';
@@ -52,16 +42,8 @@ export const HomePage = (data) => {
     themeToggler.appendChild(sunny);
     rightContainer.appendChild(themeToggler);
     navbar.appendChild(rightContainer);
-
-    // mobile sidebar toggler
-    const sidebarToggle = document.createElement('button');
-    sidebarToggle.id = "sidebar-toggle"
-    sidebarToggle.className = "sidebar-toggle"
-    sidebarToggle.innerHTML = "<span></span><span></span><span></span>"
-    navbar.appendChild(sidebarToggle)
-
-    header.appendChild(navbar)
-    document.body.appendChild(header)
+    header.appendChild(navbar);
+    document.body.appendChild(header);
 
     // Create sidebarfloating-create-post-btn
     let aside = document.createElement('aside');
@@ -92,8 +74,9 @@ export const HomePage = (data) => {
     let profile = document.createElement('div');
     profile.classList.add('profile');
 
-    profile = chat(profile)
+    profile = chat(profile, aside)
     document.body.appendChild(profile);
+    themeToggler.addEventListener('click', toggleTheme)
 };
 
 export const renderPosts = (data, postsContainer) => {
@@ -140,14 +123,13 @@ export const renderPosts = (data, postsContainer) => {
             createPostForm.style.visibility = 'hidden';
             setTimeout(() => createPostForm.classList.add('hidden'), 500);
         }
-        console.log('clicked post add')
     });
 
 
     return postsContainer
 }
 
-const chat = () => {
+const chat = (Profile, aside) => {
     let username = sessionStorage.getItem('username') || 'Username';
 
     // Create outer profile container
@@ -200,21 +182,9 @@ const chat = () => {
     chatList.classList.add('chat-list');
     chatList.id = 'chatList';
 
-    let newChat = document.createElement('div');
-    newChat.classList.add('new-chat');
-    newChat.id = 'newChat';
-    newChat.textContent = 'Start New Chat';
-
     chatListContainer.appendChild(chatHeader);
     chatListContainer.appendChild(chatList);
-    chatListContainer.appendChild(newChat);
-    profile.appendChild(chatListContainer);
-
-    // User List Panel
-    let userListContainer = document.createElement('div');
-    userListContainer.classList.add('user-list-container');
-    userListContainer.id = 'userListContainer';
-    userListContainer.style.display = 'none';
+    aside.appendChild(chatListContainer);
 
     let back = document.createElement('div');
     back.classList.add('header');
@@ -223,14 +193,6 @@ const chat = () => {
     backButton.textContent = 'Back';
     back.appendChild(backButton);
     back.textContent = 'Select User';
-
-    let userList = document.createElement('div');
-    userList.classList.add('user-list');
-    userList.id = 'userList';
-
-    userListContainer.appendChild(back);
-    userListContainer.appendChild(userList);
-    profile.appendChild(userListContainer);
 
     // Chat Container
     let chatContainer = document.createElement('div');
@@ -291,10 +253,7 @@ const chat = () => {
 const postingform = () => {
     let postForm = document.createElement('section');
     postForm.classList.add('create-post', 'hidden');
-    let overlay = document.createElement('div');
-    overlay.classList.add('overlay');
     postForm.id = 'post-form';
-    document.body.appendChild(overlay);
 
     let postdiv = document.createElement('div');
     postdiv.classList.add('post-popup');
@@ -303,19 +262,14 @@ const postingform = () => {
     let cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.classList.add('close-modal');
-    cancelBtn.innerHTML = '&times;';
+    cancelBtn.textContent = 'X';
     cancelBtn.title = 'Close';
 
     cancelBtn.addEventListener('click', () => {
         postForm.classList.add('hidden');
-        overlay.classList.remove('active');
     });
 
     postdiv.appendChild(cancelBtn);
-
-    let postTitle = document.createElement('h2');
-    postTitle.textContent = 'Create a New Post';
-    postdiv.appendChild(postTitle);
 
     let upload = document.createElement('form');
     upload.name = "upload";
@@ -535,7 +489,6 @@ const reactionHandler = (dislikecount, likecount, item, type) => {
         })
         .then(data => {
             if (data.error === 'ok') {
-                console.log(data)
                 dislikecount.textContent = data.item.dislikes
                 likecount.textContent = data.item.likes
             } else {
@@ -558,10 +511,12 @@ const createPost = (form) => {
         .then(data => {
             if (data.error === 'ok') {
                 let postsContainer = document.getElementById('postcontainer')
+                let addBtn = document.querySelector('.floating-create-post-btn-container')
                 let article = document.createElement('article');
                 article.classList.add('post');
                 article = postItem(article, data.item)
                 postsContainer.prepend(article)
+                postsContainer.prepend(addBtn)
             } else {
                 showAlert(data.error)
             }
@@ -626,9 +581,10 @@ const postItem = (article, item) => {
     likebutton.appendChild(likeimg)
     let likecount = document.createElement('span')
     likecount.classList.add('like-count')
-    likecount.textContent = item.likes
-    likebutton.appendChild(likecount)
-    // article.appendChild(likebutton)
+    likecount.textContent = item.likes;
+
+    likebutton.appendChild(likecount);
+    postactions.appendChild(likebutton);
 
     let dislikebutton = document.createElement('button')
     dislikebutton.classList.add('dislike-button')
@@ -645,9 +601,10 @@ const postItem = (article, item) => {
     dislikebutton.appendChild(dislikeimg)
     let dislikecount = document.createElement('span')
     dislikecount.classList.add('dislike-count')
-    dislikecount.textContent = item.dislikes
-    dislikebutton.appendChild(dislikecount)
-    // article.appendChild(dislikebutton)
+    dislikecount.textContent = item.dislikes;
+
+    dislikebutton.appendChild(dislikecount);
+    postactions.appendChild(dislikebutton);
 
     // Create the comment button
     let commentbutton = document.createElement('button');
@@ -666,21 +623,22 @@ const postItem = (article, item) => {
 
     commentbutton.innerHTML = commentSVG;
 
+    // Add comment count
     let commentcount = document.createElement('span');
     commentcount.classList.add('comment-count');
     commentcount.textContent = item.comment_count;
 
+    // Append count next to SVG
     commentbutton.appendChild(commentcount);
 
-    postactions.appendChild(likebutton);
-    postactions.appendChild(dislikebutton);
+    // Append the button to the article
     postactions.appendChild(commentbutton);
 
-    article.appendChild(postactions);
 
-    let commentsection = document.createElement('div');
-    commentsection.classList.add('comments-section');
-    commentsection.id = 'comments-section';
+    // Create the comment section (initially hidden)
+    let commentsection = document.createElement('div')
+    commentsection.classList.add('comments-section')
+    commentsection.id = 'comments-section'
     commentsection.style.display = 'none';
 
     let h4 = document.createElement('h4')
@@ -712,7 +670,7 @@ const postItem = (article, item) => {
     addimg.style.height = '20px'
     addimg.style.margin = '0'
     addimg.src = '/frontend/static/assets/paper-plane-regular.svg'
-    addimg.alt = 'paper-plane-regular'
+    addimg.alt = 'paper-plane-regular';
     addbutton.appendChild(addimg)
 
     addcomment.appendChild(addbutton)
@@ -732,6 +690,7 @@ const postItem = (article, item) => {
 
     // Append the comment section to the article
     article.appendChild(commentsection)
+    article.appendChild(postactions)
 
     // 👉 Toggle the visibility on button click
     commentbutton.addEventListener('click', () => {
@@ -871,3 +830,57 @@ const filterCategories = (asideform) => {
 
     return asideform;
 }
+
+// Mobile hamburger
+export function renderNavBar() {
+    const body = document.getElementById('body');
+
+    const nav = document.createElement('nav');
+    nav.className = 'navbar';
+
+    const logo = document.createElement('div');
+    logo.className = 'logo';
+    logo.textContent = 'Logo';
+
+    const navLinks = document.createElement('ul');
+    navLinks.className = 'nav-links';
+    ['Home', 'Features', 'Contact'].forEach(text => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = '#';
+        a.textContent = text;
+        li.appendChild(a);
+        navLinks.appendChild(li);
+    });
+
+    const hamburger = document.createElement('button');
+    hamburger.className = 'hamburger';
+    hamburger.innerHTML = '☰';
+
+    nav.appendChild(logo);
+    nav.appendChild(navLinks);
+    nav.appendChild(hamburger);
+    body.prepend(nav);
+
+    hamburger.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+    });
+}
+
+export const applyTheme = (theme) => {
+    if (theme === 'dark') {
+        document.body.classList.add('dark-theme');
+    } else {
+        document.body.classList.remove('dark-theme');
+    }
+};
+
+export const toggleTheme = () => {
+    const currentTheme = document.body.classList.contains('dark-theme')
+        ? 'dark'
+        : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    sessionStorage.setItem('theme', newTheme);
+};
+

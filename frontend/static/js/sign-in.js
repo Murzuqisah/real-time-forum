@@ -1,7 +1,7 @@
 import { SignUpPage } from "./sign-up.js"
 import { RealTime } from "./dom.js"
 import { HomePage } from "./homepage.js"
-import { showAlert } from "./homepage.js"
+import { showAlert, toggleTheme } from "./homepage.js"
 
 export const SignInPage = () => {
   document.head.innerHTML = ""
@@ -19,6 +19,8 @@ export const SignInPage = () => {
   justify-content: center;
 }
   .success-message {
+    margin-left: 1rem;
+    align-items: center;
     background-color: #d4edda;
     color: #155724;
     padding: 10px 15px;
@@ -33,7 +35,6 @@ export const SignInPage = () => {
   `
 
   let scriptFiles = [
-    "/frontend/static/js/script.js",
     "/frontend/static/js/signin_validation.js",
   ];
 
@@ -48,9 +49,9 @@ export const SignInPage = () => {
   document.head.appendChild(title);
 
   let header = document.createElement('header')
-
   let navbar = document.createElement('nav')
   navbar.classList.add('navbar')
+
   let logo = document.createElement('div')
   logo.classList.add('logo')
   let logoLink = document.createElement('a')
@@ -61,7 +62,7 @@ export const SignInPage = () => {
   logo.appendChild(logoLink)
   navbar.appendChild(logo)
   let themeToggler = document.createElement('div')
-  themeToggler.classList.add('theme-toggler')
+  themeToggler.classList.add('theme-toggler');
   let moon = document.createElement('img')
   moon.classList.add('moon')
   moon.src = '/frontend/static/assets/moon-regular.svg'
@@ -72,6 +73,9 @@ export const SignInPage = () => {
   sunny.alt = 'Sunny Icon'
   themeToggler.appendChild(moon)
   themeToggler.appendChild(sunny)
+  themeToggler.style.alignItems = 'flex-end';
+  themeToggler.style.justifyContent = 'space-between';
+  
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
 
@@ -167,6 +171,7 @@ export const SignInPage = () => {
 
   main.appendChild(formContainer)
   document.body.appendChild(main)
+  themeToggler.addEventListener('click', toggleTheme)
 }
 
 export const navigate = (event, page) => {
@@ -204,7 +209,6 @@ export async function login(email, password) {
     const data = await response.json();
 
     if (data.error === 'ok') {
-      console.log('Login successful:', data);
       // Store session in sessionStorage
       sessionStorage.setItem('session', data.session);
       sessionStorage.setItem('pageState', 'home');

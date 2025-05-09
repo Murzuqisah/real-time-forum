@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
   signinForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const signinFormData = new URLSearchParams(new FormData(signinForm));
-    console.log(Object.fromEntries(signinFormData));
 
     try {
       const response = await fetch('/sign-in', {

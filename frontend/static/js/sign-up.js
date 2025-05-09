@@ -1,4 +1,4 @@
-import { showAlert } from "./homepage.js"
+import { showAlert, toggleTheme } from "./homepage.js"
 import { navigate } from "./sign-in.js"
 export const SignUpPage = () => {
   document.head.innerHTML = ""
@@ -37,6 +37,7 @@ export const SignUpPage = () => {
   let header = document.createElement('header')
   let navbar = document.createElement('nav')
   navbar.classList.add('navbar')
+
   let logo = document.createElement('div')
   logo.classList.add('logo')
   let logoLink = document.createElement('a')
@@ -57,9 +58,11 @@ export const SignUpPage = () => {
   sunny.alt = 'Sunny Icon'
   themeToggler.appendChild(moon)
   themeToggler.appendChild(sunny)
+  themeToggler.style.alignItems = 'flex-end';
+  themeToggler.style.justifyContent = 'space-between';
+
   navbar.appendChild(themeToggler)
   header.appendChild(navbar)
-
 
   document.body.appendChild(header)
 
@@ -69,6 +72,8 @@ export const SignUpPage = () => {
   formContainer.classList.add = 'form-container'
   let h2 = document.createElement('h2');
   h2.textContent = 'Sign Up';
+  h2.style.alignItems = 'center';
+  h2.justifyContent = 'space-between';
   formContainer.appendChild(h2);
 
   let signupForm = document.createElement('form');
@@ -96,22 +101,40 @@ export const SignUpPage = () => {
   input5.type = 'number';
   input5.id = 'age';
   input5.name = 'age';
+  input5.min = 15;
   input5.required = true;
+  input5.placeholder = 'Enter your age';
+
   div8.appendChild(label5);
   div8.appendChild(input5);
 
   let div9 = document.createElement('div');
   div9.classList.add('input-group');
+
   let label6 = document.createElement('label');
   label6.htmlFor = 'gender';
   label6.textContent = 'Gender';
-  let input6 = document.createElement('input');
-  input6.type = 'text';
-  input6.id = 'gender';
-  input6.name = 'gender';
-  input6.required = true;
+
+  let select = document.createElement('select');
+  select.id = 'gender';
+  select.className = 'gender';
+  select.name = 'gender';
+  select.required = true;
+
+  let genderOptions = ['Select gender', 'Male', 'Female', 'Non-binary', 'Prefer not to say'];
+  genderOptions.forEach((gender, index) => {
+    let genderOption = document.createElement('option');
+    genderOption.value = index === 0 ? '' : gender.toLowerCase();
+    genderOption.textContent = gender;
+    if (index === 0) {
+      genderOption.disabled = true;
+      genderOption.selected = true;
+    }
+    select.appendChild(genderOption);
+  })
+
   div9.appendChild(label6);
-  div9.appendChild(input6);
+  div9.appendChild(select);
 
   let div10 = document.createElement('div');
   div10.classList.add('input-group');
@@ -153,12 +176,25 @@ export const SignUpPage = () => {
   div2.appendChild(input2);
 
   let div3 = document.createElement('div');
-  div3.classList.add('password');
-  let div4 = document.createElement('div');
-  div4.classList.add('password');
+  div3.classList.add('input-group');
+
+  let passwordLabels = document.createElement('div');
+  passwordLabels.classList.add('password-labels');
+
   let label3 = document.createElement('label');
   label3.htmlFor = 'password';
   label3.textContent = 'Password';
+
+  let label4 = document.createElement('label');
+  label4.htmlFor = 'confirmed-password';
+  label4.textContent = 'Confirm Password';
+
+  passwordLabels.appendChild(label3);
+  passwordLabels.appendChild(label4);
+
+  let passwordInputs = document.createElement('div');
+  passwordInputs.classList.add('password-inputs');
+
   let div5 = document.createElement('div');
   div5.classList.add('password-wrapper');
   let input3 = document.createElement('input');
@@ -176,13 +212,7 @@ export const SignUpPage = () => {
   button1.appendChild(boxIcon1);
   div5.appendChild(input3);
   div5.appendChild(button1);
-  div4.appendChild(label3);
-  div4.appendChild(div5);
-  let div6 = document.createElement('div');
-  div6.classList.add('input-group');
-  let label4 = document.createElement('label');
-  label4.htmlFor = 'confirmed-password';
-  label4.textContent = 'Confirm Password';
+
   let div7 = document.createElement('div');
   div7.classList.add('password-wrapper');
   let input4 = document.createElement('input');
@@ -200,9 +230,12 @@ export const SignUpPage = () => {
   button2.appendChild(boxIcon2);
   div7.appendChild(input4);
   div7.appendChild(button2);
-  div6.appendChild(label4);
-  div6.appendChild(div7);
-  div4.appendChild(div6);
+
+  passwordInputs.appendChild(div5);
+  passwordInputs.appendChild(div7);
+
+  div3.appendChild(passwordLabels);
+  div3.appendChild(passwordInputs);
 
   let button3 = document.createElement('button');
   button3.id = 'sign-up-btn';
@@ -238,7 +271,6 @@ export const SignUpPage = () => {
   signupForm.appendChild(div11);
   signupForm.appendChild(div2);
   signupForm.appendChild(div3);
-  signupForm.appendChild(div4);
   signupForm.appendChild(button3);
   formContainer.appendChild(signupForm);
   formContainer.appendChild(document.createElement('br'));
@@ -255,6 +287,7 @@ export const SignUpPage = () => {
   main.appendChild(formContainer);
 
   document.body.appendChild(main)
+  themeToggler.addEventListener('click', toggleTheme)
 }
 
 async function signUp(username, email, password, confirmedPassword, age, firstname, lastname, gender, e) {
@@ -273,9 +306,7 @@ async function signUp(username, email, password, confirmedPassword, age, firstna
     }
     const data = await response.json();
 
-    console.log(data);
     if (data.error === 'ok') {
-      console.log(data)
       sessionStorage.setItem('pagestate', 'fromsignup')
       navigate(e, '/sign-in');
     } else {
