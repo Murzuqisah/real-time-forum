@@ -793,6 +793,7 @@ async function filter(categories) {
         if (data.error === 'ok') {
             const postsContainer = document.getElementById('postcontainer');
             renderPosts(data, postsContainer);
+            postsContainer.appendChild(postingform());
         } else {
             showAlert(data.error);
         }
