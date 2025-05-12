@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/jesee-kuya/forum/backend/repositories"
 	"github.com/jesee-kuya/forum/backend/util"
@@ -16,7 +17,7 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/templates/index.html")
 		return
 	}
-	
+
 	if r.Method != http.MethodPost {
 		log.Println("Invalid request method:", r.Method)
 		w.Header().Set("Content-Type", "application/json")
@@ -48,6 +49,7 @@ func Comment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment := r.FormValue("comment")
+	comment = strings.Trim(comment, " ")
 	if len(comment) == 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
