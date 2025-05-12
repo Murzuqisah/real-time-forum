@@ -439,7 +439,7 @@ export async function RealTime() {
                 // Reset timer (5000ms for visible state, 3000ms for new appearance)
                 typingTimeout = setTimeout(() => {
                     typing.style.display = 'none';
-                }, wasAlreadyVisible ? 2000 : 2000);
+                }, wasAlreadyVisible ? 350 : 350);
             }
         }
     };
