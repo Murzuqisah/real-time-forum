@@ -1,4 +1,4 @@
-# real-time-forum
+# real-time-forum-typinging-in-progress
 
 This project is a web forum that allows users to communicate, share posts, comment, and interact with one another through likes/dislikes, filtering, and more.
 
