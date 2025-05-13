@@ -148,13 +148,25 @@ body.dark-theme input {
 }
 
 .switch-form {
-  margin-top: 1rem;
-  /* transition: background-color var(--transition); */
+  color: #000;
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+}
+
+body.dark-theme .switch-form {
+  color: #f5f5f5;
 }
 
 .switch-form a,
 body.dark-theme .switch-form a {
-  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.switch-form a:hover {
+  color: var(--secondary-color);
+  text-decoration: underline;
 }
 
 #custom-alert {
