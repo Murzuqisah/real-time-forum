@@ -1060,7 +1060,7 @@ body.dark-theme .session-status {
   position: relative;
   padding: 0.5rem 1rem;
   margin: 0.5rem 0;
-  left: 13rem;
+  left: 13rem auto;
   font-size: 1rem;
   font-weight: bold;
   color: var(--dark-text-color);
@@ -1534,6 +1534,7 @@ body.dark-theme .comment-button:hover {
 
 #custom-alert,
 #custom-notification {
+  color: #000;
   position: fixed;
   top: 20px;
   right: 20px;
@@ -1556,7 +1557,7 @@ body.dark-theme .comment-button:hover {
   opacity: 1;
   pointer-events: auto;
   background-color: var(--neutral-color);
-  color: white;
+  color: rgb(0, 0, 0);
   padding: 12px 20px;
   margin-top: 10px;
   border-radius: 8px;
@@ -1630,7 +1631,7 @@ body.dark-theme .comment-button:hover {
   }
 
   .logout-button {
-    left: 10rem;
+    left: 12rem;
   }
 }
 
@@ -1756,7 +1757,6 @@ body.dark-theme .comment-button:hover {
   body {
     display: grid;
     grid-template-columns: 0.8fr 1.2fr 1fr;
-    padding-top: 50px;
   }
 
   :root {
